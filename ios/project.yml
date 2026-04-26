@@ -35,6 +35,7 @@ targets:
       - path: ../src/core/api/emulator_core_c_api.cpp
       - path: ../src/core/core_adapter_registry.cpp
       - path: ../src/core/aurora3ds/core_adapter.cpp
+      - path: ../src/core/aurora3ds/bridge.cpp
     dependencies:
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libfaad.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libSDL3.xcframework
