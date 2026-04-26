@@ -45,6 +45,7 @@ jobs:
             ${CMAKE_CURRENT_LIST_DIR}/../../src/core/core_adapter_registry.cpp
             ${CMAKE_CURRENT_LIST_DIR}/../../src/core/nanoboyadvance/core_adapter.cpp
             ${CMAKE_CURRENT_LIST_DIR}/../../src/core/quick_nes/core_adapter.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/../../src/core/sameboy/core_adapter.cpp
             ${CMAKE_CURRENT_LIST_DIR}/../../src/core/melonds/core_adapter.cpp
             ${CMAKE_CURRENT_LIST_DIR}/../../src/core/aurora3ds/core_adapter.cpp
           )
