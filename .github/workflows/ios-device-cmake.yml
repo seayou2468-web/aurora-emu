@@ -39,6 +39,7 @@ jobs:
           set(CMAKE_CXX_STANDARD 20)
           set(CMAKE_CXX_STANDARD_REQUIRED ON)
           set(CMAKE_CXX_EXTENSIONS OFF)
+          include_directories(${CMAKE_CURRENT_LIST_DIR}/../../src/core/aurora3ds)
           # aurora3ds subprojects use this helper in their full superbuild.
           # Provide a no-op fallback in this CI bootstrap project.
           if (NOT COMMAND create_target_directory_groups)
