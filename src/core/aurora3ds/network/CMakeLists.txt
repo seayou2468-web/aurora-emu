@@ -17,7 +17,11 @@ add_library(network STATIC
 
 create_target_directory_groups(network)
 
-target_link_libraries(network PRIVATE citra_common enet httplib)
+target_link_libraries(network PRIVATE citra_common httplib)
+
+if (APPLE)
+    target_link_libraries(network PRIVATE "-framework Network")
+endif()
 
 if (CITRA_USE_PRECOMPILED_HEADERS)
     target_precompile_headers(network PRIVATE precompiled_headers.h)
