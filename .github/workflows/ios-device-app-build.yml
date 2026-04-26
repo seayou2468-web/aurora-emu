@@ -32,7 +32,7 @@ jobs:
       - name: Generate Xcode project
         shell: bash
         run: |
-          xcodegen generate --spec ios/project.yml --project ios/AuroraIOS.xcodeproj
+          xcodegen generate --spec ios/project.yml --project ios
 
       - name: Build iOS app archive (.app inside .xcarchive)
         shell: bash
