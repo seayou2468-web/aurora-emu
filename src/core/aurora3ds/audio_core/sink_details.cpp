@@ -8,22 +8,18 @@
 #include <vector>
 #include "audio_core/null_sink.h"
 #include "audio_core/sink_details.h"
-#ifdef HAVE_CUBEB
 #include "audio_core/cubeb_sink.h"
-#endif
 #include "common/logging/log.h"
 
 namespace AudioCore {
 namespace {
 // sink_details is ordered in terms of desirability, with the best choice at the top.
 constexpr std::array sink_details = {
-#ifdef HAVE_CUBEB
-    SinkDetails{SinkType::Cubeb, "Cubeb",
+    SinkDetails{SinkType::Cubeb, "iOS AudioQueue",
                 [](std::string_view device_id) -> std::unique_ptr<Sink> {
                     return std::make_unique<CubebSink>(device_id);
                 },
                 &ListCubebSinkDevices},
-#endif
     SinkDetails{SinkType::Null, "None",
                 [](std::string_view device_id) -> std::unique_ptr<Sink> {
                     return std::make_unique<NullSink>(device_id);

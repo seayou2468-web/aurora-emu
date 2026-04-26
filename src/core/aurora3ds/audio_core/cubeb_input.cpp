@@ -1,10 +1,11 @@
-// Copyright Citra Emulator Project / Azahar Emulator Project
-// Licensed under GPLv2 or any later version
-// Refer to the license.txt file included.
+// iOS SDK microphone input (AudioQueue) replacing cubeb.
 
+#include <array>
+#include <algorithm>
+#include <cstring>
 #include <utility>
 #include <vector>
-#include <cubeb/cubeb.h>
+#include <AudioToolbox/AudioToolbox.h>
 #include "audio_core/cubeb_input.h"
 #include "audio_core/input.h"
 #include "audio_core/sink.h"
@@ -15,16 +16,43 @@ namespace AudioCore {
 
 using SampleQueue = Common::SPSCQueue<Samples>;
 
+namespace {
+constexpr u32 kBufferFrames = 512;
+constexpr u32 kBufferCount = 3;
+}
+
 struct CubebInput::Impl {
-    cubeb* ctx = nullptr;
-    cubeb_stream* stream = nullptr;
+    AudioQueueRef queue = nullptr;
+    std::array<AudioQueueBufferRef, kBufferCount> buffers{};
 
     SampleQueue sample_queue{};
     u8 sample_size_in_bytes = 0;
+    bool started = false;
 
-    static long DataCallback(cubeb_stream* stream, void* user_data, const void* input_buffer,
-                             void* output_buffer, long num_frames);
-    static void StateCallback(cubeb_stream* stream, void* user_data, cubeb_state state);
+    static void InputCallback(void* user_data, AudioQueueRef queue, AudioQueueBufferRef buffer,
+                              const AudioTimeStamp*, u32, const AudioStreamPacketDescription*) {
+        auto* impl = static_cast<Impl*>(user_data);
+        if (!impl || !impl->started) {
+            return;
+        }
+
+        const auto num_input_samples = buffer->mAudioDataByteSize / sizeof(s16);
+        const auto* input = reinterpret_cast<const s16*>(buffer->mAudioData);
+
+        Samples samples{};
+        samples.reserve(num_input_samples * impl->sample_size_in_bytes);
+        if (impl->sample_size_in_bytes == 1) {
+            for (u32 i = 0; i < num_input_samples; i++) {
+                samples.push_back(static_cast<u8>(static_cast<u16>(input[i]) >> 8));
+            }
+        } else {
+            const auto* ptr = reinterpret_cast<const u8*>(input);
+            samples.insert(samples.end(), ptr, ptr + buffer->mAudioDataByteSize);
+        }
+        impl->sample_queue.Push(samples);
+
+        AudioQueueEnqueueBuffer(queue, buffer, 0, nullptr);
+    }
 };
 
 CubebInput::CubebInput(std::string device_id)
@@ -39,88 +67,59 @@ void CubebInput::StartSampling(const InputParameters& params) {
         return;
     }
 
-    // Cubeb apparently only supports signed 16 bit PCM (and float32 which the 3ds doesn't support)
-    // TODO: Resample the input stream.
-    if (params.sign == Signedness::Unsigned) {
-        LOG_WARNING(
-            Audio,
-            "Application requested unsupported unsigned pcm format. Falling back to signed.");
-    }
-
     parameters = params;
     impl->sample_size_in_bytes = params.sample_size / 8;
 
-    auto init_result = cubeb_init(&impl->ctx, "Azahar Input", nullptr);
-    if (init_result != CUBEB_OK) {
-        LOG_CRITICAL(Audio, "cubeb_init failed: {}", init_result);
+    AudioStreamBasicDescription asbd{};
+    asbd.mSampleRate = params.sample_rate;
+    asbd.mFormatID = kAudioFormatLinearPCM;
+    asbd.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked;
+    asbd.mChannelsPerFrame = 1;
+    asbd.mBitsPerChannel = 16;
+    asbd.mFramesPerPacket = 1;
+    asbd.mBytesPerFrame = (asbd.mBitsPerChannel / 8) * asbd.mChannelsPerFrame;
+    asbd.mBytesPerPacket = asbd.mBytesPerFrame * asbd.mFramesPerPacket;
+
+    const OSStatus create = AudioQueueNewInput(&asbd, &Impl::InputCallback, impl.get(), nullptr,
+                                               nullptr, 0, &impl->queue);
+    if (create != noErr) {
+        LOG_CRITICAL(Audio, "AudioQueueNewInput failed: {}", static_cast<int>(create));
         return;
     }
 
-    cubeb_devid input_device = nullptr;
-    if (device_id != auto_device_name && !device_id.empty()) {
-        cubeb_device_collection collection;
-        if (cubeb_enumerate_devices(impl->ctx, CUBEB_DEVICE_TYPE_INPUT, &collection) == CUBEB_OK) {
-            const auto collection_end = collection.device + collection.count;
-            const auto device = std::find_if(
-                collection.device, collection_end, [this](const cubeb_device_info& info) {
-                    return info.friendly_name != nullptr && device_id == info.friendly_name;
-                });
-            if (device != collection_end) {
-                input_device = device->devid;
-            }
-            cubeb_device_collection_destroy(impl->ctx, &collection);
-        } else {
-            LOG_WARNING(Audio_Sink,
-                        "Audio input device enumeration not supported, using default device.");
+    for (u32 i = 0; i < kBufferCount; i++) {
+        const OSStatus alloc = AudioQueueAllocateBuffer(impl->queue, kBufferFrames * asbd.mBytesPerFrame,
+                                                        &impl->buffers[i]);
+        if (alloc != noErr) {
+            LOG_CRITICAL(Audio, "AudioQueueAllocateBuffer failed: {}", static_cast<int>(alloc));
+            StopSampling();
+            return;
         }
+        AudioQueueEnqueueBuffer(impl->queue, impl->buffers[i], 0, nullptr);
     }
 
-    cubeb_stream_params input_params = {
-        .format = CUBEB_SAMPLE_S16LE,
-        .rate = params.sample_rate,
-        .channels = 1,
-        .layout = CUBEB_LAYOUT_UNDEFINED,
-    };
-
-    u32 latency_frames = 512; // Firefox default
-    auto latency_result = cubeb_get_min_latency(impl->ctx, &input_params, &latency_frames);
-    if (latency_result != CUBEB_OK) {
-        LOG_WARNING(
-            Audio, "cubeb_get_min_latency failed, falling back to default latency of {} frames: {}",
-            latency_frames, latency_result);
-    }
-
-    auto stream_init_result = cubeb_stream_init(
-        impl->ctx, &impl->stream, "Azahar Microphone", input_device, &input_params, nullptr,
-        nullptr, latency_frames, Impl::DataCallback, Impl::StateCallback, impl.get());
-    if (stream_init_result != CUBEB_OK) {
-        LOG_CRITICAL(Audio, "cubeb_stream_init failed: {}", stream_init_result);
+    const OSStatus start = AudioQueueStart(impl->queue, nullptr);
+    if (start != noErr) {
+        LOG_CRITICAL(Audio, "AudioQueueStart failed: {}", static_cast<int>(start));
         StopSampling();
         return;
     }
 
-    auto start_result = cubeb_stream_start(impl->stream);
-    if (start_result != CUBEB_OK) {
-        LOG_CRITICAL(Audio, "cubeb_stream_start failed: {}", start_result);
-        StopSampling();
-        return;
-    }
+    impl->started = true;
 }
 
 void CubebInput::StopSampling() {
-    if (impl->stream) {
-        cubeb_stream_stop(impl->stream);
-        cubeb_stream_destroy(impl->stream);
-        impl->stream = nullptr;
+    if (!impl->queue) {
+        return;
     }
-    if (impl->ctx) {
-        cubeb_destroy(impl->ctx);
-        impl->ctx = nullptr;
-    }
+    impl->started = false;
+    AudioQueueStop(impl->queue, true);
+    AudioQueueDispose(impl->queue, true);
+    impl->queue = nullptr;
 }
 
 bool CubebInput::IsSampling() {
-    return impl->ctx && impl->stream;
+    return impl->queue != nullptr && impl->started;
 }
 
 void CubebInput::AdjustSampleRate(u32 sample_rate) {
@@ -147,63 +146,8 @@ Samples CubebInput::Read() {
     return samples;
 }
 
-long CubebInput::Impl::DataCallback(cubeb_stream* stream, void* user_data, const void* input_buffer,
-                                    void* output_buffer, long num_frames) {
-    auto impl = static_cast<Impl*>(user_data);
-    if (!impl) {
-        return 0;
-    }
-
-    constexpr auto resample_s16_s8 = [](s16 sample) {
-        return static_cast<u8>(static_cast<u16>(sample) >> 8);
-    };
-
-    std::vector<u8> samples{};
-    samples.reserve(num_frames * impl->sample_size_in_bytes);
-    if (impl->sample_size_in_bytes == 1) {
-        // If the sample format is 8bit, then resample back to 8bit before passing back to core
-        for (std::size_t i = 0; i < static_cast<std::size_t>(num_frames); i++) {
-            s16 data;
-            std::memcpy(&data, static_cast<const u8*>(input_buffer) + i * 2, 2);
-            samples.push_back(resample_s16_s8(data));
-        }
-    } else {
-        // Otherwise copy all of the samples to the buffer (which will be treated as s16 by core)
-        const u8* data = reinterpret_cast<const u8*>(input_buffer);
-        samples.insert(samples.begin(), data, data + num_frames * impl->sample_size_in_bytes);
-    }
-    impl->sample_queue.Push(samples);
-
-    // returning less than num_frames here signals cubeb to stop sampling
-    return num_frames;
-}
-
-void CubebInput::Impl::StateCallback(cubeb_stream* stream, void* user_data, cubeb_state state) {}
-
 std::vector<std::string> ListCubebInputDevices() {
-    std::vector<std::string> device_list;
-    cubeb* ctx;
-
-    if (cubeb_init(&ctx, "Azahar Input Device Enumerator", nullptr) != CUBEB_OK) {
-        LOG_CRITICAL(Audio, "cubeb_init failed");
-        return {};
-    }
-
-    cubeb_device_collection collection;
-    if (cubeb_enumerate_devices(ctx, CUBEB_DEVICE_TYPE_INPUT, &collection) == CUBEB_OK) {
-        for (std::size_t i = 0; i < collection.count; i++) {
-            const cubeb_device_info& device = collection.device[i];
-            if (device.state == CUBEB_DEVICE_STATE_ENABLED && device.friendly_name) {
-                device_list.emplace_back(device.friendly_name);
-            }
-        }
-        cubeb_device_collection_destroy(ctx, &collection);
-    } else {
-        LOG_WARNING(Audio_Sink, "Audio input device enumeration not supported.");
-    }
-
-    cubeb_destroy(ctx);
-    return device_list;
+    return {auto_device_name};
 }
 
 } // namespace AudioCore
