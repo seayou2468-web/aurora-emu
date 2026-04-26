@@ -1,8 +1,127 @@
 #include "./bridge.h"
 
+#include <string>
+
+#if defined(__APPLE__)
+#include "./Core/include/core/core.h"
+#include "./Core/include/core/frontend/emu_window.h"
+#include "./Core/include/core/frontend/framebuffer_layout.h"
+#endif
+
 extern "C" {
 
 #if defined(__APPLE__)
+
+namespace {
+
+class AURBridgeEmuWindow final : public Frontend::EmuWindow {
+public:
+  AURBridgeEmuWindow() : Frontend::EmuWindow(false) {
+    window_info.type = Frontend::WindowSystemType::Headless;
+    window_info.display_connection = nullptr;
+    window_info.render_surface = nullptr;
+    window_info.render_surface_scale = 1.0f;
+    NotifyFramebufferLayoutChanged(Layout::DefaultFrameLayout(400, 480, false, false));
+  }
+
+  void PollEvents() override {}
+};
+
+struct AURBridgeRuntime {
+  Core::System* system = nullptr;
+  std::unique_ptr<AURBridgeEmuWindow> window;
+  std::string last_error;
+};
+
+const char* ToStatusString(Core::System::ResultStatus status) {
+  switch (status) {
+    case Core::System::ResultStatus::Success: return "success";
+    case Core::System::ResultStatus::ErrorNotInitialized: return "not initialized";
+    case Core::System::ResultStatus::ErrorGetLoader: return "loader not found";
+    case Core::System::ResultStatus::ErrorSystemMode: return "system mode error";
+    case Core::System::ResultStatus::ErrorLoader: return "loader error";
+    case Core::System::ResultStatus::ErrorLoader_ErrorEncrypted: return "encrypted rom";
+    case Core::System::ResultStatus::ErrorLoader_ErrorInvalidFormat: return "invalid rom format";
+    case Core::System::ResultStatus::ErrorLoader_ErrorGbaTitle: return "gba title";
+    case Core::System::ResultStatus::ErrorSystemFiles: return "system files missing";
+    case Core::System::ResultStatus::ErrorSavestate: return "savestate error";
+    case Core::System::ResultStatus::ShutdownRequested: return "shutdown requested";
+    case Core::System::ResultStatus::ErrorUnknown: return "unknown error";
+  }
+  return "unknown error";
+}
+
+AURBridgeRuntime* AsRuntime(void* runtime) {
+  return static_cast<AURBridgeRuntime*>(runtime);
+}
+
+}  // namespace
+
+void* Aurora3DSBridge_Create(void) {
+  auto* runtime = new AURBridgeRuntime();
+  runtime->system = &Core::System::GetInstance();
+  runtime->window = std::make_unique<AURBridgeEmuWindow>();
+  return runtime;
+}
+
+void Aurora3DSBridge_Destroy(void* runtime_ptr) {
+  auto* runtime = AsRuntime(runtime_ptr);
+  if (!runtime) return;
+  if (runtime->system && runtime->system->IsPoweredOn()) {
+    runtime->system->Shutdown();
+  }
+  delete runtime;
+}
+
+bool Aurora3DSBridge_LoadBIOSFromPath(void*, const char*) {
+  return true;
+}
+
+bool Aurora3DSBridge_LoadROMFromPath(void* runtime_ptr, const char* rom_path) {
+  auto* runtime = AsRuntime(runtime_ptr);
+  if (!runtime || !runtime->system || !runtime->window || !rom_path) return false;
+  const auto status = runtime->system->Load(*runtime->window, std::string(rom_path));
+  runtime->last_error = ToStatusString(status);
+  return status == Core::System::ResultStatus::Success;
+}
+
+bool Aurora3DSBridge_LoadROMFromMemory(void*, const void*, size_t) {
+  return false;
+}
+
+bool Aurora3DSBridge_StepFrame(void* runtime_ptr) {
+  auto* runtime = AsRuntime(runtime_ptr);
+  if (!runtime || !runtime->system) return false;
+  const auto status = runtime->system->RunLoop(true);
+  runtime->last_error = ToStatusString(status);
+  return status == Core::System::ResultStatus::Success ||
+         status == Core::System::ResultStatus::ShutdownRequested;
+}
+
+void Aurora3DSBridge_SetKeyStatus(void*, int, bool) {}
+
+bool Aurora3DSBridge_GetVideoSpec(void*, EmulatorVideoSpec* out_spec) {
+  if (!out_spec) return false;
+  out_spec->width = 400;
+  out_spec->height = 480;
+  out_spec->pixel_format = EMULATOR_PIXEL_FORMAT_RGBA8888;
+  return true;
+}
+
+const uint32_t* Aurora3DSBridge_GetFrameBufferRGBA(void*, size_t* pixel_count) {
+  if (pixel_count) *pixel_count = 0;
+  return nullptr;
+}
+
+bool Aurora3DSBridge_SaveStateToBuffer(void*, void*, size_t, size_t*) { return false; }
+bool Aurora3DSBridge_LoadStateFromBuffer(void*, const void*, size_t) { return false; }
+bool Aurora3DSBridge_ApplyCheatCode(void*, const char*) { return false; }
+
+const char* Aurora3DSBridge_GetLastError(void* runtime_ptr) {
+  auto* runtime = AsRuntime(runtime_ptr);
+  if (!runtime) return "invalid runtime";
+  return runtime->last_error.c_str();
+}
 
 void* Aurora3DS_Create(void) {
   return Aurora3DSBridge_Create();
