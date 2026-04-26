@@ -314,8 +314,6 @@ static NSString * const kAURSaveStateDirectoryName = @"SaveStates";
         [self saveState];
     } else if ([action isEqualToString:@"Load State"]) {
         [self loadState];
-    } else if ([action isEqualToString:@"Cheat Codes"]) {
-        [self presentCheatCodePrompt];
     } else if ([action isEqualToString:@"Fast Forward"]) {
         [self setFastForwardEnabled:!_fastForwardEnabled];
     } else if ([action isEqualToString:@"Quit Game"]) {
@@ -384,44 +382,6 @@ static NSString * const kAURSaveStateDirectoryName = @"SaveStates";
     }
 
     [self presentStatusAlertWithTitle:@"State Loaded" message:@"セーブステートを読み込みました。"];
-}
-
-- (void)presentCheatCodePrompt {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Cheat Codes"
-                                                                   message:@"チートコードを入力してください。"
-                                                            preferredStyle:UIAlertControllerStyleAlert];
-    [alert addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
-        textField.placeholder = @"ram:0200=63";
-        textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
-        textField.autocorrectionType = UITextAutocorrectionTypeNo;
-    }];
-
-    __weak typeof(self) weakSelf = self;
-    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
-    [alert addAction:[UIAlertAction actionWithTitle:@"Apply" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        NSString *code = alert.textFields.firstObject.text ?: @"";
-        [weakSelf applyCheatCode:code];
-    }]];
-    [self presentViewController:alert animated:YES completion:nil];
-}
-
-- (void)applyCheatCode:(NSString *)cheatCode {
-    if (!_core) return;
-
-    NSString *trimmed = [cheatCode stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    if (trimmed.length == 0) {
-        [self presentStatusAlertWithTitle:@"Cheat Failed" message:@"空のコードは適用できません。"];
-        return;
-    }
-
-    if (!EmulatorCore_ApplyCheatCode(_core, trimmed.UTF8String)) {
-        const char *coreError = EmulatorCore_GetLastError(_core);
-        NSString *message = coreError ? [NSString stringWithUTF8String:coreError] : @"チート適用に失敗しました。";
-        [self presentStatusAlertWithTitle:@"Cheat Failed" message:message];
-        return;
-    }
-
-    [self presentStatusAlertWithTitle:@"Cheat Applied" message:@"チートを適用しました。"];
 }
 
 - (void)setFastForwardEnabled:(BOOL)enabled {

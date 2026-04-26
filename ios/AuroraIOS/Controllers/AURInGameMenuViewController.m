@@ -31,7 +31,6 @@
 
     [self addMenuButton:@"Save State" icon:@"square.and.arrow.down"];
     [self addMenuButton:@"Load State" icon:@"square.and.arrow.up"];
-    [self addMenuButton:@"Cheat Codes" icon:@"text.badge.plus"];
     [self addMenuButton:@"Fast Forward" icon:@"forward.fill"];
     [self addMenuButton:@"Quit Game" icon:@"xmark.circle.fill" isDestructive:YES];
 }
