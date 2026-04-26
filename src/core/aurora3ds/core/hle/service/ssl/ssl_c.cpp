@@ -2,7 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include <openssl/rand.h>
+#include <Security/SecRandom.h>
 #include "common/archives.h"
 #include "common/common_types.h"
 #include "core/core.h"
@@ -17,7 +17,6 @@ void SSL_C::Initialize(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
     rp.PopPID();
 
-    // Stub, return success
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
     rb.Push(ResultSuccess);
 }
@@ -38,7 +37,6 @@ void SSL_C::GenerateRandomData(Kernel::HLERequestContext& ctx) {
 
 SSL_C::SSL_C() : ServiceFramework("ssl:C") {
     static const FunctionInfo functions[] = {
-        // clang-format off
         {0x0001, &SSL_C::Initialize, "Initialize"},
         {0x0002, nullptr, "CreateContext"},
         {0x0003, nullptr, "CreateRootCertChain"},
@@ -62,7 +60,6 @@ SSL_C::SSL_C() : ServiceFramework("ssl:C") {
         {0x001C, nullptr, "ContextGetProtocolCipher"},
         {0x001E, nullptr, "DestroyContext"},
         {0x001F, nullptr, "ContextInitSharedmem"},
-        // clang-format on
     };
 
     RegisterHandlers(functions);
@@ -74,8 +71,10 @@ void InstallInterfaces(Core::System& system) {
 }
 
 void GenerateRandomData(std::vector<u8>& out) {
-    // Fill the output buffer with random data.
-    RAND_bytes(out.data(), static_cast<int>(out.size()));
+    if (out.empty()) {
+        return;
+    }
+    SecRandomCopyBytes(kSecRandomDefault, out.size(), out.data());
 }
 
 } // namespace Service::SSL

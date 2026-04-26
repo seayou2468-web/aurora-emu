@@ -9,9 +9,7 @@
 #include "audio_core/input_details.h"
 #include "audio_core/null_input.h"
 #include "audio_core/static_input.h"
-#ifdef HAVE_CUBEB
 #include "audio_core/cubeb_input.h"
-#endif
 #include "common/logging/log.h"
 #include "core/core.h"
 
@@ -19,8 +17,7 @@ namespace AudioCore {
 namespace {
 // input_details is ordered in terms of desirability, with the best choice at the top.
 constexpr std::array input_details = {
-#ifdef HAVE_CUBEB
-    InputDetails{InputType::Cubeb, "Real Device (Cubeb)", true,
+    InputDetails{InputType::Cubeb, "iOS Microphone", true,
                  [](Core::System& system, std::string_view device_id) -> std::unique_ptr<Input> {
                      if (!system.HasMicPermission()) {
                          LOG_WARNING(Audio,
@@ -30,7 +27,6 @@ constexpr std::array input_details = {
                      return std::make_unique<CubebInput>(std::string(device_id));
                  },
                  &ListCubebInputDevices},
-#endif
     InputDetails{InputType::Static, "Static Noise", false,
                  [](Core::System& system, std::string_view device_id) -> std::unique_ptr<Input> {
                      return std::make_unique<StaticInput>();
