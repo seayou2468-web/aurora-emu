@@ -17,7 +17,7 @@ void SetBridgeMissingError(std::string& last_error) {
 
 void SetBackendError(const Aurora3DSRuntime* runtime, std::string& last_error) {
   if (runtime && runtime->backend) {
-    const char* err = Aurora3DSBridge_GetLastError(runtime->backend);
+    const char* err = Aurora3DS_GetLastError(runtime->backend);
     if (err && err[0] != '\0') {
       last_error = err;
       return;
@@ -28,7 +28,7 @@ void SetBackendError(const Aurora3DSRuntime* runtime, std::string& last_error) {
 
 void* CreateRuntime() {
   auto* runtime = new Aurora3DSRuntime();
-  runtime->backend = Aurora3DSBridge_Create();
+  runtime->backend = Aurora3DS_Create();
   if (!runtime->backend) {
     delete runtime;
     return nullptr;
@@ -40,7 +40,7 @@ void DestroyRuntime(void* runtime_ptr) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   if (!runtime) return;
   if (runtime->backend) {
-    Aurora3DSBridge_Destroy(runtime->backend);
+    Aurora3DS_Destroy(runtime->backend);
   }
   delete runtime;
 }
@@ -51,7 +51,7 @@ bool LoadBIOSFromPath(void* runtime_ptr, const char* bios_path, std::string& las
     SetBridgeMissingError(last_error);
     return false;
   }
-  if (Aurora3DSBridge_LoadBIOSFromPath(runtime->backend, bios_path)) return true;
+  if (Aurora3DS_LoadBIOSFromPath(runtime->backend, bios_path)) return true;
   SetBackendError(runtime, last_error);
   return false;
 }
@@ -62,7 +62,7 @@ bool LoadROMFromPath(void* runtime_ptr, const char* rom_path, std::string& last_
     SetBridgeMissingError(last_error);
     return false;
   }
-  if (Aurora3DSBridge_LoadROMFromPath(runtime->backend, rom_path)) return true;
+  if (Aurora3DS_LoadROMFromPath(runtime->backend, rom_path)) return true;
   SetBackendError(runtime, last_error);
   return false;
 }
@@ -73,7 +73,7 @@ bool LoadROMFromMemory(void* runtime_ptr, const void* rom_data, size_t rom_size,
     SetBridgeMissingError(last_error);
     return false;
   }
-  if (Aurora3DSBridge_LoadROMFromMemory(runtime->backend, rom_data, rom_size)) return true;
+  if (Aurora3DS_LoadROMFromMemory(runtime->backend, rom_data, rom_size)) return true;
   SetBackendError(runtime, last_error);
   return false;
 }
@@ -84,7 +84,7 @@ void StepFrame(void* runtime_ptr, std::string& last_error) {
     SetBridgeMissingError(last_error);
     return;
   }
-  if (!Aurora3DSBridge_StepFrame(runtime->backend)) {
+  if (!Aurora3DS_StepFrame(runtime->backend)) {
     SetBackendError(runtime, last_error);
   }
 }
@@ -92,14 +92,14 @@ void StepFrame(void* runtime_ptr, std::string& last_error) {
 void SetKeyStatus(void* runtime_ptr, int key, bool pressed) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   if (!runtime || !runtime->backend) return;
-  Aurora3DSBridge_SetKeyStatus(runtime->backend, key, pressed);
+  Aurora3DS_SetKeyStatus(runtime->backend, key, pressed);
 }
 
 const uint32_t* GetFrameBufferRGBA(void* runtime_ptr, size_t* pixel_count) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   if (pixel_count) *pixel_count = 0;
   if (!runtime || !runtime->backend) return nullptr;
-  return Aurora3DSBridge_GetFrameBufferRGBA(runtime->backend, pixel_count);
+  return Aurora3DS_GetFrameBufferRGBA(runtime->backend, pixel_count);
 }
 
 bool SaveStateToBuffer(void* runtime_ptr, void* out_buffer, size_t buffer_size, size_t* out_size, std::string& last_error) {
@@ -108,7 +108,7 @@ bool SaveStateToBuffer(void* runtime_ptr, void* out_buffer, size_t buffer_size, 
     SetBridgeMissingError(last_error);
     return false;
   }
-  if (Aurora3DSBridge_SaveStateToBuffer(runtime->backend, out_buffer, buffer_size, out_size)) return true;
+  if (Aurora3DS_SaveStateToBuffer(runtime->backend, out_buffer, buffer_size, out_size)) return true;
   SetBackendError(runtime, last_error);
   return false;
 }
@@ -119,7 +119,7 @@ bool LoadStateFromBuffer(void* runtime_ptr, const void* state_buffer, size_t sta
     SetBridgeMissingError(last_error);
     return false;
   }
-  if (Aurora3DSBridge_LoadStateFromBuffer(runtime->backend, state_buffer, state_size)) return true;
+  if (Aurora3DS_LoadStateFromBuffer(runtime->backend, state_buffer, state_size)) return true;
   SetBackendError(runtime, last_error);
   return false;
 }
@@ -130,7 +130,7 @@ bool ApplyCheatCode(void* runtime_ptr, const char* cheat_code, std::string& last
     SetBridgeMissingError(last_error);
     return false;
   }
-  if (Aurora3DSBridge_ApplyCheatCode(runtime->backend, cheat_code)) return true;
+  if (Aurora3DS_ApplyCheatCode(runtime->backend, cheat_code)) return true;
   SetBackendError(runtime, last_error);
   return false;
 }
