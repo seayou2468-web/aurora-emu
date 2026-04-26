@@ -12,7 +12,7 @@
 #include "common/serialization/std_archive.h"
 
 namespace Common::SerializationCompat {
-using access = Common::Serialization::Std::access;
+struct access : Common::Serialization::Std::access {};
 using Common::Serialization::Std::make_binary_object;
 
 template <typename Base, typename Derived>
@@ -79,7 +79,7 @@ struct ExportKey {
     template <>                                                                                    \
     struct Common::SerializationCompat::Export::ExportKey<Type> {                                 \
         static constexpr const char* value = #Type;                                                \
-    }
+    };
 
 #define SERIALIZATION_COMPAT_CONSTRUCT(Type)
 
@@ -90,11 +90,11 @@ struct VersionValue {
 };
 } // namespace Common::SerializationCompat::Version
 
-#define SERIALIZATION_COMPAT_CLASS_VERSION(Type, VersionNumber)                                     \
+#define SERIALIZATION_COMPAT_CLASS_VERSION(Type, VersionNumber)                                    \
     template <>                                                                                    \
-    struct Common::SerializationCompat::Version::VersionValue<Type> {                              \
-        static constexpr unsigned int value = VersionNumber;                                        \
-    }
+    struct Common::SerializationCompat::Version::VersionValue<Type> {                             \
+        static constexpr unsigned int value = VersionNumber;                                       \
+    };
 
 #define SERIALIZATION_COMPAT_SPLIT_MEMBER()                                                         \
     template <typename Archive>                                                                     \
