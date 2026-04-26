@@ -25,6 +25,7 @@ settings:
       - "$(inherited)"
       - AURORA_IOS_MINIMAL_CORE=1
       - AURORA_DISABLE_JIT=1
+      - ENABLE_SOFTWARE_RENDERER=1
 targets:
   AuroraIOS:
     type: application

@@ -1,9 +1,12 @@
 #include "./bridge.h"
 
 #include <string>
+#include <mutex>
+#include <vector>
 
 #if defined(__APPLE__)
 #include "./Core/include/core/core.h"
+#include "./Core/include/core/dumping/backend.h"
 #include "./Core/include/core/frontend/emu_window.h"
 #include "./Core/include/core/frontend/framebuffer_layout.h"
 #endif
@@ -30,7 +33,56 @@ public:
 struct AURBridgeRuntime {
   Core::System* system = nullptr;
   std::unique_ptr<AURBridgeEmuWindow> window;
+  std::shared_ptr<class AURBridgeCaptureBackend> capture;
+  std::vector<uint32_t> frame_rgba;
   std::string last_error;
+};
+
+class AURBridgeCaptureBackend final : public VideoDumper::Backend {
+public:
+  bool StartDumping(const std::string&, const Layout::FramebufferLayout& layout) override {
+    std::scoped_lock lk(mu);
+    dumping = true;
+    fb_layout = layout;
+    rgb.clear();
+    return true;
+  }
+
+  void AddVideoFrame(VideoDumper::VideoFrame frame) override {
+    std::scoped_lock lk(mu);
+    rgb = std::move(frame.data);
+  }
+
+  void AddAudioFrame(AudioCore::StereoFrame16) override {}
+  void AddAudioSample(const std::array<s16, 2>&) override {}
+
+  void StopDumping() override {
+    std::scoped_lock lk(mu);
+    dumping = false;
+  }
+
+  bool IsDumping() const override { return dumping; }
+  Layout::FramebufferLayout GetLayout() const override { return fb_layout; }
+
+  bool CopyLatestRGBA(std::vector<uint32_t>& out) {
+    std::scoped_lock lk(mu);
+    if (rgb.empty()) return false;
+    const size_t px = rgb.size() / 3;
+    out.resize(px);
+    for (size_t i = 0; i < px; ++i) {
+      const uint8_t r = rgb[i * 3 + 0];
+      const uint8_t g = rgb[i * 3 + 1];
+      const uint8_t b = rgb[i * 3 + 2];
+      out[i] = 0xFF000000u | (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b);
+    }
+    return true;
+  }
+
+private:
+  mutable std::mutex mu;
+  std::vector<uint8_t> rgb;
+  Layout::FramebufferLayout fb_layout{};
+  bool dumping = false;
 };
 
 const char* ToStatusString(Core::System::ResultStatus status) {
@@ -61,6 +113,9 @@ void* Aurora3DSBridge_Create(void) {
   auto* runtime = new AURBridgeRuntime();
   runtime->system = &Core::System::GetInstance();
   runtime->window = std::make_unique<AURBridgeEmuWindow>();
+  runtime->capture = std::make_shared<AURBridgeCaptureBackend>();
+  runtime->system->RegisterVideoDumper(runtime->capture);
+  runtime->capture->StartDumping("", runtime->window->GetFramebufferLayout());
   return runtime;
 }
 
@@ -94,6 +149,7 @@ bool Aurora3DSBridge_StepFrame(void* runtime_ptr) {
   if (!runtime || !runtime->system) return false;
   const auto status = runtime->system->RunLoop(true);
   runtime->last_error = ToStatusString(status);
+  runtime->capture->CopyLatestRGBA(runtime->frame_rgba);
   return status == Core::System::ResultStatus::Success ||
          status == Core::System::ResultStatus::ShutdownRequested;
 }
@@ -108,9 +164,12 @@ bool Aurora3DSBridge_GetVideoSpec(void*, EmulatorVideoSpec* out_spec) {
   return true;
 }
 
-const uint32_t* Aurora3DSBridge_GetFrameBufferRGBA(void*, size_t* pixel_count) {
+const uint32_t* Aurora3DSBridge_GetFrameBufferRGBA(void* runtime_ptr, size_t* pixel_count) {
+  auto* runtime = AsRuntime(runtime_ptr);
   if (pixel_count) *pixel_count = 0;
-  return nullptr;
+  if (!runtime || runtime->frame_rgba.empty()) return nullptr;
+  if (pixel_count) *pixel_count = runtime->frame_rgba.size();
+  return runtime->frame_rgba.data();
 }
 
 bool Aurora3DSBridge_SaveStateToBuffer(void*, void*, size_t, size_t*) { return false; }
