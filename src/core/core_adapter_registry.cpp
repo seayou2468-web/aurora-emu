@@ -17,6 +17,8 @@ const CoreAdapter* FindCoreAdapter(EmulatorCoreType type) {
       return &kSameBoyAdapter;
     case EMULATOR_CORE_TYPE_NDS:
       return &kMelonDSAdapter;
+    case EMULATOR_CORE_TYPE_3DS:
+      return &kMelonDSAdapter;
     default:
       return nullptr;
   }

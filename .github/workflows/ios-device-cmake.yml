@@ -1,0 +1,78 @@
+name: iOS Device CMake + Unsigned IPA (Xcode 26.1.1)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - work
+  pull_request:
+
+jobs:
+  build-ios-device:
+    name: Build iOS 26 (device, arm64, unsigned .app/.ipa)
+    runs-on: macos-26
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.1.1.app/Contents/Developer
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 26.1.1
+        run: |
+          sudo xcode-select -s "$DEVELOPER_DIR"
+          xcodebuild -version
+
+      - name: Verify iOS SDK
+        run: |
+          xcodebuild -showsdks
+          SDK_VERSION="$(xcrun --sdk iphoneos --show-sdk-version)"
+          echo "iphoneos SDK version: ${SDK_VERSION}"
+          [[ "${SDK_VERSION}" == 26.* ]]
+
+      - name: Configure (CMake / iOS device)
+        run: |
+          cmake -S src/core/nanoboyadvance/nba \
+            -B build/ios-device \
+            -G Ninja \
+            -Wno-dev \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_SYSROOT=iphoneos \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=26.0 \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build (CMake)
+        run: |
+          cmake --build build/ios-device --config Release --verbose
+
+      - name: Collect unsigned .app
+        run: |
+          set -euo pipefail
+          APP_PATH="$(find build/ios-device -type d -name '*.app' | head -n 1 || true)"
+          if [[ -z "${APP_PATH}" ]]; then
+            echo "No .app found in build/ios-device"
+            exit 1
+          fi
+          mkdir -p artifacts
+          cp -R "${APP_PATH}" artifacts/
+          echo "APP_PATH=${APP_PATH}" >> "$GITHUB_ENV"
+
+      - name: Create unsigned .ipa (manual Payload zip)
+        run: |
+          set -euo pipefail
+          APP_BASENAME="$(basename "${APP_PATH}")"
+          mkdir -p artifacts/Payload
+          cp -R "${APP_PATH}" "artifacts/Payload/${APP_BASENAME}"
+          (
+            cd artifacts
+            /usr/bin/zip -qry "AuroraIOS-unsigned.ipa" Payload
+          )
+
+      - name: Upload build artifacts (.app + unsigned .ipa)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios26-device-unsigned-app-ipa
+          path: |
+            artifacts/*.app
+            artifacts/*.ipa

@@ -17,6 +17,8 @@
 
 @implementation AURLibraryViewController
 
+static NSString * const kAURROMDirectory = @"ROMs";
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor blackColor];
@@ -44,7 +46,7 @@
     // ... (rest of the setup)
 
     // Setup Segmented Control for Systems (Glassmorphic)
-    self.segmentedControl = [[UISegmentedControl alloc] initWithItems:@[@"GBA", @"GBC", @"GB", @"NES", @"NDS"]];
+    self.segmentedControl = [[UISegmentedControl alloc] initWithItems:@[@"GBA", @"GBC", @"GB", @"NES", @"NDS", @"3DS"]];
     self.segmentedControl.selectedSegmentIndex = 0;
     [self.segmentedControl addTarget:self action:@selector(segmentChanged:) forControlEvents:UIControlEventValueChanged];
     self.navigationItem.titleView = self.segmentedControl;
@@ -113,6 +115,7 @@
         case 2: type = EMULATOR_CORE_TYPE_GB; break; // Actually GB
         case 3: type = EMULATOR_CORE_TYPE_NES; break;
         case 4: type = EMULATOR_CORE_TYPE_NDS; break;
+        case 5: type = EMULATOR_CORE_TYPE_3DS; break;
         default: type = EMULATOR_CORE_TYPE_GBA; break;
     }
     self.games = [[AURDatabaseManager sharedManager] gamesForCoreType:type];
@@ -126,7 +129,19 @@
 }
 
 - (void)addTapped {
-    UIDocumentPickerViewController *picker = [[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[UTTypeData] asCopy:YES];
+    NSArray<UTType *> *types = @[
+        UTTypeData,
+        [UTType typeWithFilenameExtension:@"gba"] ?: UTTypeData,
+        [UTType typeWithFilenameExtension:@"gb"] ?: UTTypeData,
+        [UTType typeWithFilenameExtension:@"gbc"] ?: UTTypeData,
+        [UTType typeWithFilenameExtension:@"nes"] ?: UTTypeData,
+        [UTType typeWithFilenameExtension:@"nds"] ?: UTTypeData,
+        [UTType typeWithFilenameExtension:@"3ds"] ?: UTTypeData,
+        [UTType typeWithFilenameExtension:@"cci"] ?: UTTypeData,
+        [UTType typeWithFilenameExtension:@"cxi"] ?: UTTypeData,
+        [UTType typeWithFilenameExtension:@"cia"] ?: UTTypeData
+    ];
+    UIDocumentPickerViewController *picker = [[UIDocumentPickerViewController alloc] initForOpeningContentTypes:types asCopy:NO];
     picker.delegate = self;
     [self presentViewController:picker animated:YES completion:nil];
 }
@@ -135,20 +150,28 @@
 
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
     NSURL *url = urls.firstObject;
-    if (url) {
-        AURGame *game = [[AURGame alloc] init];
-        game.title = [[url lastPathComponent] stringByDeletingPathExtension];
-        game.romPath = [url path];
+    if (!url) return;
 
-        NSString *ext = [[url pathExtension] lowercaseString];
-        if ([ext isEqualToString:@"gba"]) game.coreType = EMULATOR_CORE_TYPE_GBA;
-        else if ([ext isEqualToString:@"nes"]) game.coreType = EMULATOR_CORE_TYPE_NES;
-        else if ([ext isEqualToString:@"nds"]) game.coreType = EMULATOR_CORE_TYPE_NDS;
-        else game.coreType = EMULATOR_CORE_TYPE_GB;
-
-        [[AURDatabaseManager sharedManager] addGame:game];
-        [self reloadData];
+    NSString *ext = [[url.pathExtension lowercaseString] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+    EmulatorCoreType coreType = [self coreTypeForExtension:ext];
+    if (coreType == -1) {
+        [self presentSimpleAlertWithTitle:@"Unsupported ROM" message:@"対応拡張子: gba/gb/gbc/nes/nds/3ds/cci/cxi/cia"];
+        return;
     }
+
+    NSString *importedPath = [self importROMAtURL:url];
+    if (importedPath.length == 0) {
+        [self presentSimpleAlertWithTitle:@"Import Failed" message:@"ROMの取り込みに失敗しました。"];
+        return;
+    }
+
+    AURGame *game = [[AURGame alloc] init];
+    game.title = [[url lastPathComponent] stringByDeletingPathExtension];
+    game.romPath = importedPath;
+    game.coreType = coreType;
+
+    [[AURDatabaseManager sharedManager] addGame:game];
+    [self reloadData];
 }
 
 #pragma mark - UICollectionViewDelegate
@@ -210,6 +233,63 @@
     }];
 
     return cell;
+}
+
+- (NSString *)documentsDirectory {
+    return NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;
+}
+
+- (NSString *)romsDirectory {
+    NSString *dir = [[self documentsDirectory] stringByAppendingPathComponent:kAURROMDirectory];
+    [[NSFileManager defaultManager] createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
+    return dir;
+}
+
+- (EmulatorCoreType)coreTypeForExtension:(NSString *)ext {
+    if ([ext isEqualToString:@"gba"]) return EMULATOR_CORE_TYPE_GBA;
+    if ([ext isEqualToString:@"nes"]) return EMULATOR_CORE_TYPE_NES;
+    if ([ext isEqualToString:@"nds"]) return EMULATOR_CORE_TYPE_NDS;
+    if ([ext isEqualToString:@"3ds"] || [ext isEqualToString:@"cci"] || [ext isEqualToString:@"cxi"] || [ext isEqualToString:@"cia"]) return EMULATOR_CORE_TYPE_3DS;
+    if ([ext isEqualToString:@"gb"] || [ext isEqualToString:@"gbc"]) return EMULATOR_CORE_TYPE_GB;
+    return (EmulatorCoreType)-1;
+}
+
+- (NSString *)importROMAtURL:(NSURL *)url {
+    if (!url.isFileURL) return nil;
+
+    BOOL accessed = [url startAccessingSecurityScopedResource];
+    NSString *fileName = url.lastPathComponent ?: @"imported.rom";
+    NSString *destinationPath = [[self romsDirectory] stringByAppendingPathComponent:fileName];
+
+    NSFileManager *fm = NSFileManager.defaultManager;
+    if ([fm fileExistsAtPath:destinationPath]) {
+        NSString *basename = [fileName stringByDeletingPathExtension];
+        NSString *ext = [fileName pathExtension];
+        NSString *uniqueName = (ext.length > 0)
+            ? [NSString stringWithFormat:@"%@-%@.%@", basename, NSUUID.UUID.UUIDString, ext]
+            : [NSString stringWithFormat:@"%@-%@", basename, NSUUID.UUID.UUIDString];
+        destinationPath = [[self romsDirectory] stringByAppendingPathComponent:uniqueName];
+    }
+
+    NSError *copyError = nil;
+    [fm copyItemAtURL:url toURL:[NSURL fileURLWithPath:destinationPath] error:&copyError];
+
+    if (accessed) {
+        [url stopAccessingSecurityScopedResource];
+    }
+    if (copyError) {
+        NSLog(@"[AUR][Library] ROM import failed: %@", copyError.localizedDescription);
+        return nil;
+    }
+    return destinationPath;
+}
+
+- (void)presentSimpleAlertWithTitle:(NSString *)title message:(NSString *)message {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:title
+                                                                   message:message
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+    [self presentViewController:alert animated:YES completion:nil];
 }
 
 @end
