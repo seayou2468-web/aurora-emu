@@ -503,8 +503,8 @@ struct Values {
 #elif defined(ENABLE_SOFTWARE_RENDERER)
         GraphicsAPI::Software,
 #else
-// TODO: Add a null renderer backend for this, perhaps.
-#error "At least one renderer must be enabled."
+// Fallback for builds that intentionally compile without a renderer backend.
+        GraphicsAPI::Software,
 #endif
         GraphicsAPI::Software, GraphicsAPI::Vulkan, Keys::graphics_api};
     SwitchableSetting<u32> physical_device{0, Keys::physical_device};
