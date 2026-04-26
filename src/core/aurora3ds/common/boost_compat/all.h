@@ -25,7 +25,7 @@ using binary_oarchive = Common::Serialization::Std::BinaryOutputArchive;
 } // namespace boost::archive
 
 namespace boost::serialization {
-using access = Common::SerializationCompat::access;
+class access : public Common::SerializationCompat::access {};
 using Common::SerializationCompat::make_binary_object;
 using Common::SerializationCompat::split_free;
 using Common::SerializationCompat::split_member;
@@ -46,14 +46,14 @@ struct wrapper_traits {};
 } // namespace boost::serialization
 
 #ifndef BOOST_CLASS_EXPORT_KEY
-#define BOOST_CLASS_EXPORT_KEY(Type) SERIALIZATION_COMPAT_CLASS_EXPORT_KEY(Type)
+#define BOOST_CLASS_EXPORT_KEY(Type) SERIALIZATION_COMPAT_CLASS_EXPORT_KEY(Type);
 #endif
 #ifndef BOOST_SERIALIZATION_CONSTRUCT
 #define BOOST_SERIALIZATION_CONSTRUCT(Type)
 #endif
 #ifndef BOOST_CLASS_VERSION
 #define BOOST_CLASS_VERSION(Type, VersionNumber)                                                   \
-    SERIALIZATION_COMPAT_CLASS_VERSION(Type, VersionNumber)
+    SERIALIZATION_COMPAT_CLASS_VERSION(Type, VersionNumber);
 #endif
 #ifndef BOOST_SERIALIZATION_SPLIT_MEMBER
 #define BOOST_SERIALIZATION_SPLIT_MEMBER() SERIALIZATION_COMPAT_SPLIT_MEMBER()
