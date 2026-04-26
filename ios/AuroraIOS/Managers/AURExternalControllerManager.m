@@ -17,6 +17,7 @@
 
     for (GCController *controller in [GCController controllers]) {
         [self setupController:controller];
+        AURGCAdapterSetConnection(0, true, controller.isAttachedToDevice == NO);
     }
 }
 

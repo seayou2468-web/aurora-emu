@@ -23,6 +23,17 @@ namespace InputCommon {
 std::shared_ptr<GCButtonFactory> gcbuttons;
 std::shared_ptr<GCAnalogFactory> gcanalog;
 std::shared_ptr<GCAdapter::Adapter> gcadapter;
+
+static void EnsureGCAdapterInitialized() {
+    if (gcadapter) {
+        return;
+    }
+    gcadapter = std::make_shared<GCAdapter::Adapter>();
+    gcbuttons = std::make_shared<GCButtonFactory>(gcadapter);
+    gcanalog = std::make_shared<GCAnalogFactory>(gcadapter);
+    Input::RegisterFactory<Input::ButtonDevice>("gcpad", gcbuttons);
+    Input::RegisterFactory<Input::AnalogDevice>("gcpad", gcanalog);
+}
 #endif
 static std::shared_ptr<Keyboard> keyboard;
 static std::shared_ptr<MotionEmu> motion_emu;
@@ -30,11 +41,7 @@ static std::unique_ptr<CemuhookUDP::State> udp;
 
 void Init() {
 #ifdef ENABLE_GCADAPTER
-    gcadapter = std::make_shared<GCAdapter::Adapter>();
-    gcbuttons = std::make_shared<GCButtonFactory>(gcadapter);
-    Input::RegisterFactory<Input::ButtonDevice>("gcpad", gcbuttons);
-    gcanalog = std::make_shared<GCAnalogFactory>(gcadapter);
-    Input::RegisterFactory<Input::AnalogDevice>("gcpad", gcanalog);
+    EnsureGCAdapterInitialized();
 #endif
     keyboard = std::make_shared<Keyboard>();
     Input::RegisterFactory<Input::ButtonDevice>("keyboard", keyboard);
@@ -151,22 +158,19 @@ std::vector<std::unique_ptr<DevicePoller>> GetPollers(DeviceType type) {
 
 #ifdef ENABLE_GCADAPTER
 extern "C" void AURGCAdapterSetConnection(size_t port, bool connected, bool wireless) {
-    if (InputCommon::gcadapter) {
-        InputCommon::gcadapter->SetPadConnection(port, connected, wireless);
-    }
+    InputCommon::EnsureGCAdapterInitialized();
+    InputCommon::gcadapter->SetPadConnection(port, connected, wireless);
 }
 
 extern "C" void AURGCAdapterSetButton(size_t port, AURGCButton button, bool pressed) {
-    if (InputCommon::gcadapter) {
-        InputCommon::gcadapter->UpdatePadButtonState(
-            port, static_cast<GCAdapter::PadButton>(button), pressed);
-    }
+    InputCommon::EnsureGCAdapterInitialized();
+    InputCommon::gcadapter->UpdatePadButtonState(
+        port, static_cast<GCAdapter::PadButton>(button), pressed);
 }
 
 extern "C" void AURGCAdapterSetAxis(size_t port, AURGCAxis axis, int16_t value) {
-    if (InputCommon::gcadapter) {
-        InputCommon::gcadapter->UpdatePadAxisState(
-            port, static_cast<GCAdapter::PadAxes>(axis), value);
-    }
+    InputCommon::EnsureGCAdapterInitialized();
+    InputCommon::gcadapter->UpdatePadAxisState(
+        port, static_cast<GCAdapter::PadAxes>(axis), value);
 }
 #endif
