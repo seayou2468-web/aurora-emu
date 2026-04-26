@@ -122,7 +122,7 @@ static u8 PipeIndexToSlotIndex(u8 pipe_index, PipeDirection direction) {
 
 struct DspLle::Impl final {
     Impl(Core::Timing& timing, Memory::MemorySystem& memory, bool multithread)
-        : teakra(Teakra::UserConfig{.dsp_memory = memory.GetDspMemory(0)}), core_timing(timing),
+        : teakra(), dsp_memory(memory.GetDspMemory(0)), core_timing(timing),
           multithread(multithread) {
         teakra_slice_event = core_timing.RegisterEvent(
             "DSP slice", [this](u64, int late) { TeakraSliceEvent(static_cast<u64>(late)); });
@@ -133,6 +133,7 @@ struct DspLle::Impl final {
     }
 
     Teakra::Teakra teakra;
+    u8* dsp_memory;
     u16 pipe_base_waddr = 0;
 
     bool semaphore_signaled = false;
@@ -191,13 +192,11 @@ struct DspLle::Impl final {
     }
 
     u8* GetDspDataPointer(u32 baddr) {
-        uint8_t* memory = teakra.GetDspMemory();
-        return &memory[DspDataOffset + baddr];
+        return &dsp_memory[DspDataOffset + baddr];
     }
 
     const u8* GetDspDataPointer(u32 baddr) const {
-        const uint8_t* memory = teakra.GetDspMemory();
-        return &memory[DspDataOffset + baddr];
+        return &dsp_memory[DspDataOffset + baddr];
     }
 
     PipeStatus GetPipeStatus(u8 pipe_index, PipeDirection direction) const {
@@ -314,7 +313,6 @@ struct DspLle::Impl final {
         teakra.Reset();
 
         Dsp1 dsp(buffer);
-        auto dsp_memory = teakra.GetDspMemory();
         u8* program = dsp_memory;
         u8* data = dsp_memory + DspDataOffset;
         for (const auto& segment : dsp.segments) {
