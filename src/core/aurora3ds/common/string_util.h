@@ -50,7 +50,7 @@ void BuildCompleteFilename(std::string& _CompleteFilename, const std::string& _P
 [[nodiscard]] std::string UTF16ToUTF8(std::u16string_view input);
 [[nodiscard]] std::u16string UTF8ToUTF16(std::string_view input);
 
-#ifdef _WIN32
+#if 0
 [[nodiscard]] std::string UTF16ToUTF8(const std::wstring& input);
 [[nodiscard]] std::wstring UTF8ToUTF16W(const std::string& str);
 

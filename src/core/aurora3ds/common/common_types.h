@@ -27,7 +27,7 @@
 #include <array>
 #include <cstdint>
 
-#ifdef _MSC_VER
+#if 0
 #ifndef __func__
 #define __func__ __FUNCTION__
 #endif

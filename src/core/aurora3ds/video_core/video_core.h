@@ -6,10 +6,6 @@
 
 #include <memory>
 
-namespace Frontend {
-class EmuWindow;
-}
-
 namespace Core {
 class System;
 }
@@ -22,8 +18,6 @@ namespace VideoCore {
 
 class RendererBase;
 
-std::unique_ptr<RendererBase> CreateRenderer(Frontend::EmuWindow& emu_window,
-                                             Frontend::EmuWindow* secondary_window,
-                                             Pica::PicaCore& pica, Core::System& system);
+std::unique_ptr<RendererBase> CreateRenderer(Pica::PicaCore& pica, Core::System& system);
 
 } // namespace VideoCore

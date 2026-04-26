@@ -42,9 +42,7 @@ enum class LayoutOption : u32 { // Shouldn't these have set numbers to prevent l
     SingleScreen,
     LargeScreen,
     SideScreen,
-#ifndef ANDROID
     SeparateWindows,
-#endif
     HybridScreen,
     CustomLayout,
 };
@@ -471,7 +469,6 @@ struct Values {
     SwitchableSetting<bool> enable_gamemode{true, Keys::enable_gamemode};
 
     // Core
-    Setting<bool> use_cpu_jit{true, Keys::use_cpu_jit};
     SwitchableSetting<s32, true> cpu_clock_percentage{100, 5, 400, Keys::cpu_clock_percentage};
     SwitchableSetting<bool> is_new_3ds{true, Keys::is_new_3ds};
     SwitchableSetting<bool> lle_applets{true, Keys::lle_applets};
@@ -521,14 +518,9 @@ struct Values {
     SwitchableSetting<bool> use_hw_shader{true, Keys::use_hw_shader};
     SwitchableSetting<bool> use_disk_shader_cache{true, Keys::use_disk_shader_cache};
     SwitchableSetting<bool> shaders_accurate_mul{true, Keys::shaders_accurate_mul};
-#ifdef ANDROID // TODO: Fuck this -OS
-    SwitchableSetting<bool> use_vsync{false, Keys::use_vsync};
-#else
     SwitchableSetting<bool> use_vsync{true, Keys::use_vsync};
-#endif
     SwitchableSetting<bool> use_display_refresh_rate_detection{
         true, Keys::use_display_refresh_rate_detection};
-    Setting<bool> use_shader_jit{true, Keys::use_shader_jit};
     SwitchableSetting<u32, true> resolution_factor{1, 0, 10, Keys::resolution_factor};
     SwitchableSetting<bool> use_integer_scaling{false, Keys::use_integer_scaling};
     SwitchableSetting<double, true> frame_limit{100, 0, 1000, Keys::frame_limit};
@@ -546,10 +538,7 @@ struct Values {
         SecondaryDisplayLayout::None, Keys::secondary_display_layout};
     SwitchableSetting<std::vector<LayoutOption>> layouts_to_cycle{
         {LayoutOption::Default, LayoutOption::SingleScreen, LayoutOption::LargeScreen,
-         LayoutOption::SideScreen,
-#ifndef ANDROID
-         LayoutOption::SeparateWindows,
-#endif
+         LayoutOption::SideScreen, LayoutOption::SeparateWindows,
          LayoutOption::HybridScreen, LayoutOption::CustomLayout},
         Keys::layouts_to_cycle};
     SwitchableSetting<float, true> large_screen_proportion{4.f, 1.f, 16.f,

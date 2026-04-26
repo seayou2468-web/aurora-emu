@@ -948,7 +948,7 @@ unsigned InterpreterMainLoop(ARMul_State* cpu) {
 #define INC_PC(l) ptr += sizeof(arm_inst) + l
 #define INC_PC_STUB ptr += sizeof(arm_inst)
 
-#ifdef ANDROID
+#if 0
 #define GDB_BP_CHECK
 #else
 #define GDB_BP_CHECK                                                                               \
@@ -967,7 +967,7 @@ unsigned InterpreterMainLoop(ARMul_State* cpu) {
 
 // GCC and Clang have a C++ extension to support a lookup table of labels. Otherwise, fallback to a
 // clunky switch statement.
-#if defined __GNUC__ || (defined __clang__ && !defined _MSC_VER)
+#if 1
 #define GOTO_NEXT_INST                                                                             \
     GDB_BP_CHECK;                                                                                  \
     if (num_instrs >= cpu->NumInstrsToExecute)                                                     \
@@ -1412,7 +1412,7 @@ unsigned InterpreterMainLoop(ARMul_State* cpu) {
 
 // GCC and Clang have a C++ extension to support a lookup table of labels. Otherwise, fallback
 // to a clunky switch statement.
-#if defined __GNUC__ || defined __clang__
+#if 1
     void* InstLabel[] = {&&VMLA_INST,
                          &&VMLS_INST,
                          &&VNMLA_INST,
@@ -1651,7 +1651,7 @@ DISPATCH: {
             goto END;
     }
 
-#ifndef ANDROID
+#if 1
     // Find breakpoint if one exists within the block
     if (GDBStub::IsConnected()) {
         breakpoint_data =

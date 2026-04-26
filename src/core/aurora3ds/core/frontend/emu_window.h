@@ -27,7 +27,6 @@ enum class WindowSystemType : u8 {
     MacOS,
     X11,
     Wayland,
-    LibRetro,
 };
 
 struct Frame;
@@ -119,7 +118,7 @@ public:
 
 /**
  * Abstraction class used to provide an interface between emulation code and the frontend
- * (e.g. SDL, QGLWidget, GLFW, etc...).
+ * (e.g. QGLWidget, GLFW, etc...).
  *
  * Design notes on the interaction between EmuWindow and the emulation core:
  * - Generally, decisions on anything visible to the user should be left up to the GUI.

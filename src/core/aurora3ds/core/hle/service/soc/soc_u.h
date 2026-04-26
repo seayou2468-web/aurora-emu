@@ -22,7 +22,7 @@ namespace Service::SOC {
 
 /// Holds information about a particular socket
 struct SocketHolder {
-#ifdef _WIN32
+#if 0
     using SOCKET = unsigned long long;
 #else
     using SOCKET = int;

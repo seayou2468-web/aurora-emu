@@ -4,52 +4,68 @@
 
 #pragma once
 
-// Centralized Boost dependency boundary for aurora3ds.
+// Centralized compatibility boundary for legacy Boost-style aurora3ds call sites.
 
-#include <boost/archive/archive_exception.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/detail/basic_iarchive.hpp>
-#include <boost/asio.hpp>
-#include <boost/config.hpp>
-#include <boost/detail/workaround.hpp>
-#include <boost/icl/discrete_interval.hpp>
-#include <boost/icl/interval_map.hpp>
-#include <boost/icl/interval_set.hpp>
-#include <boost/icl/right_open_interval.hpp>
-#include <boost/mpl/bool_fwd.hpp>
-#include <boost/mpl/if.hpp>
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/array.hpp>
-#include <boost/serialization/array_wrapper.hpp>
-#include <boost/serialization/assume_abstract.hpp>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/binary_object.hpp>
-#include <boost/serialization/bitset.hpp>
-#include <boost/serialization/collection_size_type.hpp>
-#include <boost/serialization/collection_traits.hpp>
-#include <boost/serialization/collections_load_imp.hpp>
-#include <boost/serialization/collections_save_imp.hpp>
-#include <boost/serialization/deque.hpp>
-#include <boost/serialization/export.hpp>
-#include <boost/serialization/item_version_type.hpp>
-#include <boost/serialization/list.hpp>
-#include <boost/serialization/map.hpp>
-#include <boost/serialization/nvp.hpp>
-#include <boost/serialization/priority_queue.hpp>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/set.hpp>
-#include <boost/serialization/shared_ptr.hpp>
-#include <boost/serialization/split_free.hpp>
-#include <boost/serialization/split_member.hpp>
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/throw_exception.hpp>
-#include <boost/serialization/tracking.hpp>
-#include <boost/serialization/unique_ptr.hpp>
-#include <boost/serialization/unordered_map.hpp>
-#include <boost/serialization/utility.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/version.hpp>
-#include <boost/serialization/weak_ptr.hpp>
-#include <boost/serialization/wrapper.hpp>
-#include <boost/stacktrace.hpp>
+#include <stdexcept>
+
+#include "common/serialization/compat.h"
+#include "common/serialization/std_archive.h"
+
+namespace boost::archive {
+class archive_exception : public std::runtime_error {
+public:
+    enum exception_code { unsupported_version };
+
+    explicit archive_exception(exception_code)
+        : std::runtime_error("archive_exception: unsupported_version") {}
+};
+
+using binary_iarchive = Common::Serialization::Std::BinaryInputArchive;
+using binary_oarchive = Common::Serialization::Std::BinaryOutputArchive;
+} // namespace boost::archive
+
+namespace boost::serialization {
+using access = Common::SerializationCompat::access;
+using Common::SerializationCompat::make_binary_object;
+using Common::SerializationCompat::split_free;
+using Common::SerializationCompat::split_member;
+using Common::SerializationCompat::throw_exception;
+
+template <typename Base, typename Derived>
+Base& base_object(Derived& derived) {
+    return Common::SerializationCompat::base_object<Base>(derived);
+}
+
+template <typename Base, typename Derived>
+const Base& base_object(const Derived& derived) {
+    return Common::SerializationCompat::base_object<Base>(derived);
+}
+
+template <typename T>
+struct wrapper_traits {};
+} // namespace boost::serialization
+
+#ifndef BOOST_CLASS_EXPORT_KEY
+#define BOOST_CLASS_EXPORT_KEY(Type) SERIALIZATION_COMPAT_CLASS_EXPORT_KEY(Type)
+#endif
+#ifndef BOOST_SERIALIZATION_CONSTRUCT
+#define BOOST_SERIALIZATION_CONSTRUCT(Type)
+#endif
+#ifndef BOOST_CLASS_VERSION
+#define BOOST_CLASS_VERSION(Type, VersionNumber)                                                   \
+    SERIALIZATION_COMPAT_CLASS_VERSION(Type, VersionNumber)
+#endif
+#ifndef BOOST_SERIALIZATION_SPLIT_MEMBER
+#define BOOST_SERIALIZATION_SPLIT_MEMBER() SERIALIZATION_COMPAT_SPLIT_MEMBER()
+#endif
+#ifndef BOOST_CLASS_EXPORT_IMPLEMENT
+#define BOOST_CLASS_EXPORT_IMPLEMENT(Type)                                                         \
+    static_assert(Common::SerializationCompat::Export::ExportKey<Type>::value != nullptr,         \
+                  "BOOST_CLASS_EXPORT_KEY missing for type")
+#endif
+#ifndef BOOST_SERIALIZATION_REGISTER_ARCHIVE
+#define BOOST_SERIALIZATION_REGISTER_ARCHIVE(ArchiveType) static_assert(true, "archive registered")
+#endif
+#ifndef BOOST_SERIALIZATION_NVP
+#define BOOST_SERIALIZATION_NVP(Value) Value
+#endif

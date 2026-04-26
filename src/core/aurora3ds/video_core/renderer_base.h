@@ -8,10 +8,6 @@
 #include "core/frontend/framebuffer_layout.h"
 #include "video_core/rasterizer_interface.h"
 
-namespace Frontend {
-class EmuWindow;
-}
-
 namespace Core {
 class System;
 }
@@ -37,8 +33,7 @@ struct RendererSettings {
 
 class RendererBase : NonCopyable {
 public:
-    explicit RendererBase(Core::System& system, Frontend::EmuWindow& window,
-                          Frontend::EmuWindow* secondary_window);
+    explicit RendererBase(Core::System& system);
     virtual ~RendererBase();
 
     /// Returns the rasterizer owned by the renderer
@@ -81,14 +76,6 @@ public:
         return current_frame;
     }
 
-    Frontend::EmuWindow& GetRenderWindow() {
-        return render_window;
-    }
-
-    const Frontend::EmuWindow& GetRenderWindow() const {
-        return render_window;
-    }
-
     [[nodiscard]] RendererSettings& Settings() {
         return settings;
     }
@@ -107,8 +94,6 @@ public:
 protected:
     Core::System& system;
     RendererSettings settings;
-    Frontend::EmuWindow& render_window;    /// Reference to the render window handle.
-    Frontend::EmuWindow* secondary_window; /// Reference to the secondary render window handle.
 
 protected:
     f32 current_fps = 0.0f; /// Current framerate, should be set by the renderer

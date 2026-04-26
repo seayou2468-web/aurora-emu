@@ -5,9 +5,9 @@
 #include <array>
 #include <cstdio>
 
-#ifdef _WIN32
+#if 0
 #include <windows.h>
-#elif defined(ANDROID)
+#elif 0
 #include <android/log.h>
 #endif
 
@@ -37,7 +37,7 @@ void PrintMessage(const Entry& entry) {
 }
 
 void PrintColoredMessage(const Entry& entry) {
-#ifdef _WIN32
+#if 0
     HANDLE console_handle = GetStdHandle(STD_ERROR_HANDLE);
     if (console_handle == INVALID_HANDLE_VALUE) {
         return;
@@ -102,7 +102,7 @@ void PrintColoredMessage(const Entry& entry) {
 
     PrintMessage(entry);
 
-#ifdef _WIN32
+#if 0
     SetConsoleTextAttribute(console_handle, original_info.wAttributes);
 #else
     fputs(ESC "[0m", stderr);
@@ -111,7 +111,7 @@ void PrintColoredMessage(const Entry& entry) {
 }
 
 void PrintMessageToLogcat([[maybe_unused]] const Entry& entry) {
-#ifdef ANDROID
+#if 0
     const auto str = FormatLogMessage(entry);
 
     android_LogPriority android_log_priority;

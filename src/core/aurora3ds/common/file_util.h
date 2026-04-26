@@ -16,9 +16,7 @@
 #include <ios>
 #include <limits>
 #include <memory>
-#ifdef HAVE_LIBRETRO
 #include <mutex>
-#endif
 #include <optional>
 #include <span>
 #include <string>
@@ -26,20 +24,8 @@
 #include <type_traits>
 #include <vector>
 #include "common/common_types.h"
-#ifdef _MSC_VER
-#include "common/string_util.h"
-#endif
-#if defined(ANDROID) && !defined(HAVE_LIBRETRO_VFS)
-#include "android_storage.h"
-#endif
 
-#ifdef HAVE_LIBRETRO_VFS
-#define SKIP_STDIO_REDEFINES
-#include <streams/file_stream_transforms.h>
-#define CORE_FILE RFILE
-#else
 #define CORE_FILE std::FILE
-#endif
 
 namespace FileUtil {
 
@@ -220,17 +206,9 @@ void SetCurrentRomPath(const std::string& path);
 // Update the Global Path with the new value
 void UpdateUserPath(UserPath path, const std::string& filename);
 
-#ifdef __APPLE__
 [[nodiscard]] std::optional<std::string> GetBundleDirectory();
-#endif
-
-#ifdef _WIN32
-[[nodiscard]] const std::string& GetExeDirectory();
-[[nodiscard]] std::string AppDataRoamingDirectory();
-#else
 [[nodiscard]] const std::string GetHomeDirectory();
 [[nodiscard]] const std::string GetUserDirectory(const std::string& envvar);
-#endif
 
 std::size_t WriteStringToFile(bool text_file, const std::string& filename, std::string_view str);
 
@@ -432,20 +410,9 @@ public:
         return m_good;
     }
     [[nodiscard]] virtual int GetFd() const {
-#ifdef HAVE_LIBRETRO_VFS
-        if (m_file == nullptr)
-            return -1;
-        return fileno(filestream_get_vfs_handle(m_file)->fp);
-#else
-#ifdef ANDROID
-        if (!AndroidStorage::CanUseRawFS()) {
-            return m_fd;
-        }
-#endif // ANDROID
         if (m_file == nullptr)
             return -1;
         return fileno(m_file);
-#endif // HAVE_LIBRETRO_VFS
     }
     [[nodiscard]] explicit operator bool() const {
         return IsGood();
@@ -465,11 +432,7 @@ public:
     virtual void Clear() {
         m_good = true;
 
-#ifdef HAVE_LIBRETRO_VFS
-        filestream_rewind(m_file);
-#else
         std::clearerr(m_file);
-#endif
     }
 
     virtual bool IsCrypto() {
@@ -500,13 +463,9 @@ private:
     CORE_FILE* m_file = nullptr;
     int m_fd = -1;
     bool m_good = true;
-#ifdef HAVE_LIBRETRO_VFS
     // pread() doesn't touch the file position, so it's safe alongside
-    // concurrent fread/fwrite. Libretro VFS has no pread equivalent, so
-    // ReadAtImpl emulates it with seek+read+seek, which would corrupt the
-    // file position for concurrent Read/Write operations.
+    // concurrent fread/fwrite.
     mutable std::mutex m_file_pos_mutex;
-#endif
 
     std::string filename;
     std::string openmode;
@@ -567,11 +526,7 @@ void OpenFStream(T& fstream, const std::string& filename);
 // To deal with Windows being dumb at unicode:
 template <typename T>
 void OpenFStream(T& fstream, const std::string& filename, std::ios_base::openmode openmode) {
-#ifdef _MSC_VER
-    fstream.open(Common::UTF8ToUTF16W(filename), openmode);
-#else
     fstream.open(filename, openmode);
-#endif
 }
 
 BOOST_CLASS_EXPORT_KEY(FileUtil::IOFile)

@@ -15,7 +15,7 @@
 #include "common/logging/log.h"
 #include "common/string_util.h"
 
-#ifdef _WIN32
+#if 0
 #include <windows.h>
 #endif
 
@@ -76,7 +76,7 @@ bool SplitPath(const std::string& full_path, std::string* _pPath, std::string* _
 
     std::size_t dir_end = full_path.find_last_of("/"
 // windows needs the : included for something like just "C:" to be considered a directory
-#ifdef _WIN32
+#if 0
                                                  ":"
 #endif
     );
@@ -165,7 +165,7 @@ std::u16string UTF8ToUTF16(std::string_view input) {
     return converter.from_bytes(input.data(), input.data() + input.size());
 }
 
-#ifdef _WIN32
+#if 0
 static std::wstring CPToUTF16(u32 code_page, const std::string& input) {
     const auto size =
         MultiByteToWideChar(code_page, 0, input.data(), static_cast<int>(input.size()), nullptr, 0);

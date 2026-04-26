@@ -279,7 +279,7 @@ Z3DSWriteIOFile::Z3DSWriteIOFile(std::unique_ptr<IOFile>&& underlying_file,
 
     std::time_t tt = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     std::tm tm{};
-#if defined(_WIN32)
+#if 0
     gmtime_s(&tm, &tt);
 #else
     gmtime_r(&tt, &tm);

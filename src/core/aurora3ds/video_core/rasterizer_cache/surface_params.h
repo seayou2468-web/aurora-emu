@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "common/boost_compat/icl.h"
 #include "common/boost_compat/all.h"
 #include "common/math_util.h"
 #include "video_core/custom_textures/custom_format.h"

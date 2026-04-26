@@ -2,14 +2,14 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include "common/boost_compat/all.h"
 #include <chrono>
+#include <cstdlib>
 #include <optional>
 #include <regex>
 
 #include <fmt/format.h>
 
-#ifdef _WIN32
+#if 0
 #include <share.h>   // For _SH_DENYWR
 #include <windows.h> // For OutputDebugStringW
 #else
@@ -17,8 +17,7 @@
 #endif
 
 #ifdef CITRA_LINUX_GCC_BACKTRACE
-#define BOOST_STACKTRACE_USE_BACKTRACE
-#undef BOOST_STACKTRACE_USE_BACKTRACE
+#include <execinfo.h>
 #include <signal.h>
 #endif
 
@@ -55,60 +54,6 @@ public:
     virtual void Close() = 0;
 };
 
-#ifdef HAVE_LIBRETRO
-/**
- * LibRetro backend
- */
-class LibRetroBackend : public Backend {
-public:
-    explicit LibRetroBackend() {}
-    explicit LibRetroBackend(retro_log_printf_t callback) : callback(callback) {}
-
-    ~LibRetroBackend() override = default;
-
-    void Write(const Entry& entry) override {
-        if (callback == nullptr) {
-            return;
-        }
-        retro_log_level log_level;
-
-        switch (entry.log_level) {
-        case Common::Log::Level::Trace:
-            log_level = retro_log_level::RETRO_LOG_DEBUG;
-            break;
-        case Common::Log::Level::Debug:
-            log_level = retro_log_level::RETRO_LOG_DEBUG;
-            break;
-        case Common::Log::Level::Info:
-            log_level = retro_log_level::RETRO_LOG_INFO;
-            break;
-        case Common::Log::Level::Warning:
-            log_level = retro_log_level::RETRO_LOG_WARN;
-            break;
-        case Common::Log::Level::Error:
-            log_level = retro_log_level::RETRO_LOG_ERROR;
-            break;
-        case Common::Log::Level::Critical:
-            log_level = retro_log_level::RETRO_LOG_ERROR;
-            break;
-        default:
-            log_level = retro_log_level::RETRO_LOG_DUMMY;
-        }
-
-        auto str = FormatLogMessage(entry).append(1, '\n');
-        callback(log_level, str.c_str());
-    }
-
-    void Flush() override {}
-
-    void Close() override {}
-
-    void EnableForStacktrace() override {}
-
-private:
-    retro_log_printf_t callback = nullptr;
-};
-#endif
 
 /**
  * Backend that writes to stderr and with color
@@ -217,7 +162,7 @@ public:
     ~DebuggerBackend() override = default;
 
     void Write(const Entry& entry) override {
-#ifdef _WIN32
+#if 0
         ::OutputDebugStringW(UTF8ToUTF16W(FormatLogMessage(entry).append(1, '\n')).c_str());
 #endif
     }
@@ -229,7 +174,7 @@ public:
     void EnableForStacktrace() override {}
 };
 
-#ifdef ANDROID
+#if 0
 /**
  * Backend that writes to the Android logcat
  */
@@ -273,19 +218,6 @@ public:
         }
         return *instance;
     }
-#ifdef HAVE_LIBRETRO
-    static void Initialize(retro_log_printf_t callback) {
-        if (instance) {
-            LOG_WARNING(Log, "Reinitializing logging backend");
-            return;
-        }
-        initialization_in_progress_suppress_logging = true;
-        Filter filter;
-        filter.ParseFilterString(Settings::values.log_filter.GetValue());
-        instance = std::unique_ptr<Impl, decltype(&Deleter)>(new Impl(callback, filter), Deleter);
-        initialization_in_progress_suppress_logging = false;
-    }
-#endif
     static void Initialize(std::string_view log_file) {
         if (instance) {
             LOG_WARNING(Log, "Reinitializing logging backend");
@@ -379,10 +311,6 @@ public:
     }
 
 private:
-#ifdef HAVE_LIBRETRO
-    Impl(retro_log_printf_t callback, const Filter& filter_)
-        : filter{filter_}, file_backend{""}, libretro_backend{callback} {}
-#endif
     Impl(const std::string& file_backend_filename, const Filter& filter_)
         : filter{filter_}, file_backend{file_backend_filename} {
 #ifdef CITRA_LINUX_GCC_BACKTRACE
@@ -410,18 +338,21 @@ private:
                 backend.EnableForStacktrace();
                 backend.Write(signal_entry);
             });
-            const auto backtrace =
-                boost::stacktrace::stacktrace::from_dump(backtrace_storage.data(), 4096);
-            for (const auto& frame : backtrace.as_vector()) {
-                auto line = boost::stacktrace::detail::to_string(&frame, 1);
+            char** symbols = backtrace_symbols(backtrace_storage.data(),
+                                               static_cast<int>(backtrace_size.load()));
+            if (symbols == nullptr) {
+                abort();
+            }
+            for (std::size_t i = 0; i < backtrace_size.load(); ++i) {
+                std::string line = symbols[i] ? symbols[i] : "";
                 if (line.empty()) {
-                    abort();
+                    continue;
                 }
-                line.pop_back(); // Remove newline
                 const auto frame_entry = CreateEntry(Class::Log, Level::Critical, "?", 0, "?",
                                                      std::move(line), time_origin);
                 ForEachBackend([&frame_entry](Backend& backend) { backend.Write(frame_entry); });
             }
+            free(symbols);
             using namespace std::literals;
             const auto rip_entry =
                 CreateEntry(Class::Log, Level::Critical, "?", 0, "?", "RIP"s, time_origin);
@@ -485,16 +416,12 @@ private:
     }
 
     void ForEachBackend(auto lambda) {
-#ifdef HAVE_LIBRETRO
-        lambda(static_cast<Backend&>(libretro_backend));
-#else
         lambda(static_cast<Backend&>(debugger_backend));
         lambda(static_cast<Backend&>(color_console_backend));
         lambda(static_cast<Backend&>(file_backend));
-#ifdef ANDROID
+#if 0
         lambda(static_cast<Backend&>(lc_backend));
 #endif // ANDROID
-#endif // HAVE_LIBRETRO
     }
 
     static void Deleter(Impl* ptr) {
@@ -518,10 +445,8 @@ private:
             }
             SleepForever();
         }
-        // Don't restart like boost suggests. We want to append to the log file and not lose dynamic
-        // symbols. This may segfault if it unwinds outside C/C++ code but we'll just have to fall
-        // back to core dumps.
-        boost::stacktrace::safe_dump_to(backtrace_storage.data(), 4096);
+        backtrace_size.store(static_cast<std::size_t>(
+            backtrace(backtrace_storage.data(), static_cast<int>(backtrace_storage.size()))));
         std::atomic_thread_fence(std::memory_order_seq_cst);
         for (const int anything = 0; write(backtrace_thread_waker_fd, &anything, 1) != 1;)
             ;
@@ -538,11 +463,8 @@ private:
     DebuggerBackend debugger_backend{};
     ColorConsoleBackend color_console_backend{};
     FileBackend file_backend;
-#ifdef ANDROID
+#if 0
     LogcatBackend lc_backend{};
-#endif
-#ifdef HAVE_LIBRETRO
-    LibRetroBackend libretro_backend;
 #endif
 
     MPSCQueue<Entry> message_queue{};
@@ -551,19 +473,13 @@ private:
 
 #ifdef CITRA_LINUX_GCC_BACKTRACE
     std::atomic_int received_signal{0};
-    std::array<u8, 4096> backtrace_storage{};
+    std::array<void*, 256> backtrace_storage{};
+    std::atomic<std::size_t> backtrace_size{};
     int backtrace_thread_waker_fd;
     int backtrace_done_printing_fd;
 #endif
 };
 } // namespace
-
-#ifdef HAVE_LIBRETRO
-void LibRetroStart(retro_log_printf_t callback) {
-    Impl::Initialize(callback);
-    Impl::Start();
-}
-#endif
 
 void Initialize(std::string_view log_file) {
     Impl::Initialize(log_file.empty() ? LOG_FILE : log_file);

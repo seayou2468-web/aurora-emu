@@ -1879,13 +1879,13 @@ Result SVC::GetSystemInfo(s64* out, u32 type, s32 param) {
             CopyStringPart(reinterpret_cast<char*>(out), Common::g_build_version, 0, sizeof(s64));
             break;
         case SystemInfoEmulatorInformation::BUILD_PLATFORM: {
-#if defined(_WIN32)
+#if 0
             *out = static_cast<s64>(SystemInfoCitraPlatform::PLATFORM_WINDOWS);
-#elif defined(ANDROID)
+#elif 0
             *out = static_cast<s64>(SystemInfoCitraPlatform::PLATFORM_ANDROID);
-#elif defined(__linux__)
+#elif 0
             *out = static_cast<s64>(SystemInfoCitraPlatform::PLATFORM_LINUX);
-#elif defined(__APPLE__)
+#elif 1
             *out = static_cast<s64>(SystemInfoCitraPlatform::PLATFORM_APPLE);
 #else
             *out = static_cast<s64>(SystemInfoCitraPlatform::PLATFORM_UNKNOWN);

@@ -24,30 +24,13 @@
 #ifdef USER_DIR
 #define EMU_DATA_DIR USER_DIR
 #else
-#ifdef _WIN32
-#define EMU_DATA_DIR "AzaharPlus"
-#define LEGACY_CITRA_DATA_DIR "Citra"
-#define LEGACY_LIME3DS_DATA_DIR "Lime3DS"
-#elif defined(__APPLE__)
-#include <TargetConditionals.h>
-#if TARGET_OS_IPHONE
+// iOS device-only data roots
 #define EMU_APPLE_DATA_DIR "Documents" DIR_SEP "AzaharPlus"
 #define LEGACY_CITRA_APPLE_DATA_DIR "Documents" DIR_SEP "Citra"
 #define LEGACY_LIME3DS_APPLE_DATA_DIR "Documents" DIR_SEP "Lime3DS"
-#else
-#define EMU_APPLE_DATA_DIR "Library" DIR_SEP "Application Support" DIR_SEP "AzaharPlus"
-#define LEGACY_CITRA_APPLE_DATA_DIR "Library" DIR_SEP "Application Support" DIR_SEP "Citra"
-#define LEGACY_LIME3DS_APPLE_DATA_DIR "Library" DIR_SEP "Application Support" DIR_SEP "Lime3DS"
-#endif
-// For compatibility with XDG paths.
 #define EMU_DATA_DIR "azaharplus-emu"
 #define LEGACY_CITRA_DATA_DIR "citra-emu"
 #define LEGACY_LIME3DS_DATA_DIR "lime3ds-emu"
-#else
-#define EMU_DATA_DIR "azaharplus-emu"
-#define LEGACY_CITRA_DATA_DIR "citra-emu"
-#define LEGACY_LIME3DS_DATA_DIR "lime3ds-emu"
-#endif
 #endif
 
 // Dirs in both User and Sys
