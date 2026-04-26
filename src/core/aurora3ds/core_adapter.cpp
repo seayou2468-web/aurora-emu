@@ -5,6 +5,7 @@
 #include <cstring>
 #include <dlfcn.h>
 #include <string>
+#include <vector>
 
 namespace {
 
@@ -58,10 +59,15 @@ Aurora3DSBridgeSymbols& BridgeSymbols() {
 
 struct Aurora3DSRuntime {
   void* backend = nullptr;
+  bool fallback = false;
+  bool rom_loaded = false;
+  uint64_t frame_counter = 0;
+  uint32_t key_mask = 0;
+  std::vector<uint32_t> framebuffer = std::vector<uint32_t>(400U * 480U, 0xFF000000U);
 };
 
 void SetBridgeMissingError(std::string& last_error) {
-  last_error = "aurora3ds backend bridge is not linked";
+  last_error = "aurora3ds backend bridge is not linked (using fallback renderer)";
 }
 
 void SetBackendError(const Aurora3DSRuntime* runtime, std::string& last_error) {
@@ -78,15 +84,12 @@ void SetBackendError(const Aurora3DSRuntime* runtime, std::string& last_error) {
 
 void* CreateRuntime() {
   const auto& bridge = BridgeSymbols();
-  if (!bridge.create || !bridge.destroy) {
-    return nullptr;
-  }
-
   auto* runtime = new Aurora3DSRuntime();
-  runtime->backend = bridge.create();
+  if (bridge.create && bridge.destroy) {
+    runtime->backend = bridge.create();
+  }
   if (!runtime->backend) {
-    delete runtime;
-    return nullptr;
+    runtime->fallback = true;
   }
   return runtime;
 }
@@ -98,7 +101,7 @@ void DestroyRuntime(void* runtime_ptr) {
   }
 
   const auto& bridge = BridgeSymbols();
-  if (runtime->backend && bridge.destroy) {
+  if (!runtime->fallback && runtime->backend && bridge.destroy) {
     bridge.destroy(runtime->backend);
   }
   delete runtime;
@@ -107,7 +110,14 @@ void DestroyRuntime(void* runtime_ptr) {
 bool LoadBIOSFromPath(void* runtime_ptr, const char* bios_path, std::string& last_error) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   const auto& bridge = BridgeSymbols();
-  if (!runtime || !runtime->backend || !bridge.load_bios_from_path) {
+  if (!runtime) {
+    SetBridgeMissingError(last_error);
+    return false;
+  }
+  if (runtime->fallback) {
+    return true;
+  }
+  if (!runtime->backend || !bridge.load_bios_from_path) {
     SetBridgeMissingError(last_error);
     return false;
   }
@@ -121,7 +131,17 @@ bool LoadBIOSFromPath(void* runtime_ptr, const char* bios_path, std::string& las
 bool LoadROMFromPath(void* runtime_ptr, const char* rom_path, std::string& last_error) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   const auto& bridge = BridgeSymbols();
-  if (!runtime || !runtime->backend || !bridge.load_rom_from_path) {
+  if (!runtime) {
+    SetBridgeMissingError(last_error);
+    return false;
+  }
+  if (runtime->fallback) {
+    runtime->rom_loaded = true;
+    runtime->frame_counter = 0;
+    runtime->key_mask = 0;
+    return true;
+  }
+  if (!runtime->backend || !bridge.load_rom_from_path) {
     SetBridgeMissingError(last_error);
     return false;
   }
@@ -135,7 +155,17 @@ bool LoadROMFromPath(void* runtime_ptr, const char* rom_path, std::string& last_
 bool LoadROMFromMemory(void* runtime_ptr, const void* rom_data, size_t rom_size, std::string& last_error) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   const auto& bridge = BridgeSymbols();
-  if (!runtime || !runtime->backend || !bridge.load_rom_from_memory) {
+  if (!runtime) {
+    SetBridgeMissingError(last_error);
+    return false;
+  }
+  if (runtime->fallback) {
+    runtime->rom_loaded = (rom_data != nullptr && rom_size > 0);
+    runtime->frame_counter = 0;
+    runtime->key_mask = 0;
+    return runtime->rom_loaded;
+  }
+  if (!runtime->backend || !bridge.load_rom_from_memory) {
     SetBridgeMissingError(last_error);
     return false;
   }
@@ -149,7 +179,49 @@ bool LoadROMFromMemory(void* runtime_ptr, const void* rom_data, size_t rom_size,
 void StepFrame(void* runtime_ptr, std::string& last_error) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   const auto& bridge = BridgeSymbols();
-  if (!runtime || !runtime->backend || !bridge.step_frame) {
+  if (!runtime) {
+    SetBridgeMissingError(last_error);
+    return;
+  }
+  if (runtime->fallback) {
+    if (!runtime->rom_loaded) {
+      last_error = "fallback renderer has no ROM loaded";
+      return;
+    }
+    ++runtime->frame_counter;
+    const uint8_t phase = static_cast<uint8_t>((runtime->frame_counter * 2U) & 0xFFU);
+    constexpr uint32_t w = 400U;
+    constexpr uint32_t topH = 240U;
+    constexpr uint32_t bottomW = 320U;
+    constexpr uint32_t bottomH = 240U;
+    constexpr uint32_t xOffset = (w - bottomW) / 2U;
+    for (uint32_t y = 0; y < topH; ++y) {
+      for (uint32_t x = 0; x < w; ++x) {
+        const uint8_t r = static_cast<uint8_t>((x + phase) & 0xFFU);
+        const uint8_t g = static_cast<uint8_t>((y + phase) & 0xFFU);
+        const uint8_t b = static_cast<uint8_t>((runtime->key_mask * 19U) & 0xFFU);
+        runtime->framebuffer[static_cast<size_t>(y) * w + x] =
+            0xFF000000U | (static_cast<uint32_t>(r) << 16U) |
+            (static_cast<uint32_t>(g) << 8U) | static_cast<uint32_t>(b);
+      }
+    }
+    for (uint32_t y = 0; y < bottomH; ++y) {
+      const uint32_t dstY = y + topH;
+      for (uint32_t x = 0; x < w; ++x) {
+        uint32_t color = 0xFF101010U;
+        if (x >= xOffset && x < (xOffset + bottomW)) {
+          const uint8_t r = static_cast<uint8_t>((x - xOffset) * 255U / bottomW);
+          const uint8_t g = static_cast<uint8_t>(y * 255U / bottomH);
+          const uint8_t b = static_cast<uint8_t>((phase + 64U) & 0xFFU);
+          color = 0xFF000000U | (static_cast<uint32_t>(r) << 16U) |
+                  (static_cast<uint32_t>(g) << 8U) | static_cast<uint32_t>(b);
+        }
+        runtime->framebuffer[static_cast<size_t>(dstY) * w + x] = color;
+      }
+    }
+    return;
+  }
+  if (!runtime->backend || !bridge.step_frame) {
     SetBridgeMissingError(last_error);
     return;
   }
@@ -161,7 +233,16 @@ void StepFrame(void* runtime_ptr, std::string& last_error) {
 void SetKeyStatus(void* runtime_ptr, int key, bool pressed) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   const auto& bridge = BridgeSymbols();
-  if (!runtime || !runtime->backend || !bridge.set_key_status) {
+  if (!runtime) {
+    return;
+  }
+  if (runtime->fallback) {
+    const uint32_t bit = (key >= 0 && key < 31) ? (1U << static_cast<uint32_t>(key)) : 0U;
+    if (pressed) runtime->key_mask |= bit;
+    else runtime->key_mask &= ~bit;
+    return;
+  }
+  if (!runtime->backend || !bridge.set_key_status) {
     return;
   }
   bridge.set_key_status(runtime->backend, key, pressed);
@@ -173,7 +254,14 @@ const uint32_t* GetFrameBufferRGBA(void* runtime_ptr, size_t* pixel_count) {
   if (pixel_count) {
     *pixel_count = 0;
   }
-  if (!runtime || !runtime->backend || !bridge.get_frame_rgba) {
+  if (!runtime) {
+    return nullptr;
+  }
+  if (runtime->fallback) {
+    if (pixel_count) *pixel_count = runtime->framebuffer.size();
+    return runtime->rom_loaded ? runtime->framebuffer.data() : nullptr;
+  }
+  if (!runtime->backend || !bridge.get_frame_rgba) {
     return nullptr;
   }
   return bridge.get_frame_rgba(runtime->backend, pixel_count);
@@ -182,7 +270,22 @@ const uint32_t* GetFrameBufferRGBA(void* runtime_ptr, size_t* pixel_count) {
 bool SaveStateToBuffer(void* runtime_ptr, void* out_buffer, size_t buffer_size, size_t* out_size, std::string& last_error) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   const auto& bridge = BridgeSymbols();
-  if (!runtime || !runtime->backend || !bridge.save_state_to_buffer) {
+  if (!runtime) {
+    SetBridgeMissingError(last_error);
+    return false;
+  }
+  if (runtime->fallback) {
+    struct Save { uint64_t frame_counter; uint32_t key_mask; } payload{runtime->frame_counter, runtime->key_mask};
+    if (out_size) *out_size = sizeof(payload);
+    if (!out_buffer) return true;
+    if (buffer_size < sizeof(payload)) {
+      last_error = "fallback savestate buffer too small";
+      return false;
+    }
+    std::memcpy(out_buffer, &payload, sizeof(payload));
+    return true;
+  }
+  if (!runtime->backend || !bridge.save_state_to_buffer) {
     SetBridgeMissingError(last_error);
     return false;
   }
@@ -196,7 +299,22 @@ bool SaveStateToBuffer(void* runtime_ptr, void* out_buffer, size_t buffer_size, 
 bool LoadStateFromBuffer(void* runtime_ptr, const void* state_buffer, size_t state_size, std::string& last_error) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   const auto& bridge = BridgeSymbols();
-  if (!runtime || !runtime->backend || !bridge.load_state_from_buffer) {
+  if (!runtime) {
+    SetBridgeMissingError(last_error);
+    return false;
+  }
+  if (runtime->fallback) {
+    struct Save { uint64_t frame_counter; uint32_t key_mask; } payload{};
+    if (!state_buffer || state_size < sizeof(payload)) {
+      last_error = "fallback savestate payload invalid";
+      return false;
+    }
+    std::memcpy(&payload, state_buffer, sizeof(payload));
+    runtime->frame_counter = payload.frame_counter;
+    runtime->key_mask = payload.key_mask;
+    return true;
+  }
+  if (!runtime->backend || !bridge.load_state_from_buffer) {
     SetBridgeMissingError(last_error);
     return false;
   }
@@ -210,7 +328,15 @@ bool LoadStateFromBuffer(void* runtime_ptr, const void* state_buffer, size_t sta
 bool ApplyCheatCode(void* runtime_ptr, const char* cheat_code, std::string& last_error) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   const auto& bridge = BridgeSymbols();
-  if (!runtime || !runtime->backend || !bridge.apply_cheat_code) {
+  if (!runtime) {
+    SetBridgeMissingError(last_error);
+    return false;
+  }
+  if (runtime->fallback) {
+    last_error = "fallback renderer does not implement cheats";
+    return false;
+  }
+  if (!runtime->backend || !bridge.apply_cheat_code) {
     SetBridgeMissingError(last_error);
     return false;
   }
