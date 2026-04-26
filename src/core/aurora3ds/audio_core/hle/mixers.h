@@ -76,7 +76,7 @@ private:
         ar & state;
         ar & backup_state;
     }
-    friend class SerializationCompat::access;
+    friend class Common::SerializationCompat::access;
 };
 
 } // namespace AudioCore::HLE
