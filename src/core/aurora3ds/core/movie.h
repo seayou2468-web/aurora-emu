@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <functional>
 #include <span>
-#include <boost/serialization/vector.hpp>
 #include "common/common_types.h"
 
 namespace Service {

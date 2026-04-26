@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include <boost/icl/interval_set.hpp>
-#include <boost/serialization/split_free.hpp>
+#include "common/boost_compat/all.h"
 #include "common/serialization/boost_discrete_interval.hpp"
 
 namespace boost::serialization {

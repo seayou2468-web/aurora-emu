@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <array>
 #include <atomic>
 #include <functional>
@@ -14,8 +15,6 @@
 #include <mutex>
 #include <string>
 #include <vector>
-#include <boost/serialization/array.hpp>
-#include <boost/serialization/shared_ptr.hpp>
 #include "common/common_types.h"
 #include "common/construct.h"
 #include "common/swap.h"

@@ -4,12 +4,9 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <array>
 #include <vector>
-#include <boost/serialization/array.hpp>
-#include <boost/serialization/deque.hpp>
-#include <boost/serialization/priority_queue.hpp>
-#include <boost/serialization/vector.hpp>
 #include <queue>
 #include "audio_core/audio_types.h"
 #include "audio_core/codec.h"

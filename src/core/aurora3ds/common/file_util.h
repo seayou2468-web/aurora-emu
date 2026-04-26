@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <array>
 #include <atomic>
 #include <cstdio>
@@ -24,12 +25,6 @@
 #include <string_view>
 #include <type_traits>
 #include <vector>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/export.hpp>
-#include <boost/serialization/split_member.hpp>
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/wrapper.hpp>
 #include "common/common_types.h"
 #ifdef _MSC_VER
 #include "common/string_util.h"

@@ -2,8 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/unique_ptr.hpp>
+#include "core/hle/serialization_compat.h"
 #include "common/archives.h"
 #include "common/logging/log.h"
 #include "core/file_sys/directory_backend.h"

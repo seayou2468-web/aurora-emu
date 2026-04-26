@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <boost/serialization/access.hpp>
 
+#include "common/boost_compat/all.h"
 #include "common/bit_field.h"
 #include "common/common_funcs.h"
 #include "common/common_types.h"

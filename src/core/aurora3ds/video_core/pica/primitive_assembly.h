@@ -4,10 +4,9 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <array>
 #include <functional>
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/array.hpp>
 #include "video_core/pica/output_vertex.h"
 #include "video_core/pica/regs_pipeline.h"
 

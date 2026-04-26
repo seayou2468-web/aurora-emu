@@ -4,11 +4,9 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <cstddef>
 #include <memory>
-#include <boost/serialization/shared_ptr.hpp>
-#include <boost/serialization/split_member.hpp>
-#include <boost/serialization/version.hpp>
 #include "common/common_types.h"
 #include "core/arm/skyeye_common/arm_regformat.h"
 #include "core/arm/skyeye_common/vfp/asm_vfp.h"

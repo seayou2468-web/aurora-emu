@@ -2,11 +2,11 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include "core/hle/serialization_compat.h"
 #include <algorithm>
 #include <memory>
 #include <utility>
 #include <vector>
-#include <boost/serialization/set.hpp>
 #include "common/archives.h"
 #include "common/assert.h"
 #include "common/common_types.h"

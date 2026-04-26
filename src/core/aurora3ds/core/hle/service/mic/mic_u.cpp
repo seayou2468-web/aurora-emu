@@ -2,8 +2,8 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include "core/hle/serialization_compat.h"
 #include <span>
-#include <boost/serialization/weak_ptr.hpp>
 #include "audio_core/input.h"
 #include "audio_core/input_details.h"
 #include "common/archives.h"

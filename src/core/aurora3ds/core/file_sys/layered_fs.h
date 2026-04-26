@@ -4,15 +4,12 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <map>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/export.hpp>
-#include <boost/serialization/shared_ptr.hpp>
-#include <boost/serialization/string.hpp>
 #include "common/common_types.h"
 #include "common/swap.h"
 #include "core/file_sys/romfs_reader.h"

@@ -2,10 +2,8 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include "core/hle/serialization_compat.h"
 #include <tuple>
-#include <boost/serialization/shared_ptr.hpp>
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/vector.hpp>
 #include "common/archives.h"
 #include "core/hle/kernel/client_port.h"
 #include "core/hle/kernel/client_session.h"

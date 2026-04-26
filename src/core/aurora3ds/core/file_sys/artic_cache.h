@@ -4,13 +4,11 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <array>
 #include <shared_mutex>
 #include "vector"
 
-#include <boost/serialization/array.hpp>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/export.hpp>
 #include "common/alignment.h"
 #include "common/common_types.h"
 #include "common/static_lru_cache.h"

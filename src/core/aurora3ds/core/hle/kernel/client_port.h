@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <memory>
 #include <string>
-#include <boost/serialization/export.hpp>
 #include "common/common_types.h"
 #include "core/hle/kernel/object.h"
 #include "core/hle/kernel/server_port.h"

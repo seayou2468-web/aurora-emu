@@ -6,14 +6,13 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include "common/boost_compat/all.h"
 #include <array>
 #include <fstream>
 #include <limits>
 #include <memory>
 #include <sstream>
 #include <unordered_map>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
 #include <fmt/format.h>

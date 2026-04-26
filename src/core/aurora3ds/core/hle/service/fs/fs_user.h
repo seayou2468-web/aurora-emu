@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <optional>
 #include <unordered_map>
-#include <boost/serialization/base_object.hpp>
 #include "common/common_types.h"
 #include "core/file_sys/errors.h"
 #include "core/file_sys/secure_value_backend.h"

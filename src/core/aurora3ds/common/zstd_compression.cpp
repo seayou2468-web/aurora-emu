@@ -6,6 +6,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include "common/boost_compat/all.h"
 #include <algorithm>
 #include <chrono>
 #include <ctime>
@@ -14,8 +15,6 @@
 #include <zstd.h>
 #include <zstd_seekable.h>
 
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/unique_ptr.hpp>
 #include "common/alignment.h"
 #include "common/archives.h"
 #include "common/assert.h"

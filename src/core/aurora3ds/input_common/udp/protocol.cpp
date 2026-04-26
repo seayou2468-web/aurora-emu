@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <cstring>
+#include <span>
 #include "common/logging/log.h"
 #include "input_common/udp/protocol.h"
 
@@ -62,12 +63,10 @@ std::optional<Type> Validate(u8* data, std::size_t size) {
     }
 
     const u32 crc32 = header.crc;
-    boost::crc_32_type result;
     // zero out the crc in the buffer and then run the crc against it
     std::memset(&data[offsetof(Header, crc)], 0, sizeof(u32_le));
-
-    result.process_bytes(data, data_len + sizeof(Header));
-    if (crc32 != result.checksum()) {
+    const auto packet_view = std::span<const u8>{data, data_len + sizeof(Header)};
+    if (crc32 != Common::CRC::CRC32_04C11DB7(packet_view)) {
         LOG_ERROR(Input, "UDP Packet CRC check failed. Offset: {}", offsetof(Header, crc));
         return std::nullopt;
     }

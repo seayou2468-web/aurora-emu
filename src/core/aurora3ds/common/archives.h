@@ -4,10 +4,8 @@
 
 #pragma once
 
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/serialization/export.hpp>
 
+#include "common/boost_compat/all.h"
 using iarchive = boost::archive::binary_iarchive;
 using oarchive = boost::archive::binary_oarchive;
 

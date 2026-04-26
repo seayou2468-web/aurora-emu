@@ -2,10 +2,9 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include "core/hle/serialization_compat.h"
 #include <chrono>
 #include <cstring>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/binary_object.hpp>
 #include "common/archives.h"
 #include "common/assert.h"
 #include "common/settings.h"

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <boost/serialization/export.hpp>
+#include "core/hle/serialization_compat.h"
 #include "common/common_types.h"
 #include "core/core_timing.h"
 #include "core/hle/kernel/object.h"

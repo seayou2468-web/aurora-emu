@@ -4,11 +4,10 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include "common/boost_compat/all.h"
 #include <algorithm>
 #include <optional>
 #include <sstream>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
 #include <cryptopp/aes.h>
 #include <cryptopp/modes.h>
 #include "common/common_paths.h"

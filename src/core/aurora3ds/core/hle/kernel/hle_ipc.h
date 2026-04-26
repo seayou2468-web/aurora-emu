@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -11,7 +12,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <boost/serialization/export.hpp>
 #include "common/common_types.h"
 #include "common/settings.h"
 #include "common/swap.h"

@@ -2,8 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/unordered_map.hpp>
+#include "core/hle/serialization_compat.h"
 #include "common/archives.h"
 #include "common/assert.h"
 #include "common/logging/log.h"

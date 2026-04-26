@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <array>
 #include <atomic>
 #include <functional>
@@ -17,7 +18,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <boost/serialization/export.hpp>
 #include "common/common_types.h"
 #include "core/hle/kernel/memory.h"
 #include "core/hle/result.h"

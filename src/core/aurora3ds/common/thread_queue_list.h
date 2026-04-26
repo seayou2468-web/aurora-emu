@@ -4,11 +4,10 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <algorithm>
 #include <array>
 #include <deque>
-#include <boost/serialization/deque.hpp>
-#include <boost/serialization/split_member.hpp>
 #include "common/common_types.h"
 
 namespace Common {

@@ -4,13 +4,13 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <functional>
 #include <list>
 #include <optional>
 #include <span>
 #include <unordered_map>
 #include <vector>
-#include <boost/icl/interval_map.hpp>
 #include <tsl/robin_map.h>
 
 #include "video_core/rasterizer_cache/framebuffer_base.h"

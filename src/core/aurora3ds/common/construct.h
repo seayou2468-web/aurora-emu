@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <boost/serialization/serialization.hpp>
 
+#include "common/boost_compat/all.h"
 /// Allows classes to define `save_construct` and `load_construct` methods for serialization
 /// This is used where we don't call the default constructor during deserialization, as a shortcut
 /// instead of using load_construct_data directly

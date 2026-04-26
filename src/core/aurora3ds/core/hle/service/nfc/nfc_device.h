@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <span>
 #include <vector>
-#include <boost/serialization/binary_object.hpp>
 
 #include "common/common_types.h"
 #include "core/hle/service/nfc/nfc_results.h"

@@ -1,3 +1,4 @@
+#include "common/boost_compat/all.h"
 #ifndef BOOST_SERIALIZATION_BOOST_VECTOR_HPP
 #define BOOST_SERIALIZATION_BOOST_VECTOR_HPP
 
@@ -17,23 +18,9 @@
 
 //  See http://www.boost.org for updates, documentation, and revision history.
 
-#include <boost/container/vector.hpp>
 
-#include <boost/config.hpp>
-#include <boost/detail/workaround.hpp>
 
-#include <boost/archive/detail/basic_iarchive.hpp>
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/collection_size_type.hpp>
-#include <boost/serialization/item_version_type.hpp>
-#include <boost/serialization/nvp.hpp>
 
-#include <boost/mpl/bool_fwd.hpp>
-#include <boost/mpl/if.hpp>
-#include <boost/serialization/array_wrapper.hpp>
-#include <boost/serialization/collections_load_imp.hpp>
-#include <boost/serialization/collections_save_imp.hpp>
-#include <boost/serialization/split_free.hpp>
 
 // default is being compatible with version 1.34.1 files, not 1.35 files
 #ifndef BOOST_SERIALIZATION_VECTOR_VERSIONED
@@ -142,7 +129,6 @@ inline void serialize(Archive& ar, boost::container::vector<bool, Allocator, Opt
 } // namespace serialization
 } // namespace boost
 
-#include <boost/serialization/collection_traits.hpp>
 
 BOOST_SERIALIZATION_COLLECTION_TRAITS(boost::container::vector)
 

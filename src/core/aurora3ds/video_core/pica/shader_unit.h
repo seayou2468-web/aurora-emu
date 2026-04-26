@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <functional>
 #include <span>
-#include <boost/serialization/base_object.hpp>
 
 #include "video_core/pica/output_vertex.h"
 

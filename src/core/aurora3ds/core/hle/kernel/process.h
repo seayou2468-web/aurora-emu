@@ -4,13 +4,13 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <array>
 #include <bitset>
 #include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
-#include <boost/serialization/export.hpp>
 #include "common/bit_field.h"
 #include "common/common_types.h"
 #include "core/hle/kernel/handle_table.h"

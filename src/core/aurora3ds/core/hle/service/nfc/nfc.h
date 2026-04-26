@@ -4,8 +4,8 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <memory>
-#include <boost/serialization/binary_object.hpp>
 #include "common/common_types.h"
 #include "core/hle/service/nfc/nfc_device.h"
 #include "core/hle/service/service.h"

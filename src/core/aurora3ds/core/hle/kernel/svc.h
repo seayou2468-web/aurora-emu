@@ -4,8 +4,8 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <memory>
-#include <boost/serialization/export.hpp>
 #include "common/common_types.h"
 
 namespace Core {

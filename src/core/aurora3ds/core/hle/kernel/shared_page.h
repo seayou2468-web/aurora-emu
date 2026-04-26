@@ -10,10 +10,10 @@
  * write access, according to 3dbrew; this is not emulated)
  */
 
+#include "core/hle/serialization_compat.h"
 #include <chrono>
 #include <ctime>
 #include <memory>
-#include <boost/serialization/export.hpp>
 #include "common/bit_field.h"
 #include "common/common_funcs.h"
 #include "common/common_types.h"

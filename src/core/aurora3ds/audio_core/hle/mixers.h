@@ -4,8 +4,8 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <array>
-#include <boost/serialization/array.hpp>
 #include "audio_core/audio_types.h"
 #include "audio_core/hle/shared_memory.h"
 

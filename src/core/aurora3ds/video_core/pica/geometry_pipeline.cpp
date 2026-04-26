@@ -2,9 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/export.hpp>
-#include <boost/serialization/unique_ptr.hpp>
+#include "common/boost_compat/all.h"
 #include "common/archives.h"
 #include "core/core.h"
 #include "video_core/gpu.h"

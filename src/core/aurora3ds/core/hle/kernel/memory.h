@@ -4,8 +4,8 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <optional>
-#include <boost/serialization/export.hpp>
 #include "common/common_types.h"
 #include "common/interval_set.h"
 #include "common/serialization/interval_set.hpp"

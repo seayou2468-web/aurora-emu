@@ -8,13 +8,13 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <memory>
 #include <set>
 #include <span>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <boost/serialization/export.hpp>
 #include "common/common_types.h"
 #include "common/thread_queue_list.h"
 #include "core/arm/arm_interface.h"

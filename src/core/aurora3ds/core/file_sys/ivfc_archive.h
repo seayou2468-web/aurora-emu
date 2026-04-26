@@ -4,12 +4,11 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
-#include <boost/serialization/export.hpp>
-#include <boost/serialization/shared_ptr.hpp>
 #include "common/common_types.h"
 #include "common/file_util.h"
 #include "core/file_sys/archive_backend.h"

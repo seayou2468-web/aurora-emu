@@ -4,8 +4,8 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <memory>
-#include <boost/serialization/export.hpp>
 #include "core/global.h"
 #include "core/hle/kernel/event.h"
 #include "core/hle/kernel/resource_limit.h"

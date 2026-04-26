@@ -2,6 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include "common/boost_compat/all.h"
 #include <chrono>
 #include <optional>
 #include <regex>
@@ -17,7 +18,6 @@
 
 #ifdef CITRA_LINUX_GCC_BACKTRACE
 #define BOOST_STACKTRACE_USE_BACKTRACE
-#include <boost/stacktrace.hpp>
 #undef BOOST_STACKTRACE_USE_BACKTRACE
 #include <signal.h>
 #endif

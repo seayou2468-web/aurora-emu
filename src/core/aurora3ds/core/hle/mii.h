@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <boost/serialization/export.hpp>
+#include "core/hle/serialization_compat.h"
 #include "common/bit_field.h"
 #include "common/common_types.h"
 

@@ -4,13 +4,13 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <atomic>
 #include <chrono>
 #include <memory>
 #include <mutex>
 #include <optional>
 #include <string>
-#include <boost/serialization/version.hpp>
 #include "common/common_types.h"
 #include "common/serialization/std_optional.hpp"
 #include "common/vector_math.h"

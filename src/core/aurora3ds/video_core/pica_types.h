@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <cmath>
 #include <cstring>
-#include <boost/serialization/access.hpp>
 #include "common/common_types.h"
 
 namespace Pica {

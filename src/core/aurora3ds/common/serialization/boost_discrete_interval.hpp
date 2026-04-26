@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <boost/icl/discrete_interval.hpp>
+#include "common/boost_compat/all.h"
 #include "common/common_types.h"
 #include "common/logging/log.h"
 

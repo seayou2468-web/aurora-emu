@@ -2,8 +2,8 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include "core/hle/serialization_compat.h"
 #include <algorithm>
-#include <boost/serialization/shared_ptr.hpp>
 #include "common/alignment.h"
 #include "common/archives.h"
 #include "common/memory_ref.h"

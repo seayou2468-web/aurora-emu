@@ -4,6 +4,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include "common/boost_compat/all.h"
 #include <cryptopp/sha.h>
 #include "common/common_paths.h"
 #include "common/logging/log.h"
@@ -18,8 +19,6 @@
 #include "core/loader/loader.h"
 #include <map>
 #include <sstream>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
 
 namespace HW::UniqueData {
 

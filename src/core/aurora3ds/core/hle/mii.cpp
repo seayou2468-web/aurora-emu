@@ -2,7 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include <boost/serialization/binary_object.hpp>
+#include "core/hle/serialization_compat.h"
 #include "common/archives.h"
 #include "common/crc.h"
 #include "core/hle/mii.h"

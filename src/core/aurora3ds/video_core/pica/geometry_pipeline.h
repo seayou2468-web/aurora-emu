@@ -4,8 +4,8 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <memory>
-#include <boost/serialization/export.hpp>
 #include "video_core/pica/shader_unit.h"
 
 namespace Pica {

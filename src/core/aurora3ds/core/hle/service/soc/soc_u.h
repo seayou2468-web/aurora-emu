@@ -4,10 +4,9 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <unordered_map>
 #include <utility>
-#include <boost/serialization/set.hpp>
-#include <boost/serialization/unordered_map.hpp>
 #include "core/hle/result.h"
 #include "core/hle/service/service.h"
 

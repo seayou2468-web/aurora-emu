@@ -4,14 +4,13 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <array>
 #include <cstddef>
 #include <functional>
 #include <map>
 #include <memory>
 #include <string>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/shared_ptr.hpp>
 #include "common/archives.h"
 #include "common/common_types.h"
 #include "common/construct.h"

@@ -4,8 +4,8 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <bit>
-#include <boost/serialization/binary_object.hpp>
 
 #include "common/vector_math.h"
 #include "video_core/pica_types.h"

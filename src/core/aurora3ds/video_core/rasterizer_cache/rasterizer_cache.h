@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include <ranges>
 #include <type_traits>
-#include <boost/container/small_vector.hpp>
-#include <boost/range/iterator_range.hpp>
+#include <vector>
 #include "common/alignment.h"
 #include "common/logging/log.h"
 #include "common/microprofile.h"
@@ -29,7 +29,8 @@ MICROPROFILE_DECLARE(RasterizerCache_DownloadSurface);
 MICROPROFILE_DECLARE(RasterizerCache_Invalidation);
 
 constexpr auto RangeFromInterval(const auto& map, const auto& interval) {
-    return boost::make_iterator_range(map.equal_range(interval));
+    const auto [first, last] = map.equal_range(interval);
+    return std::ranges::subrange(first, last);
 }
 
 template <class T>
@@ -669,7 +670,8 @@ typename T::Surface& RasterizerCache<T>::GetTextureCube(const TextureCubeConfig&
             continue;
         }
         cube.ticks[i] = surface.modification_tick;
-        boost::container::small_vector<TextureCopy, 8> upload_copies;
+        std::vector<TextureCopy> upload_copies;
+        upload_copies.reserve(8);
         for (u32 level = 0; level < config.levels; level++) {
             const u32 width_lod = surface.GetScaledWidth() >> level;
             upload_copies.push_back({
@@ -816,7 +818,8 @@ template <typename Func>
 void RasterizerCache<T>::ForEachSurfaceInRegion(PAddr addr, std::size_t size, Func&& func) {
     using FuncReturn = typename std::invoke_result<Func, SurfaceId, Surface&>::type;
     static constexpr bool BOOL_BREAK = std::is_same_v<FuncReturn, bool>;
-    boost::container::small_vector<SurfaceId, 8> surfaces;
+    std::vector<SurfaceId> surfaces;
+    surfaces.reserve(8);
     ForEachPage(addr, size, [this, &surfaces, addr, size, func](u64 page) {
         const auto it = page_table.find(page);
         if (it == page_table.end()) {
@@ -1311,7 +1314,8 @@ void RasterizerCache<T>::InvalidateRegion(PAddr addr, u32 size, SurfaceId region
         region_owner.MarkValid(invalid_interval);
     }
 
-    boost::container::small_vector<SurfaceId, 4> remove_surfaces;
+    std::vector<SurfaceId> remove_surfaces;
+    remove_surfaces.reserve(4);
     ForEachSurfaceInRegion(addr, size, [&](SurfaceId surface_id, Surface& surface) {
         if (surface_id == region_owner_id) {
             return;

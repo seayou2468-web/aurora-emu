@@ -4,17 +4,13 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <future>
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <boost/serialization/shared_ptr.hpp>
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/unordered_map.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/weak_ptr.hpp>
 #include <httplib.h>
 #include "common/serialization/std_optional.hpp"
 #include "common/thread.h"

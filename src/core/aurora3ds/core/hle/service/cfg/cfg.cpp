@@ -2,11 +2,10 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include "core/hle/serialization_compat.h"
 #include <algorithm>
 #include <array>
 #include <tuple>
-#include <boost/serialization/array.hpp>
-#include <boost/serialization/unique_ptr.hpp>
 #include <cryptopp/osrng.h>
 #include <cryptopp/sha.h>
 #include <fmt/ranges.h>

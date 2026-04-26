@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <memory>
 #include <unordered_map>
-#include <boost/serialization/export.hpp>
 #include "core/hle/service/service.h"
 
 namespace Core {

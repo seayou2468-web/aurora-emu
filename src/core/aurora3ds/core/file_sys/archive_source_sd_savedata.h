@@ -4,10 +4,9 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <memory>
 #include <string>
-#include <boost/serialization/export.hpp>
-#include <boost/serialization/string.hpp>
 #include "core/file_sys/archive_backend.h"
 #include "core/file_sys/artic_cache.h"
 #include "core/hle/result.h"

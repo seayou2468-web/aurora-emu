@@ -3,11 +3,10 @@
 // Refer to the license.txt file included.
 
 #pragma once
+#include "common/boost_compat/all.h"
 #include <array>
 #include <cstddef>
 #include <string>
-#include <boost/serialization/array.hpp>
-#include <boost/serialization/vector.hpp>
 #include "common/common_types.h"
 #include "common/memory_ref.h"
 

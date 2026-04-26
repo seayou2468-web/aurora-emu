@@ -4,10 +4,10 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <array>
 #include <memory>
 #include <string>
-#include <boost/serialization/array.hpp>
 #include "common/common_types.h"
 #include "core/hle/result.h"
 #include "core/hle/service/service.h"

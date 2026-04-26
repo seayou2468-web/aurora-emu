@@ -4,9 +4,8 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <memory>
-#include <boost/serialization/array.hpp>
-#include <boost/serialization/shared_ptr.hpp>
 #include "common/archives.h"
 #include "core/hle/kernel/mutex.h"
 #include "core/hle/kernel/shared_memory.h"

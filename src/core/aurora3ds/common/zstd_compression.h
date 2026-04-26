@@ -8,12 +8,11 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <span>
 #include <unordered_map>
 #include <vector>
 
-#include <boost/serialization/array.hpp>
-#include <boost/serialization/unordered_map.hpp>
 #include "common/archives.h"
 #include "common/common_types.h"
 #include "common/file_util.h"

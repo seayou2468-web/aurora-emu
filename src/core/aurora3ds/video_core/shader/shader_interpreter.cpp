@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <cmath>
 #include <numeric>
-#include <boost/circular_buffer.hpp>
-#include <boost/container/static_vector.hpp>
+#include <utility>
+#include <vector>
 #include <nihstro/shader_bytecode.h>
 #include "common/assert.h"
 #include "common/common_types.h"
@@ -25,6 +25,43 @@ using nihstro::SourceRegister;
 using nihstro::SwizzlePattern;
 
 namespace Pica::Shader {
+
+template <typename T>
+class FixedStack {
+public:
+    explicit FixedStack(std::size_t max_size) : max_size{max_size} {
+        values.reserve(max_size);
+    }
+
+    bool empty() const {
+        return values.empty();
+    }
+
+    std::size_t size() const {
+        return values.size();
+    }
+
+    T& back() {
+        return values.back();
+    }
+
+    const T& back() const {
+        return values.back();
+    }
+
+    void pop_back() {
+        values.pop_back();
+    }
+
+    void push_back(T value) {
+        ASSERT(values.size() < max_size);
+        values.push_back(std::move(value));
+    }
+
+private:
+    std::vector<T> values;
+    std::size_t max_size;
+};
 
 struct IfStackElement {
     u32 else_address;
@@ -47,9 +84,9 @@ struct LoopStackElement {
 template <bool Debug>
 static void RunInterpreter(const ShaderSetup& setup, ShaderUnit& state,
                            DebugData<Debug>& debug_data, unsigned entry_point) {
-    boost::circular_buffer<IfStackElement> if_stack(8);
-    boost::circular_buffer<CallStackElement> call_stack(4);
-    boost::circular_buffer<LoopStackElement> loop_stack(4);
+    FixedStack<IfStackElement> if_stack(8);
+    FixedStack<CallStackElement> call_stack(4);
+    FixedStack<LoopStackElement> loop_stack(4);
     u32 program_counter = entry_point;
 
     const auto do_if = [&](Instruction instr, bool condition) {

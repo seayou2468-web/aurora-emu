@@ -4,8 +4,7 @@
 
 #pragma once
 
-#include <boost/container/flat_set.hpp>
-#include <boost/serialization/split_free.hpp>
+#include "common/boost_compat/all.h"
 #include "common/common_types.h"
 
 namespace boost::serialization {

@@ -4,8 +4,8 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <vector>
-#include <boost/serialization/split_free.hpp>
 #include "common/interval_set.h"
 
 namespace boost::serialization {

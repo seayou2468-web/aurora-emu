@@ -4,12 +4,11 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <memory>
 #include <span>
 #include <string>
 #include <unordered_map>
-#include <boost/serialization/unique_ptr.hpp>
-#include <boost/serialization/unordered_map.hpp>
 #include "common/common_types.h"
 #include "core/file_sys/archive_backend.h"
 #include "core/file_sys/archive_source_sd_savedata.h"

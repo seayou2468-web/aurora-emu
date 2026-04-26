@@ -1,3 +1,4 @@
+#include "common/boost_compat/all.h"
 #ifndef BOOST_SERIALIZATION_STD_VARIANT_HPP
 #define BOOST_SERIALIZATION_STD_VARIANT_HPP
 
@@ -20,15 +21,10 @@
 // Widely inspired form boost::variant serialization
 //
 
-#include <boost/serialization/throw_exception.hpp>
 
 #include <variant>
 
-#include <boost/archive/archive_exception.hpp>
 
-#include <boost/serialization/split_free.hpp>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/nvp.hpp>
 
 namespace boost {
 namespace serialization {
@@ -184,7 +180,6 @@ void serialize(Archive &ar, std::monostate &, const unsigned int /*version*/)
 
 //template<typename T0_, BOOST_VARIANT_ENUM_SHIFTED_PARAMS(typename T)>
 
-#include <boost/serialization/tracking.hpp>
 
 namespace boost {
     namespace serialization {

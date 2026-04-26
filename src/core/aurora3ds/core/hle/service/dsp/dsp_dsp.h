@@ -4,10 +4,8 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <memory>
-#include <boost/serialization/array.hpp>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/shared_ptr.hpp>
 #include "audio_core/dsp_interface.h"
 #include "core/hle/kernel/event.h"
 #include "core/hle/result.h"

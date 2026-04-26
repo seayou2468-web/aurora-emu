@@ -652,7 +652,7 @@ Movie::ValidationResult Movie::ValidateMovie(const std::string& movie_file) cons
 
 Movie::MovieMetadata Movie::GetMovieMetadata(const std::string& movie_file) const {
     auto header = ReadHeader(movie_file);
-    if (header == boost::none)
+    if (!header.has_value())
         return {};
 
     std::array<char, 33> author{}; // Add a null terminator

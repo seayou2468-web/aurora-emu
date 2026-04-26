@@ -31,6 +31,7 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #ifdef __ARM_NEON
 #include <arm_neon.h>
 #endif
@@ -38,7 +39,6 @@
 #include <cmath>
 #include <cstring>
 #include <type_traits>
-#include <boost/serialization/access.hpp>
 
 namespace Common {
 

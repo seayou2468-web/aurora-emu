@@ -7,13 +7,15 @@
 #include <chrono>
 #include <cstring>
 #include <functional>
+#include <netinet/in.h>
+#include <sys/select.h>
+#include <sys/socket.h>
 #include <thread>
-#include <boost/asio.hpp>
+#include <unistd.h>
+#include <arpa/inet.h>
 #include "common/logging/log.h"
 #include "input_common/udp/client.h"
 #include "input_common/udp/protocol.h"
-
-using boost::asio::ip::udp;
 
 namespace InputCommon::CemuhookUDP {
 
@@ -29,42 +31,76 @@ public:
 
     explicit Socket(const std::string& host, u16 port, u8 pad_index, u32 client_id,
                     SocketCallback callback)
-        : callback(std::move(callback)), timer(io_context),
-          socket(io_context, udp::endpoint(udp::v4(), 0)), client_id(client_id),
-          pad_index(pad_index) {
-        boost::system::error_code ec{};
-        auto ipv4 = boost::asio::ip::make_address_v4(host, ec);
-        if (ec.value() != boost::system::errc::success) {
-            LOG_ERROR(Input, "Invalid IPv4 address \"{}\" provided to socket", host);
-            ipv4 = boost::asio::ip::address_v4{};
+        : callback(std::move(callback)), client_id(client_id), pad_index(pad_index) {
+        socket_fd = ::socket(AF_INET, SOCK_DGRAM, 0);
+        if (socket_fd < 0) {
+            LOG_ERROR(Input, "Failed to create UDP socket");
+            should_run = false;
+            return;
         }
 
-        send_endpoint = {udp::endpoint(ipv4, port)};
+        sockaddr_in local_addr{};
+        local_addr.sin_family = AF_INET;
+        local_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        local_addr.sin_port = htons(0);
+        if (::bind(socket_fd, reinterpret_cast<sockaddr*>(&local_addr), sizeof(local_addr)) != 0) {
+            LOG_ERROR(Input, "Failed to bind UDP socket");
+            Stop();
+            return;
+        }
+
+        send_endpoint.sin_family = AF_INET;
+        send_endpoint.sin_port = htons(port);
+        if (::inet_pton(AF_INET, host.c_str(), &send_endpoint.sin_addr) != 1) {
+            LOG_ERROR(Input, "Invalid IPv4 address \"{}\" provided to socket", host);
+            send_endpoint.sin_addr.s_addr = htonl(INADDR_ANY);
+        }
     }
 
     void Stop() {
-        io_context.stop();
+        should_run = false;
+        if (socket_fd >= 0) {
+            ::shutdown(socket_fd, SHUT_RDWR);
+            ::close(socket_fd);
+            socket_fd = -1;
+        }
     }
 
     void Loop() {
-        io_context.run();
+        auto next_send = clock::now() + std::chrono::seconds(3);
+        while (should_run) {
+            const auto now = clock::now();
+            if (now >= next_send) {
+                HandleSend();
+                next_send = now + std::chrono::seconds(3);
+            }
+            fd_set read_fds;
+            FD_ZERO(&read_fds);
+            FD_SET(socket_fd, &read_fds);
+            timeval timeout{};
+            timeout.tv_sec = 0;
+            timeout.tv_usec = 100'000;
+            const int ready = ::select(socket_fd + 1, &read_fds, nullptr, nullptr, &timeout);
+            if (ready <= 0 || !FD_ISSET(socket_fd, &read_fds)) {
+                continue;
+            }
+
+            socklen_t receive_endpoint_size = sizeof(receive_endpoint);
+            const ssize_t bytes_transferred =
+                ::recvfrom(socket_fd, receive_buffer.data(), receive_buffer.size(), 0,
+                           reinterpret_cast<sockaddr*>(&receive_endpoint), &receive_endpoint_size);
+            if (bytes_transferred > 0) {
+                HandleReceive(static_cast<std::size_t>(bytes_transferred));
+            }
+        }
     }
 
-    void StartSend(const clock::time_point& from) {
-        timer.expires_at(from + std::chrono::seconds(3));
-        timer.async_wait([this](const boost::system::error_code& error) { HandleSend(error); });
-    }
+    void StartSend(const clock::time_point&) {}
 
-    void StartReceive() {
-        socket.async_receive_from(
-            boost::asio::buffer(receive_buffer), receive_endpoint,
-            [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
-                HandleReceive(error, bytes_transferred);
-            });
-    }
+    void StartReceive() {}
 
 private:
-    void HandleReceive(const boost::system::error_code& error, std::size_t bytes_transferred) {
+    void HandleReceive(std::size_t bytes_transferred) {
         if (auto type = Response::Validate(receive_buffer.data(), bytes_transferred)) {
             switch (*type) {
             case Type::Version: {
@@ -88,30 +124,27 @@ private:
             }
             }
         }
-        StartReceive();
     }
 
-    void HandleSend(const boost::system::error_code& error) {
-        boost::system::error_code _ignored{};
+    void HandleSend() {
         // Send a request for getting port info for the pad
         Request::PortInfo port_info{1, {pad_index, 0, 0, 0}};
         const auto port_message = Request::Create(port_info, client_id);
         std::memcpy(&send_buffer1, &port_message, PORT_INFO_SIZE);
-        socket.send_to(boost::asio::buffer(send_buffer1), send_endpoint, {}, _ignored);
+        ::sendto(socket_fd, send_buffer1.data(), send_buffer1.size(), 0,
+                 reinterpret_cast<const sockaddr*>(&send_endpoint), sizeof(send_endpoint));
 
         // Send a request for getting pad data for the pad
         Request::PadData pad_data{Request::PadData::Flags::Id, pad_index, EMPTY_MAC_ADDRESS};
         const auto pad_message = Request::Create(pad_data, client_id);
         std::memcpy(send_buffer2.data(), &pad_message, PAD_DATA_SIZE);
-        socket.send_to(boost::asio::buffer(send_buffer2), send_endpoint, {}, _ignored);
-        StartSend(timer.expiry());
+        ::sendto(socket_fd, send_buffer2.data(), send_buffer2.size(), 0,
+                 reinterpret_cast<const sockaddr*>(&send_endpoint), sizeof(send_endpoint));
     }
 
     SocketCallback callback;
-    boost::asio::io_context io_context;
-    boost::asio::basic_waitable_timer<clock> timer;
-    udp::socket socket;
-
+    int socket_fd = -1;
+    bool should_run = true;
     u32 client_id{};
     u8 pad_index{};
 
@@ -119,10 +152,10 @@ private:
     static constexpr std::size_t PAD_DATA_SIZE = sizeof(Message<Request::PadData>);
     std::array<u8, PORT_INFO_SIZE> send_buffer1;
     std::array<u8, PAD_DATA_SIZE> send_buffer2;
-    udp::endpoint send_endpoint;
+    sockaddr_in send_endpoint{};
 
     std::array<u8, MAX_PACKET_SIZE> receive_buffer;
-    udp::endpoint receive_endpoint;
+    sockaddr_in receive_endpoint{};
 };
 
 static void SocketLoop(Socket* socket) {

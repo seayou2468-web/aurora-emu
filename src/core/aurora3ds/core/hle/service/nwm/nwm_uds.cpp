@@ -2,10 +2,9 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include "core/hle/serialization_compat.h"
 #include <algorithm>
 #include <cstring>
-#include <boost/serialization/list.hpp>
-#include <boost/serialization/map.hpp>
 #include <cryptopp/osrng.h>
 #include "common/archives.h"
 #include "common/common_types.h"

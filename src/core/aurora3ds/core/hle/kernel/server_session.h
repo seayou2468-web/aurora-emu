@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <memory>
 #include <string>
-#include <boost/serialization/export.hpp>
 #include "common/assert.h"
 #include "common/common_types.h"
 #include "core/hle/kernel/ipc.h"

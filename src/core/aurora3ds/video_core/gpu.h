@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <functional>
 #include <memory>
-#include <boost/serialization/access.hpp>
 
 #include "core/hle/service/gsp/gsp_interrupt.h"
 

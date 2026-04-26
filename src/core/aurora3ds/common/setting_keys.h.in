@@ -4,9 +4,6 @@
 
 #pragma once
 
-#include <boost/hana/string.hpp>
-
-
 namespace Settings {
 
 namespace Keys {
@@ -17,14 +14,6 @@ namespace Keys {
 static const std::array keys_array = {
 @SETTING_KEY_LIST@
 };
-
-#undef DEFINE_KEY
-}
-
-namespace HKeys {
-#define DEFINE_KEY(KEY) static constexpr auto KEY = BOOST_HANA_STRING(#KEY);
-
-@SETTING_KEY_DEFINITIONS@
 
 #undef DEFINE_KEY
 }

@@ -4,8 +4,8 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <memory>
-#include <boost/serialization/version.hpp>
 #include "core/hle/service/service.h"
 
 namespace Core {

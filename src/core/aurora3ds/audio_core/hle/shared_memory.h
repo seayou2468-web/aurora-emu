@@ -4,11 +4,11 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 #include <array>
 #include <cstddef>
 #include <memory>
 #include <type_traits>
-#include <boost/serialization/access.hpp>
 #include "audio_core/audio_types.h"
 #include "audio_core/hle/common.h"
 #include "common/bit_field.h"

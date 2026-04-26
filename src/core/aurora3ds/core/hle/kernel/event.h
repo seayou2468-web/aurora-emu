@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <boost/serialization/export.hpp>
+#include "core/hle/serialization_compat.h"
 #include "core/hle/kernel/object.h"
 #include "core/hle/kernel/resource_limit.h"
 #include "core/hle/kernel/wait_object.h"

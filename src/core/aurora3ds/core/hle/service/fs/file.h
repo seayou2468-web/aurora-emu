@@ -4,8 +4,8 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <memory>
-#include <boost/serialization/base_object.hpp>
 #include "core/file_sys/archive_backend.h"
 #include "core/global.h"
 #include "core/hle/service/service.h"

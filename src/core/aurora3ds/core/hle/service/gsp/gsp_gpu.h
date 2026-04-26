@@ -4,11 +4,11 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <cstddef>
 #include <memory>
 #include <optional>
 #include <string>
-#include <boost/serialization/export.hpp>
 #include "common/bit_field.h"
 #include "common/common_types.h"
 #include "common/serialization/std_optional.hpp"

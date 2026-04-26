@@ -4,12 +4,12 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <array>
 #include <atomic>
 #include <cstddef>
 #include <memory>
 #include <vector>
-#include <boost/serialization/version.hpp>
 #include "common/bit_field.h"
 #include "common/common_funcs.h"
 #include "common/common_types.h"

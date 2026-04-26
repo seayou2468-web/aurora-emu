@@ -4,16 +4,12 @@
 
 #pragma once
 
+#include "core/hle/serialization_compat.h"
 #include <array>
 #include <deque>
 #include <future>
 #include <memory>
 #include <vector>
-#include <boost/serialization/array.hpp>
-#include <boost/serialization/deque.hpp>
-#include <boost/serialization/shared_ptr.hpp>
-#include <boost/serialization/unique_ptr.hpp>
-#include <boost/serialization/version.hpp>
 #include "common/common_types.h"
 #include "common/swap.h"
 #include "core/global.h"

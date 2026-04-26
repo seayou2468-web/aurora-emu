@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "common/boost_compat/all.h"
 /**
  * This is a system to schedule events into the emulated machine's future. Time is measured
  * in main CPU clock cycles.
@@ -23,8 +24,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <boost/serialization/split_member.hpp>
-#include <boost/serialization/vector.hpp>
 #include "common/common_types.h"
 #include "common/logging/log.h"
 #include "common/threadsafe_queue.h"

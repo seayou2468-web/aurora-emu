@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <boost/icl/interval_set.hpp>
+#include "common/boost_compat/all.h"
 #include "video_core/rasterizer_cache/surface_params.h"
 #include "video_core/rasterizer_cache/utils.h"
 

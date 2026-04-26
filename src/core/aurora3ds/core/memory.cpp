@@ -2,10 +2,9 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include "common/boost_compat/all.h"
 #include <array>
 #include <cstring>
-#include <boost/serialization/array.hpp>
-#include <boost/serialization/binary_object.hpp>
 #include "audio_core/dsp_interface.h"
 #include "common/archives.h"
 #include "common/assert.h"
