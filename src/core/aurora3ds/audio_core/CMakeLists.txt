@@ -64,7 +64,12 @@ if (NOT TARGET teakra)
 endif()
 
 target_link_libraries(audio_core PUBLIC citra_common citra_core)
-target_link_libraries(audio_core PRIVATE faad2 SoundTouch teakra)
+target_link_libraries(audio_core PRIVATE faad2 teakra)
+
+find_library(SOUNDTOUCH_LIBRARY NAMES SoundTouch soundtouch)
+if (SOUNDTOUCH_LIBRARY)
+    target_link_libraries(audio_core PRIVATE ${SOUNDTOUCH_LIBRARY})
+endif()
 
 if(ENABLE_CUBEB)
     target_link_libraries(audio_core PRIVATE cubeb)

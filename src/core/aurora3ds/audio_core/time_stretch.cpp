@@ -9,7 +9,42 @@
 #include <memory>
 #include <type_traits>
 #include <vector>
+
+#if __has_include(<SoundTouch.h>)
 #include <SoundTouch.h>
+#else
+namespace soundtouch {
+using SAMPLETYPE = float;
+
+class SoundTouch {
+public:
+    void setChannels(unsigned int) {}
+    void setSampleRate(unsigned int) {}
+    void setPitch(double) {}
+    void setTempo(double) {}
+    void putSamples(const SAMPLETYPE* samples, unsigned int num_samples) {
+        buffer.insert(buffer.end(), samples, samples + num_samples * 2);
+    }
+    unsigned int receiveSamples(SAMPLETYPE* out, unsigned int max_samples) {
+        const std::size_t available_samples = buffer.size() / 2;
+        const std::size_t count = std::min<std::size_t>(available_samples, max_samples);
+        std::copy_n(buffer.begin(), count * 2, out);
+        buffer.erase(buffer.begin(), buffer.begin() + static_cast<std::ptrdiff_t>(count * 2));
+        return static_cast<unsigned int>(count);
+    }
+    std::size_t numSamples() const {
+        return buffer.size() / 2;
+    }
+    void clear() {
+        buffer.clear();
+    }
+    void flush() {}
+
+private:
+    std::vector<SAMPLETYPE> buffer;
+};
+} // namespace soundtouch
+#endif
 
 #include "audio_core/audio_types.h"
 #include "audio_core/time_stretch.h"
