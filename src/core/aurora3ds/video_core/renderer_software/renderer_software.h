@@ -21,8 +21,7 @@ struct ScreenInfo {
 
 class RendererSoftware : public VideoCore::RendererBase {
 public:
-    explicit RendererSoftware(Core::System& system, Pica::PicaCore& pica,
-                              Frontend::EmuWindow& window);
+    explicit RendererSoftware(Core::System& system, Pica::PicaCore& pica);
     ~RendererSoftware() override;
 
     [[nodiscard]] VideoCore::RasterizerInterface* Rasterizer() override {

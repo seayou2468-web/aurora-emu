@@ -36,11 +36,10 @@ struct GPU::Impl {
     Core::TimingEventType* vblank_event;
     Service::GSP::InterruptHandler signal_interrupt;
 
-    explicit Impl(Core::System& system, Frontend::EmuWindow& emu_window,
-                  Frontend::EmuWindow* secondary_window)
+    explicit Impl(Core::System& system)
         : timing{system.CoreTiming()}, system{system}, memory{system.Memory()},
           debug_context{Pica::g_debug_context}, pica{memory, debug_context},
-          renderer{VideoCore::CreateRenderer(emu_window, secondary_window, pica, system)},
+          renderer{VideoCore::CreateRenderer(pica, system)},
           rasterizer{renderer->Rasterizer()},
           sw_blitter{std::make_unique<SwRenderer::SwBlitter>(memory, rasterizer)} {}
     ~Impl() = default;

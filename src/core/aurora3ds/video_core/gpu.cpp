@@ -29,10 +29,9 @@ constexpr VAddr VADDR_GPU = 0x1EF00000;
 MICROPROFILE_DEFINE(GPU_DisplayTransfer, "GPU", "DisplayTransfer", MP_RGB(100, 100, 255));
 MICROPROFILE_DEFINE(GPU_CmdlistProcessing, "GPU", "Cmdlist Processing", MP_RGB(100, 255, 100));
 
-GPU::GPU(Core::System& system, Frontend::EmuWindow& emu_window,
-         Frontend::EmuWindow* secondary_window)
+GPU::GPU(Core::System& system)
     : right_eye_disabler{std::make_unique<RightEyeDisabler>(*this)},
-      impl{std::make_unique<Impl>(system, emu_window, secondary_window)} {
+      impl{std::make_unique<Impl>(system)} {
     impl->vblank_event = impl->timing.RegisterEvent(
         "GPU::VBlankCallback",
         [this](uintptr_t user_data, s64 cycles_late) { VBlankCallback(user_data, cycles_late); });
@@ -422,13 +421,12 @@ void GPU::VBlankCallback(std::uintptr_t user_data, s64 cycles_late) {
     impl->timing.ScheduleEvent(FRAME_TICKS - cycles_late, impl->vblank_event);
 }
 
-void GPU::RecreateRenderer(Frontend::EmuWindow& emu_window, Frontend::EmuWindow* secondary_window) {
+void GPU::RecreateRenderer() {
     // Reset the renderer and recreate software renderer resources.
     impl->renderer.reset();
 
     // Create a new renderer
-    impl->renderer =
-        VideoCore::CreateRenderer(emu_window, secondary_window, impl->pica, impl->system);
+    impl->renderer = VideoCore::CreateRenderer(impl->pica, impl->system);
     impl->rasterizer = impl->renderer->Rasterizer();
 
     // Rebind the rasterizer to the PICA GPU

@@ -11,12 +11,9 @@
 
 namespace VideoCore {
 
-std::unique_ptr<RendererBase> CreateRenderer(Frontend::EmuWindow& emu_window,
-                                             Frontend::EmuWindow* secondary_window,
-                                             Pica::PicaCore& pica, Core::System& system) {
-    (void)secondary_window;
+std::unique_ptr<RendererBase> CreateRenderer(Pica::PicaCore& pica, Core::System& system) {
 #ifdef ENABLE_SOFTWARE_RENDERER
-    return std::make_unique<SwRenderer::RendererSoftware>(system, pica, emu_window);
+    return std::make_unique<SwRenderer::RendererSoftware>(system, pica);
 #else
     LOG_CRITICAL(Render, "Software renderer is required but not enabled in this build");
 // TODO: Add a null renderer backend for this, perhaps.

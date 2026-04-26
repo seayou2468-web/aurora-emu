@@ -290,8 +290,7 @@ System::ResultStatus System::SingleStep() {
     return RunLoop(false);
 }
 
-System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::string& filepath,
-                                  Frontend::EmuWindow* secondary_window) {
+System::ResultStatus System::Load(const std::string& filepath) {
     Settings::ResetTemporaryFrameLimit();
     FileUtil::SetCurrentRomPath(filepath);
     if (early_app_loader) {
@@ -390,7 +389,7 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
     if (Settings::values.is_new_3ds) {
         num_cores = 4;
     }
-    ResultStatus init_result{Init(emu_window, secondary_window, system_mem_mode, num_cores)};
+    ResultStatus init_result{Init(system_mem_mode, num_cores)};
     if (init_result != ResultStatus::Success) {
         LOG_CRITICAL(Core, "Failed to initialize system (Error {})!",
                      static_cast<u32>(init_result));
@@ -463,8 +462,6 @@ System::ResultStatus System::Load(Frontend::EmuWindow& emu_window, const std::st
     }
 
     status = ResultStatus::Success;
-    m_emu_window = &emu_window;
-    m_secondary_window = secondary_window;
     m_filepath = filepath;
 
     // Reset counters and set time origin to current frame
@@ -503,9 +500,7 @@ void System::Reschedule() {
     }
 }
 
-System::ResultStatus System::Init(Frontend::EmuWindow& emu_window,
-                                  Frontend::EmuWindow* secondary_window,
-                                  Kernel::MemoryMode memory_mode, u32 num_cores) {
+System::ResultStatus System::Init(Kernel::MemoryMode memory_mode, u32 num_cores) {
     LOG_DEBUG(HW_Memory, "initialized OK");
 
     memory = std::make_unique<Memory::MemorySystem>(*this);
@@ -562,7 +557,7 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window,
     custom_tex_manager = std::make_unique<VideoCore::CustomTexManager>(*this);
 
     auto gsp = service_manager->GetService<Service::GSP::GSP_GPU>("gsp::Gpu");
-    gpu = std::make_unique<VideoCore::GPU>(*this, emu_window, secondary_window);
+    gpu = std::make_unique<VideoCore::GPU>(*this);
     gpu->SetInterruptHandler(
         [gsp](Service::GSP::InterruptId interrupt_id) { gsp->SignalInterrupt(interrupt_id); });
 
@@ -736,7 +731,7 @@ void System::Reset() {
 
     // Reload the system with the same setting
     [[maybe_unused]] const System::ResultStatus result =
-        Load(*m_emu_window, m_filepath, m_secondary_window);
+        Load(m_filepath);
 }
 
 void System::ApplySettings() {
@@ -843,7 +838,7 @@ void System::serialize(Archive& ar, const unsigned int file_version) {
         Shutdown(true);
 
         [[maybe_unused]] const System::ResultStatus result =
-            Init(*m_emu_window, m_secondary_window, mem_mode, num_cores);
+            Init(mem_mode, num_cores);
     }
 
     // Flush on save, don't flush on load

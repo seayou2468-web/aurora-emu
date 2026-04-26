@@ -10,9 +10,8 @@
 
 namespace SwRenderer {
 
-RendererSoftware::RendererSoftware(Core::System& system, Pica::PicaCore& pica_,
-                                   Frontend::EmuWindow& window)
-    : VideoCore::RendererBase{system, window, nullptr}, memory{system.Memory()}, pica{pica_},
+RendererSoftware::RendererSoftware(Core::System& system, Pica::PicaCore& pica_)
+    : VideoCore::RendererBase{system}, memory{system.Memory()}, pica{pica_},
       rasterizer{memory, pica} {}
 
 RendererSoftware::~RendererSoftware() = default;

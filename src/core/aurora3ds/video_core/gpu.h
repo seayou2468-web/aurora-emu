@@ -26,10 +26,6 @@ struct RegsLcd;
 union ColorFill;
 } // namespace Pica
 
-namespace Frontend {
-class EmuWindow;
-}
-
 namespace VideoCore {
 
 /// Measured on hardware to be 2240568 timer cycles or 4481136 ARM11 cycles
@@ -44,8 +40,7 @@ class RightEyeDisabler;
  */
 class GPU {
 public:
-    explicit GPU(Core::System& system, Frontend::EmuWindow& emu_window,
-                 Frontend::EmuWindow* secondary_window);
+    explicit GPU(Core::System& system);
     ~GPU();
 
     /// Sets the function to call for signalling GSP interrupts.
@@ -97,7 +92,7 @@ public:
     void ApplyPerProgramSettings(u64 program_ID);
 
     /// Recreates the renderer (for GL context reset in libretro)
-    void RecreateRenderer(Frontend::EmuWindow& emu_window, Frontend::EmuWindow* secondary_window);
+    void RecreateRenderer();
 
     /// Releases the renderer (for GL context destroy in libretro)
     void ReleaseRenderer();
