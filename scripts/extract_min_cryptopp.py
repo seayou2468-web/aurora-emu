@@ -10,27 +10,11 @@ import re
 import shutil
 import sys
 
-DIRECT_HEADERS = {
-    "aes.h",
-    "base64.h",
-    "ccm.h",
-    "cmac.h",
-    "cryptlib.h",
-    "eccrypto.h",
-    "filters.h",
-    "hex.h",
-    "hmac.h",
-    "integer.h",
-    "md5.h",
-    "modes.h",
-    "nbtheory.h",
-    "oids.h",
-    "osrng.h",
-    "rsa.h",
-    "sha.h",
-}
+SOURCE_ROOT = pathlib.Path("src/core/aurora3ds")
+VENDORED_DIR = pathlib.Path("src/core/aurora3ds/cryptopp")
 
 INCLUDE_RE = re.compile(r'#include\s+"([^"]+)"')
+PROJECT_CRYPTOPP_INCLUDE_RE = re.compile(r'#include\s+[<"]cryptopp/([^>"]+)[>"]')
 
 
 def closure(src: pathlib.Path, seeds: set[str]) -> set[str]:
@@ -52,6 +36,21 @@ def closure(src: pathlib.Path, seeds: set[str]) -> set[str]:
     return out
 
 
+def discover_direct_headers(repo_root: pathlib.Path) -> set[str]:
+    source_root = repo_root / SOURCE_ROOT
+    headers: set[str] = set()
+    for path in source_root.rglob("*"):
+        if path.suffix not in {".c", ".cc", ".cpp", ".h", ".hpp"}:
+            continue
+        text = path.read_text(errors="ignore")
+        headers.update(PROJECT_CRYPTOPP_INCLUDE_RE.findall(text))
+
+    if not headers:
+        raise RuntimeError(f"No Crypto++ includes found under {source_root}")
+
+    return headers
+
+
 def main() -> int:
     if len(sys.argv) != 3:
         print(__doc__)
@@ -59,16 +58,20 @@ def main() -> int:
 
     cryptopp_src = pathlib.Path(sys.argv[1]).resolve()
     repo_root = pathlib.Path(sys.argv[2]).resolve()
-    dest = repo_root / "src/core/aurora3ds/cryptopp"
+    dest = repo_root / VENDORED_DIR
+
+    if cryptopp_src == dest:
+        raise SystemExit("cryptopp source and vendored destination must be different directories")
 
     if not (cryptopp_src / "config.h").exists():
         raise SystemExit(f"Not a Crypto++ source dir: {cryptopp_src}")
 
-    headers = closure(cryptopp_src, DIRECT_HEADERS)
+    direct_headers = discover_direct_headers(repo_root)
+    headers = closure(cryptopp_src, direct_headers)
 
     # Add matching .cpp files and recurse through their local includes.
     seeds = set(headers)
-    for h in list(headers):
+    for h in list(direct_headers):
         cpp = pathlib.Path(h).with_suffix(".cpp").name
         if (cryptopp_src / cpp).exists():
             seeds.add(cpp)
@@ -82,7 +85,7 @@ def main() -> int:
 
     dest.mkdir(parents=True, exist_ok=True)
     for p in dest.glob("*"):
-        if p.is_file():
+        if p.is_file() and p.name != "README.md":
             p.unlink()
 
     for name in sorted(files):
@@ -90,6 +93,7 @@ def main() -> int:
 
     shutil.copy2(cryptopp_src / "License.txt", dest / "License.txt")
 
+    print(f"Found {len(direct_headers)} directly used Crypto++ headers")
     print(f"Copied {len(files)} Crypto++ files into {dest}")
     return 0
 

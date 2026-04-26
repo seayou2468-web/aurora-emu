@@ -10,8 +10,8 @@ This directory contains a minimized subset of Crypto++ source files used by `src
 ## Why this exists
 
 aurora3ds uses many Crypto++ features (AES modes, CCM, RSA, EC2N ECC, hashing, HMAC, CMAC,
-filters, and RNG). This subset vendors only the files needed by the currently included Crypto++
-headers and their transitive local dependencies.
+filters, and RNG). This subset vendors only the files needed by currently used Crypto++ includes in aurora3ds
+(`src/core/aurora3ds`) and their transitive local dependencies.
 
 ## Regeneration
 
@@ -21,8 +21,11 @@ Use:
 python3 scripts/extract_min_cryptopp.py /path/to/cryptopp-source /path/to/repo
 ```
 
-The script computes transitive local `#include "..."` closure from the directly referenced
-Crypto++ headers and copies matching `.cpp` pairs when present.
+The script auto-detects directly used `#include <cryptopp/...>` headers from
+`src/core/aurora3ds`, computes transitive local `#include "..."` closure, and copies matching
+`.cpp` pairs only for those directly-used headers (to avoid pulling in unrelated algorithm translation units).
+
+For safety, the source Crypto++ directory must be different from the vendored destination.
 
 ## License
 
