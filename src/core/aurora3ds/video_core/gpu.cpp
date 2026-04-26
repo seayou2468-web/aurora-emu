@@ -423,7 +423,7 @@ void GPU::VBlankCallback(std::uintptr_t user_data, s64 cycles_late) {
 }
 
 void GPU::RecreateRenderer(Frontend::EmuWindow& emu_window, Frontend::EmuWindow* secondary_window) {
-    // Reset the renderer (this will destroy OpenGL resources)
+    // Reset the renderer and recreate software renderer resources.
     impl->renderer.reset();
 
     // Create a new renderer
@@ -462,7 +462,7 @@ void GPU::RecreateRenderer(Frontend::EmuWindow& emu_window, Frontend::EmuWindow*
 }
 
 void GPU::ReleaseRenderer() {
-    // Just reset the renderer to release OpenGL resources
+    // Just reset the renderer to release renderer resources
     // Don't null out rasterizer pointer as it will become dangling
     impl->renderer.reset();
     impl->sw_blitter.reset();
