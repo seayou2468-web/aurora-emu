@@ -3,14 +3,41 @@
 // Refer to the license.txt file included.
 
 #ifdef ANDROID
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
+#include <array>
+#include <random>
 #include "common/android_storage.h"
 #include "common/file_util.h"
 #include "common/logging/log.h"
+#include "common/string_util.h"
 
 namespace AndroidStorage {
+namespace {
+std::string GenerateUuidLikeString() {
+    std::array<u8, 16> bytes{};
+    std::random_device rd;
+    std::mt19937_64 gen(rd());
+    for (auto& b : bytes) {
+        b = static_cast<u8>(gen() & 0xFF);
+    }
+
+    // UUIDv4 variant bits
+    bytes[6] = static_cast<u8>((bytes[6] & 0x0F) | 0x40);
+    bytes[8] = static_cast<u8>((bytes[8] & 0x3F) | 0x80);
+
+    static constexpr char kHex[] = "0123456789abcdef";
+    std::string out;
+    out.reserve(36);
+    for (std::size_t i = 0; i < bytes.size(); ++i) {
+        if (i == 4 || i == 6 || i == 8 || i == 10) {
+            out.push_back('-');
+        }
+        out.push_back(kHex[bytes[i] >> 4]);
+        out.push_back(kHex[bytes[i] & 0x0F]);
+    }
+    return out;
+}
+} // namespace
+
 JNIEnv* GetEnvForThread() {
     thread_local static struct OwnedEnv {
         OwnedEnv() {
@@ -281,7 +308,7 @@ bool MoveAndRenameFile(const std::string& src_full_path, const std::string& dest
 
     // Step 1: Create directory named after UUID inside /tmp to house the moved file.
     //         This prevents clashes if files with the same name are moved simultaneously.
-    const auto uuid = boost::uuids::to_string(boost::uuids::time_generator_v7()());
+    const auto uuid = GenerateUuidLikeString();
     const auto allocated_tmp_path = tmp_path + "/" + uuid;
     AndroidStorage::CreateDir(tmp_path, uuid);
 
@@ -319,7 +346,7 @@ std::string TranslateFilePath(const std::string& filepath) {
     std::optional<std::string> userDirLocation = GetUserDirectory();
     if (userDirLocation) {
         std::string translatedPath = *userDirLocation + "/" + filepath;
-        boost::replace_all(translatedPath, "//", "/");
+        translatedPath = Common::ReplaceAll(translatedPath, "//", "/");
         return translatedPath;
     }
     return "";

@@ -8,10 +8,11 @@
 #include <chrono>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string>
-#include <boost/optional.hpp>
 #include <boost/serialization/version.hpp>
 #include "common/common_types.h"
+#include "common/serialization/std_optional.hpp"
 #include "common/vector_math.h"
 #include "core/arm/arm_interface.h"
 #include "core/cheats/cheats.h"
@@ -501,9 +502,9 @@ private:
     std::function<bool()> mic_permission_func;
     bool mic_permission_granted = false;
 
-    boost::optional<Service::APT::DeliverArg> restore_deliver_arg;
-    boost::optional<Service::APT::SysMenuArg> restore_sys_menu_arg;
-    boost::optional<Service::PLGLDR::PLG_LDR::PluginLoaderContext> restore_plugin_context;
+    std::optional<Service::APT::DeliverArg> restore_deliver_arg;
+    std::optional<Service::APT::SysMenuArg> restore_sys_menu_arg;
+    std::optional<Service::PLGLDR::PLG_LDR::PluginLoaderContext> restore_plugin_context;
     std::unique_ptr<IPCDebugger::Recorder> restore_ipc_recorder;
     std::vector<u8> restore_wireless_reboot_info;
 

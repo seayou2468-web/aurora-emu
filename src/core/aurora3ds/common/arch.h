@@ -4,10 +4,18 @@
 
 #pragma once
 
-#include <boost/predef.h>
+#include <cstdint>
 
 #define CITRA_ARCH(NAME) (CITRA_ARCH_##NAME)
 
-#define CITRA_ARCH_x86_64 BOOST_ARCH_X86_64
-#define CITRA_ARCH_arm64                                                                           \
-    (BOOST_ARCH_ARM >= BOOST_VERSION_NUMBER(8, 0, 0) && BOOST_ARCH_WORD_BITS == 64)
+#if defined(__x86_64__) || defined(_M_X64)
+#define CITRA_ARCH_x86_64 1
+#else
+#define CITRA_ARCH_x86_64 0
+#endif
+
+#if (defined(__aarch64__) || defined(_M_ARM64)) && (UINTPTR_MAX == 0xffffffffffffffffULL)
+#define CITRA_ARCH_arm64 1
+#else
+#define CITRA_ARCH_arm64 0
+#endif

@@ -7,8 +7,8 @@
 #include <array>
 #include <optional>
 #include <type_traits>
-#include <boost/crc.hpp>
 #include "common/bit_field.h"
+#include "common/crc.h"
 #include "common/swap.h"
 
 namespace InputCommon::CemuhookUDP {
@@ -98,13 +98,11 @@ static_assert(std::is_trivially_copyable_v<PadData>,
  */
 template <typename T>
 Message<T> Create(const T data, const u32 client_id = 0) {
-    boost::crc_32_type crc;
     Header header{
         CLIENT_MAGIC, PROTOCOL_VERSION, sizeof(T) + sizeof(Type), 0, client_id, GetMessageType<T>(),
     };
     Message<T> message{header, data};
-    crc.process_bytes(&message, sizeof(Message<T>));
-    message.header.crc = crc.checksum();
+    message.header.crc = Common::CRC::CRC32_04C11DB7(&message, sizeof(Message<T>));
     return message;
 }
 } // namespace Request

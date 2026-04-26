@@ -10,14 +10,13 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <boost/optional.hpp>
-#include <boost/serialization/optional.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/unordered_map.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/weak_ptr.hpp>
 #include <httplib.h>
+#include "common/serialization/std_optional.hpp"
 #include "common/thread.h"
 #include "core/hle/ipc_helpers.h"
 #include "core/hle/kernel/shared_memory.h"
@@ -309,7 +308,7 @@ public:
 struct SessionData : public Kernel::SessionRequestHandler::SessionDataBase {
     /// The HTTP context that is currently bound to this session, this can be empty if no context
     /// has been bound. Certain commands can only be called on a session with a bound context.
-    boost::optional<Context::Handle> current_http_context;
+    std::optional<Context::Handle> current_http_context;
 
     u32 session_id;
 

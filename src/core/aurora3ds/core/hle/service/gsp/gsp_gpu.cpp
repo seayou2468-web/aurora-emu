@@ -5,9 +5,9 @@
 #include <span>
 #include <vector>
 #include <boost/serialization/base_object.hpp>
-#include <boost/serialization/optional.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 #include "common/archives.h"
+#include "common/serialization/std_optional.hpp"
 #include "common/bit_field.h"
 #include "common/hacks/hack_manager.h"
 #include "common/settings.h"
