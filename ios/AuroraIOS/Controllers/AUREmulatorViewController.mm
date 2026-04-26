@@ -133,6 +133,13 @@
     _core = EmulatorCore_Create(_coreType);
     if (!_core) {
         NSLog(@"[AUR][Emu] Failed to create core: %d", (int)_coreType);
+        if (_coreType == EMULATOR_CORE_TYPE_3DS) {
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Aurora3DS接続エラー"
+                                                                           message:@"Aurora3DSの実コアブリッジがリンクされていないため起動できません。"
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+            [self presentViewController:alert animated:YES completion:nil];
+        }
         return;
     }
 
@@ -169,6 +176,15 @@
         [self.displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
     } else {
         NSLog(@"[AUR][Emu] ROM load failed (%@): %s", self.romURL.lastPathComponent, EmulatorCore_GetLastError(_core) ?: "unknown error");
+        if (_coreType == EMULATOR_CORE_TYPE_3DS) {
+            const char *errorText = EmulatorCore_GetLastError(_core) ?: "unknown error";
+            NSString *message = [NSString stringWithFormat:@"Aurora3DSブリッジまたはROM初期化に失敗しました。\n%s", errorText];
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Aurora3DS起動失敗"
+                                                                           message:message
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+            [self presentViewController:alert animated:YES completion:nil];
+        }
         [self stopEmulator];
     }
 }
