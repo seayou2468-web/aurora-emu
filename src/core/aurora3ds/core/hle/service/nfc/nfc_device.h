@@ -108,7 +108,7 @@ private:
 
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 } // namespace Service::NFC

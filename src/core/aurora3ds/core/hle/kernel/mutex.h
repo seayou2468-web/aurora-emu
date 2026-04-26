@@ -62,7 +62,7 @@ public:
 private:
     KernelSystem& kernel;
 
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
 };
@@ -75,5 +75,5 @@ void ReleaseThreadMutexes(Thread* thread);
 
 } // namespace Kernel
 
-BOOST_CLASS_EXPORT_KEY(Kernel::Mutex)
+SERIALIZATION_CLASS_EXPORT_KEY(Kernel::Mutex)
 CONSTRUCT_KERNEL_OBJECT(Kernel::Mutex)

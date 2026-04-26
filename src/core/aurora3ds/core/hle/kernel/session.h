@@ -27,10 +27,10 @@ public:
     std::shared_ptr<ClientPort> port; ///< The port that this session is associated with (optional).
 
 private:
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
 };
 } // namespace Kernel
 
-BOOST_CLASS_EXPORT_KEY(Kernel::Session)
+SERIALIZATION_CLASS_EXPORT_KEY(Kernel::Session)

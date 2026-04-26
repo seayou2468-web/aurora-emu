@@ -137,16 +137,16 @@ private:
 
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 } // namespace SharedPage
 
-namespace boost::serialization {
+SERIALIZATION_EXT_NAMESPACE_BEGIN
 
 template <class Archive>
 void load_construct_data(Archive& ar, SharedPage::Handler* t, const unsigned int);
 
-} // namespace boost::serialization
+SERIALIZATION_EXT_NAMESPACE_END
 
-BOOST_CLASS_EXPORT_KEY(SharedPage::Handler)
+SERIALIZATION_CLASS_EXPORT_KEY(SharedPage::Handler)

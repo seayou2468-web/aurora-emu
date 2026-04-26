@@ -62,12 +62,12 @@ private:
     friend class KernelSystem;
 
 private:
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
 };
 
 } // namespace Kernel
 
-BOOST_CLASS_EXPORT_KEY(Kernel::ClientPort)
+SERIALIZATION_CLASS_EXPORT_KEY(Kernel::ClientPort)
 CONSTRUCT_KERNEL_OBJECT(Kernel::ClientPort)

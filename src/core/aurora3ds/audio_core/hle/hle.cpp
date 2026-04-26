@@ -31,7 +31,7 @@ DspHle::DspHle(Core::System& system) : DspHle(system, system.Memory(), system.Co
 
 template <class Archive>
 void DspHle::serialize(Archive& ar, const unsigned int) {
-    ar& boost::serialization::base_object<DspInterface>(*this);
+    ar& SerializationCompat::base_object<DspInterface>(*this);
     ar&* impl.get();
 }
 SERIALIZE_IMPL(DspHle)
@@ -104,7 +104,7 @@ private:
 
     template <class Archive>
     void serialize(Archive& ar, const unsigned int) {
-        ar& boost::serialization::make_binary_object(backup_dsp_memory.raw_memory.data(),
+        ar& SerializationCompat::make_binary_object(backup_dsp_memory.raw_memory.data(),
                                                      backup_dsp_memory.raw_memory.size());
         ar & dsp_state;
         ar & pipe_data;
@@ -112,7 +112,7 @@ private:
         ar & mixers;
         // interrupt_handler is reregistered when loading state from DSP_DSP
     }
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 DspHle::Impl::Impl(DspHle& parent_, Memory::MemorySystem& memory, Core::Timing& timing)

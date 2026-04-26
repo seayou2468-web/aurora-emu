@@ -107,7 +107,7 @@ private:
             ar & play_position;
             ar & has_played;
         }
-        friend class boost::serialization::access;
+        friend class SerializationCompat::access;
     };
 
     struct BufferOrder {
@@ -179,7 +179,7 @@ private:
             ar & rate_multiplier;
             ar & interpolation_mode;
         }
-        friend class boost::serialization::access;
+        friend class SerializationCompat::access;
     };
 
     SourceState state;
@@ -204,7 +204,7 @@ private:
         ar & current_frame;
         ar & backup_frame;
     }
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 } // namespace AudioCore::HLE

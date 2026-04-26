@@ -35,7 +35,7 @@ private:
     friend class Timer;
     friend class KernelSystem;
 
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
 };
@@ -113,12 +113,12 @@ private:
 
     friend class KernelSystem;
 
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
 };
 
 } // namespace Kernel
 
-BOOST_CLASS_EXPORT_KEY(Kernel::Timer)
+SERIALIZATION_CLASS_EXPORT_KEY(Kernel::Timer)
 CONSTRUCT_KERNEL_OBJECT(Kernel::Timer)

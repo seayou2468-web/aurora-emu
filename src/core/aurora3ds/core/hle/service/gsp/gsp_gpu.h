@@ -91,7 +91,7 @@ public:
 private:
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 class GSP_GPU final : public ServiceFramework<GSP_GPU, SessionData> {
@@ -410,11 +410,11 @@ private:
 
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 } // namespace Service::GSP
 
-BOOST_CLASS_EXPORT_KEY(Service::GSP::SessionData)
-BOOST_CLASS_EXPORT_KEY(Service::GSP::GSP_GPU)
+SERIALIZATION_CLASS_EXPORT_KEY(Service::GSP::SessionData)
+SERIALIZATION_CLASS_EXPORT_KEY(Service::GSP::GSP_GPU)
 SERVICE_CONSTRUCT(Service::GSP::GSP_GPU)

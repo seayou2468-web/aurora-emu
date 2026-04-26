@@ -268,19 +268,19 @@ private:
     template <class Archive>
     void serialize(Archive& ar, const unsigned int) {
         DEBUG_SERIALIZATION_POINT;
-        ar& boost::serialization::base_object<Kernel::SessionRequestHandler>(*this);
+        ar& SerializationCompat::base_object<Kernel::SessionRequestHandler>(*this);
         ar & semaphore_event;
         ar & preset_semaphore;
         ar & interrupt_zero;
         ar & interrupt_one;
         ar & pipes;
     }
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 void InstallInterfaces(Core::System& system);
 
 } // namespace Service::DSP
 
-BOOST_CLASS_EXPORT_KEY(Service::DSP::DSP_DSP)
+SERIALIZATION_CLASS_EXPORT_KEY(Service::DSP::DSP_DSP)
 SERVICE_CONSTRUCT(Service::DSP::DSP_DSP)

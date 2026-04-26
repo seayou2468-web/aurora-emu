@@ -1633,36 +1633,6 @@ void CryptoIOFile::serialize(Archive& ar, const unsigned int) {
     ar& boost::serialization::base_object<IOFile>(*this);
 }
 
-template <typename T>
-using boost_iostreams = boost::iostreams::stream<T>;
-
-template <>
-void OpenFStream<std::ios_base::in>(
-    boost_iostreams<boost::iostreams::file_descriptor_source>& fstream,
-    const std::string& filename) {
-    IOFile file(filename, "r");
-    if (file.GetFd() == -1)
-        return;
-    int fd = dup(file.GetFd());
-    if (fd == -1)
-        return;
-    boost::iostreams::file_descriptor_source file_descriptor_source(fd,
-                                                                    boost::iostreams::close_handle);
-    fstream.open(file_descriptor_source);
-}
-
-template <>
-void OpenFStream<std::ios_base::out>(
-    boost_iostreams<boost::iostreams::file_descriptor_sink>& fstream, const std::string& filename) {
-    IOFile file(filename, "w");
-    if (file.GetFd() == -1)
-        return;
-    int fd = dup(file.GetFd());
-    if (fd == -1)
-        return;
-    boost::iostreams::file_descriptor_sink file_descriptor_sink(fd, boost::iostreams::close_handle);
-    fstream.open(file_descriptor_sink);
-}
 } // namespace FileUtil
 
 SERIALIZE_EXPORT_IMPL(FileUtil::IOFile)

@@ -78,7 +78,7 @@ public:
 private:
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 class ThreadManager {
@@ -167,7 +167,7 @@ private:
     friend class Thread;
     friend class KernelSystem;
 
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
 };
@@ -334,7 +334,7 @@ public:
 private:
     ThreadManager& thread_manager;
 
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
 };
@@ -352,10 +352,10 @@ std::shared_ptr<Thread> SetupMainThread(KernelSystem& kernel, u32 entry_point, u
 
 } // namespace Kernel
 
-BOOST_CLASS_EXPORT_KEY(Kernel::Thread)
-BOOST_CLASS_EXPORT_KEY(Kernel::WakeupCallback)
+SERIALIZATION_CLASS_EXPORT_KEY(Kernel::Thread)
+SERIALIZATION_CLASS_EXPORT_KEY(Kernel::WakeupCallback)
 
-namespace boost::serialization {
+SERIALIZATION_EXT_NAMESPACE_BEGIN
 
 template <class Archive>
 void save_construct_data(Archive& ar, const Kernel::Thread* t, const unsigned int) {
@@ -369,4 +369,4 @@ void load_construct_data(Archive& ar, Kernel::Thread* t, const unsigned int) {
     ::new (t) Kernel::Thread(Core::Global<Kernel::KernelSystem>(), core_id);
 }
 
-} // namespace boost::serialization
+SERIALIZATION_EXT_NAMESPACE_END

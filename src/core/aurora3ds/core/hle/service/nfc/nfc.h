@@ -376,7 +376,7 @@ private:
 
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 void InstallInterfaces(Core::System& system);
@@ -384,4 +384,4 @@ void InstallInterfaces(Core::System& system);
 } // namespace Service::NFC
 
 SERVICE_CONSTRUCT(Service::NFC::Module)
-BOOST_CLASS_EXPORT_KEY(Service::NFC::Module)
+SERIALIZATION_CLASS_EXPORT_KEY(Service::NFC::Module)

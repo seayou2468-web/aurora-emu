@@ -4,8 +4,8 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include "common/boost_compat/all.h"
 #include <cryptopp/sha.h>
+#include <fstream>
 #include "common/common_paths.h"
 #include "common/logging/log.h"
 #include "core/file_sys/archive_systemsavedata.h"
@@ -466,8 +466,8 @@ static void loadDigests(std::map<std::string, int> &digests)
     const std::string filepath = FileUtil::GetUserPath(FileUtil::UserPath::SysDataDir) + "digests.txt";
     FileUtil::CreateFullPath(filepath);
 
-    boost::iostreams::stream<boost::iostreams::file_descriptor_source> file;
-    FileUtil::OpenFStream<std::ios_base::in>(file, filepath);
+    std::ifstream file;
+    OpenFStream(file, filepath, std::ios_base::in);
 	
     if (file.is_open())
 	{

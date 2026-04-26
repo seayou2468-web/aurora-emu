@@ -286,9 +286,9 @@ private:
 
     template <class Archive>
     void serialize(Archive& ar, const unsigned int) {
-        ar& boost::serialization::base_object<Kernel::HLERequestContext::WakeupCallback>(*this);
+        ar& SerializationCompat::base_object<Kernel::HLERequestContext::WakeupCallback>(*this);
     }
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 bool DLP_Clt_Base::OnConnectCallback() {

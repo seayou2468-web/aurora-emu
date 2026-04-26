@@ -135,7 +135,7 @@ private:
         ar & object;
         ar & buffer;
     }
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 enum class AppletPos : u32 {
@@ -177,7 +177,7 @@ private:
         ar & hmac;
         ar & source_program_id;
     }
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 using SysMenuArg = std::array<u8, SysMenuArgSize>;
@@ -208,7 +208,7 @@ private:
         ar & current_title_id;
         ar & current_media_type;
     }
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 struct ApplicationStartParameters {
@@ -221,7 +221,7 @@ private:
         ar & next_title_id;
         ar & next_media_type;
     }
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 enum class DisplayBufferMode : u32_le {
@@ -257,7 +257,7 @@ private:
         ar & bottom_screen_right_offset;
         ar & bottom_screen_format;
     }
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 static_assert(sizeof(CaptureBufferInfo) == 0x20, "CaptureBufferInfo struct has incorrect size");
 
@@ -492,7 +492,7 @@ private:
             ar & notification_event;
             ar & parameter_event;
         }
-        friend class boost::serialization::access;
+        friend class SerializationCompat::access;
     };
 
     // Holds data about the concurrently running applets in the system.
@@ -586,12 +586,12 @@ private:
             LoadInputDevices();
         }
     }
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 } // namespace Service::APT
 
-BOOST_CLASS_VERSION(Service::APT::ApplicationJumpParameters, 1)
-BOOST_CLASS_VERSION(Service::APT::AppletManager, 1)
+SERIALIZATION_CLASS_VERSION(Service::APT::ApplicationJumpParameters, 1)
+SERIALIZATION_CLASS_VERSION(Service::APT::AppletManager, 1)
 
 SERVICE_CONSTRUCT(Service::APT::AppletManager)

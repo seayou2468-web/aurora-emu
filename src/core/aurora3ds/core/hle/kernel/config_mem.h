@@ -69,11 +69,11 @@ public:
 private:
     ConfigMemDef config_mem;
 
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
 };
 
 } // namespace ConfigMem
 
-BOOST_CLASS_EXPORT_KEY(ConfigMem::Handler)
+SERIALIZATION_CLASS_EXPORT_KEY(ConfigMem::Handler)

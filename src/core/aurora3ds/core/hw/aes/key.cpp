@@ -4,8 +4,8 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include "common/boost_compat/all.h"
 #include <algorithm>
+#include <fstream>
 #include <optional>
 #include <sstream>
 #include <cryptopp/aes.h>
@@ -368,8 +368,8 @@ void LoadPresetAesKeys() {
     const std::string filepath = FileUtil::GetUserPath(FileUtil::UserPath::SysDataDir) + AES_KEYS;
     FileUtil::CreateFullPath(filepath); // Create path if not already created
 
-    boost::iostreams::stream<boost::iostreams::file_descriptor_source> file;
-    FileUtil::OpenFStream<std::ios_base::in>(file, filepath);
+    std::ifstream file;
+    OpenFStream(file, filepath, std::ios_base::in);
     if (!file.is_open()) {
         return;
     }
@@ -475,8 +475,8 @@ std::istringstream GetKeysStream() {
     const std::string filepath = FileUtil::GetUserPath(FileUtil::UserPath::SysDataDir) + KEYS_FILE;
     FileUtil::CreateFullPath(filepath); // Create path if not already created
 
-    boost::iostreams::stream<boost::iostreams::file_descriptor_source> file;
-    FileUtil::OpenFStream<std::ios_base::in>(file, filepath);
+    std::ifstream file;
+    OpenFStream(file, filepath, std::ios_base::in);
     std::istringstream ret;
     if (file.is_open()) {
         return std::istringstream(std::string(std::istreambuf_iterator<char>(file), {}));

@@ -133,7 +133,7 @@ struct New3dsHwCapabilities {
 private:
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 class KernelSystem {
@@ -439,11 +439,11 @@ private:
      */
     bool main_thread_extended_sleep = false;
 
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
 };
 
 } // namespace Kernel
 
-BOOST_CLASS_EXPORT_KEY(Kernel::New3dsHwCapabilities)
+SERIALIZATION_CLASS_EXPORT_KEY(Kernel::New3dsHwCapabilities)

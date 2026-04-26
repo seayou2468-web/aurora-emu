@@ -12,16 +12,11 @@
 #include <boost/archive/detail/basic_iarchive.hpp>
 #include <boost/asio.hpp>
 #include <boost/config.hpp>
-#include <boost/container/flat_set.hpp>
-#include <boost/container/small_vector.hpp>
-#include <boost/container/vector.hpp>
 #include <boost/detail/workaround.hpp>
 #include <boost/icl/discrete_interval.hpp>
 #include <boost/icl/interval_map.hpp>
 #include <boost/icl/interval_set.hpp>
 #include <boost/icl/right_open_interval.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
 #include <boost/mpl/bool_fwd.hpp>
 #include <boost/mpl/if.hpp>
 #include <boost/serialization/access.hpp>

@@ -43,7 +43,7 @@ private:
         ar & isGlobal;
         ar & ownerProcess;
     }
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 class SOC_U final : public ServiceFramework<SOC_U> {
@@ -169,11 +169,11 @@ private:
     template <class Archive>
     void serialize(Archive& ar, const unsigned int) {
         DEBUG_SERIALIZATION_POINT;
-        ar& boost::serialization::base_object<Kernel::SessionRequestHandler>(*this);
+        ar& SerializationCompat::base_object<Kernel::SessionRequestHandler>(*this);
         ar & created_sockets;
         ar & initialized_processes;
     }
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 std::shared_ptr<SOC_U> GetService(Core::System& system);
@@ -182,4 +182,4 @@ void InstallInterfaces(Core::System& system);
 
 } // namespace Service::SOC
 
-BOOST_CLASS_EXPORT_KEY(Service::SOC::SOC_U)
+SERIALIZATION_CLASS_EXPORT_KEY(Service::SOC::SOC_U)

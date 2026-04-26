@@ -33,7 +33,7 @@ public:
     private:
         template <class Archive>
         void serialize(Archive& ar, const unsigned int);
-        friend class boost::serialization::access;
+        friend class SerializationCompat::access;
     };
 
     class Interface : public ServiceFramework<Interface, SessionData> {
@@ -987,7 +987,7 @@ private:
 
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 void InstallInterfaces(Core::System& system);
@@ -995,5 +995,5 @@ void InstallInterfaces(Core::System& system);
 } // namespace Service::BOSS
 
 SERVICE_CONSTRUCT(Service::BOSS::Module)
-BOOST_CLASS_EXPORT_KEY(Service::BOSS::Module)
-BOOST_CLASS_EXPORT_KEY(Service::BOSS::Module::SessionData)
+SERIALIZATION_CLASS_EXPORT_KEY(Service::BOSS::Module)
+SERIALIZATION_CLASS_EXPORT_KEY(Service::BOSS::Module::SessionData)

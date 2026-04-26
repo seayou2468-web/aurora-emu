@@ -100,9 +100,9 @@ private:
         }
     }
 
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
+    SERIALIZATION_SPLIT_MEMBER()
 
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 } // namespace Service::SM

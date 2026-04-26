@@ -24,7 +24,7 @@ namespace Service::IR {
 template <class Archive>
 void IR_USER::serialize(Archive& ar, const unsigned int) {
     DEBUG_SERIALIZATION_POINT;
-    ar& boost::serialization::base_object<Kernel::SessionRequestHandler>(*this);
+    ar& SerializationCompat::base_object<Kernel::SessionRequestHandler>(*this);
     ar & conn_status_event;
     ar & send_event;
     ar & receive_event;
@@ -168,7 +168,7 @@ private:
             ar & packet_count;
             ar & unknown;
         }
-        friend class boost::serialization::access;
+        friend class SerializationCompat::access;
     };
     static_assert(sizeof(BufferInfo) == 16, "BufferInfo has wrong size!");
 
@@ -222,7 +222,7 @@ private:
         ar & max_packet_count;
         ar & max_data_size;
     }
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 /// Wraps the payload into packet and puts it to the receive buffer

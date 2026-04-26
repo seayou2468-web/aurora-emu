@@ -106,12 +106,12 @@ private:
     friend class KernelSystem;
     KernelSystem& kernel;
 
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
 };
 
 } // namespace Kernel
 
-BOOST_CLASS_EXPORT_KEY(Kernel::ServerSession)
+SERIALIZATION_CLASS_EXPORT_KEY(Kernel::ServerSession)
 CONSTRUCT_KERNEL_OBJECT(Kernel::ServerSession)

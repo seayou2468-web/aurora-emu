@@ -65,7 +65,7 @@ bool ResourceLimit::Release(ResourceLimitType type, s32 amount) {
 
 template <class Archive>
 void ResourceLimit::serialize(Archive& ar, const unsigned int) {
-    ar& boost::serialization::base_object<Object>(*this);
+    ar& SerializationCompat::base_object<Object>(*this);
     ar & m_name;
     ar & m_limit_values;
     ar & m_current_values;

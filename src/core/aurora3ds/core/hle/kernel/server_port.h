@@ -64,12 +64,12 @@ public:
     void Acquire(Thread* thread) override;
 
 private:
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
 };
 
 } // namespace Kernel
 
-BOOST_CLASS_EXPORT_KEY(Kernel::ServerPort)
+SERIALIZATION_CLASS_EXPORT_KEY(Kernel::ServerPort)
 CONSTRUCT_KERNEL_OBJECT(Kernel::ServerPort)

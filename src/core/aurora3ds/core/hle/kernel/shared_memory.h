@@ -111,10 +111,10 @@ private:
 
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 } // namespace Kernel
 
-BOOST_CLASS_EXPORT_KEY(Kernel::SharedMemory)
+SERIALIZATION_CLASS_EXPORT_KEY(Kernel::SharedMemory)
 CONSTRUCT_KERNEL_OBJECT(Kernel::SharedMemory)

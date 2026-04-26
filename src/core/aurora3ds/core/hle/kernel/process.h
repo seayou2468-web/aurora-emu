@@ -27,7 +27,7 @@ struct AddressMapping {
     bool unk_flag;
 
 private:
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
 };
@@ -66,7 +66,7 @@ public:
         u32 size = 0;
 
     private:
-        friend class boost::serialization::access;
+        friend class SerializationCompat::access;
         template <class Archive>
         void serialize(Archive& ar, const unsigned int);
     };
@@ -118,7 +118,7 @@ public:
     u64 program_id;
 
 private:
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);
 };
@@ -230,16 +230,16 @@ private:
 
     KernelSystem& kernel;
 
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
     template <class Archive>
     void serialize(Archive& ar, const unsigned int file_version);
 };
 
 } // namespace Kernel
 
-BOOST_CLASS_EXPORT_KEY(Kernel::AddressMapping)
-BOOST_CLASS_EXPORT_KEY(Kernel::CodeSet)
-BOOST_CLASS_EXPORT_KEY(Kernel::CodeSet::Segment)
-BOOST_CLASS_EXPORT_KEY(Kernel::Process)
+SERIALIZATION_CLASS_EXPORT_KEY(Kernel::AddressMapping)
+SERIALIZATION_CLASS_EXPORT_KEY(Kernel::CodeSet)
+SERIALIZATION_CLASS_EXPORT_KEY(Kernel::CodeSet::Segment)
+SERIALIZATION_CLASS_EXPORT_KEY(Kernel::Process)
 CONSTRUCT_KERNEL_OBJECT(Kernel::CodeSet)
 CONSTRUCT_KERNEL_OBJECT(Kernel::Process)

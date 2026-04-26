@@ -342,7 +342,7 @@ private:
         ar & next_handle;
         ar & sd_savedata_source;
     }
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 } // namespace Service::FS

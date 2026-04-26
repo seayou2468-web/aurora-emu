@@ -64,11 +64,11 @@ private:
 
     template <class Archive>
     void serialize(Archive& ar, const unsigned int) {
-        ar& boost::serialization::base_object<Kernel::WakeupCallback>(*this);
+        ar& SerializationCompat::base_object<Kernel::WakeupCallback>(*this);
         ar & callback;
         ar & context;
     }
-    friend class boost::serialization::access;
+    friend class SerializationCompat::access;
 };
 
 SessionRequestHandler::SessionInfo::SessionInfo(std::shared_ptr<ServerSession> session,
