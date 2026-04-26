@@ -17,9 +17,6 @@
 
 #pragma once
 
-#if defined(_MSC_VER)
-#include <cstdlib>
-#endif
 #include <bit>
 #include <cstring>
 #include <type_traits>
@@ -27,23 +24,7 @@
 
 namespace Common {
 
-#ifdef _MSC_VER
-[[nodiscard]] inline u16 swap16(u16 data) noexcept {
-    return _byteswap_ushort(data);
-}
-[[nodiscard]] inline u32 swap32(u32 data) noexcept {
-    return _byteswap_ulong(data);
-}
-[[nodiscard]] inline u64 swap64(u64 data) noexcept {
-    return _byteswap_uint64(data);
-}
-#elif defined(__clang__) || defined(__GNUC__)
-#if defined(__Bitrig__) || defined(__OpenBSD__)
-// redefine swap16, swap32, swap64 as inline functions
-#undef swap16
-#undef swap32
-#undef swap64
-#endif
+// iOS device-only compilers (clang) provide builtin byte swaps.
 [[nodiscard]] inline u16 swap16(u16 data) noexcept {
     return __builtin_bswap16(data);
 }
@@ -53,22 +34,6 @@ namespace Common {
 [[nodiscard]] inline u64 swap64(u64 data) noexcept {
     return __builtin_bswap64(data);
 }
-#else
-// Generic implementation.
-[[nodiscard]] inline u16 swap16(u16 data) noexcept {
-    return (data >> 8) | (data << 8);
-}
-[[nodiscard]] inline u32 swap32(u32 data) noexcept {
-    return ((data & 0xFF000000U) >> 24) | ((data & 0x00FF0000U) >> 8) |
-           ((data & 0x0000FF00U) << 8) | ((data & 0x000000FFU) << 24);
-}
-[[nodiscard]] inline u64 swap64(u64 data) noexcept {
-    return ((data & 0xFF00000000000000ULL) >> 56) | ((data & 0x00FF000000000000ULL) >> 40) |
-           ((data & 0x0000FF0000000000ULL) >> 24) | ((data & 0x000000FF00000000ULL) >> 8) |
-           ((data & 0x00000000FF000000ULL) << 8) | ((data & 0x0000000000FF0000ULL) << 24) |
-           ((data & 0x000000000000FF00ULL) << 40) | ((data & 0x00000000000000FFULL) << 56);
-}
-#endif
 
 [[nodiscard]] inline float swapf(float f) noexcept {
     static_assert(sizeof(u32) == sizeof(float), "float must be the same size as uint32_t.");

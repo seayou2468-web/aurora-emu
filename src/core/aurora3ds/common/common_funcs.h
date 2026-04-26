@@ -20,38 +20,11 @@
 #define INSERT_PADDING_BYTES(num_bytes) u8 CONCAT2(pad, __LINE__)[(num_bytes)]
 #define INSERT_PADDING_WORDS(num_words) u32 CONCAT2(pad, __LINE__)[(num_words)]
 
-// Inlining
-#ifdef _WIN32
-#define FORCE_INLINE __forceinline
-#else
+// iOS device-only compiler attributes
 #define FORCE_INLINE inline __attribute__((always_inline))
-#endif
-
-#ifdef _MSC_VER
-#define CITRA_NO_INLINE __declspec(noinline)
-#else
 #define CITRA_NO_INLINE __attribute__((noinline))
-#endif
-
-#ifdef _MSC_VER
-#define CITRA_NO_RETURN __declspec(noreturn)
-#else
 #define CITRA_NO_RETURN __attribute__((noreturn))
-#endif
-
-#ifdef _MSC_VER
-extern "C" {
-__declspec(dllimport) void __stdcall DebugBreak(void);
-}
-#define Crash() DebugBreak()
-#else
 #define Crash() __builtin_trap()
-#endif
-
-#ifdef _MSC_VER
-// Locale Cross-Compatibility
-#define locale_t _locale_t
-#endif // _MSC_VER
 
 #define DECLARE_ENUM_FLAG_OPERATORS(type)                                                          \
     [[nodiscard]] constexpr type operator|(type a, type b) noexcept {                              \
