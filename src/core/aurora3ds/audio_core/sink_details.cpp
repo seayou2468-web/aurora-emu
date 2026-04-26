@@ -8,9 +8,6 @@
 #include <vector>
 #include "audio_core/null_sink.h"
 #include "audio_core/sink_details.h"
-#ifdef HAVE_LIBRETRO
-#include "audio_core/libretro_sink.h"
-#endif
 #ifdef HAVE_CUBEB
 #include "audio_core/cubeb_sink.h"
 #endif
@@ -23,13 +20,6 @@ namespace AudioCore {
 namespace {
 // sink_details is ordered in terms of desirability, with the best choice at the top.
 constexpr std::array sink_details = {
-#ifdef HAVE_LIBRETRO
-    SinkDetails{SinkType::LibRetro, "libretro",
-                [](std::string_view device_id) -> std::unique_ptr<Sink> {
-                    return std::make_unique<LibRetroSink>(std::string(device_id));
-                },
-                &ListLibretroSinkDevices},
-#endif
 #ifdef HAVE_CUBEB
     SinkDetails{SinkType::Cubeb, "Cubeb",
                 [](std::string_view device_id) -> std::unique_ptr<Sink> {

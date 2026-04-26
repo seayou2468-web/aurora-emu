@@ -54,60 +54,6 @@ public:
     virtual void Close() = 0;
 };
 
-#ifdef HAVE_LIBRETRO
-/**
- * LibRetro backend
- */
-class LibRetroBackend : public Backend {
-public:
-    explicit LibRetroBackend() {}
-    explicit LibRetroBackend(retro_log_printf_t callback) : callback(callback) {}
-
-    ~LibRetroBackend() override = default;
-
-    void Write(const Entry& entry) override {
-        if (callback == nullptr) {
-            return;
-        }
-        retro_log_level log_level;
-
-        switch (entry.log_level) {
-        case Common::Log::Level::Trace:
-            log_level = retro_log_level::RETRO_LOG_DEBUG;
-            break;
-        case Common::Log::Level::Debug:
-            log_level = retro_log_level::RETRO_LOG_DEBUG;
-            break;
-        case Common::Log::Level::Info:
-            log_level = retro_log_level::RETRO_LOG_INFO;
-            break;
-        case Common::Log::Level::Warning:
-            log_level = retro_log_level::RETRO_LOG_WARN;
-            break;
-        case Common::Log::Level::Error:
-            log_level = retro_log_level::RETRO_LOG_ERROR;
-            break;
-        case Common::Log::Level::Critical:
-            log_level = retro_log_level::RETRO_LOG_ERROR;
-            break;
-        default:
-            log_level = retro_log_level::RETRO_LOG_DUMMY;
-        }
-
-        auto str = FormatLogMessage(entry).append(1, '\n');
-        callback(log_level, str.c_str());
-    }
-
-    void Flush() override {}
-
-    void Close() override {}
-
-    void EnableForStacktrace() override {}
-
-private:
-    retro_log_printf_t callback = nullptr;
-};
-#endif
 
 /**
  * Backend that writes to stderr and with color
@@ -272,19 +218,6 @@ public:
         }
         return *instance;
     }
-#ifdef HAVE_LIBRETRO
-    static void Initialize(retro_log_printf_t callback) {
-        if (instance) {
-            LOG_WARNING(Log, "Reinitializing logging backend");
-            return;
-        }
-        initialization_in_progress_suppress_logging = true;
-        Filter filter;
-        filter.ParseFilterString(Settings::values.log_filter.GetValue());
-        instance = std::unique_ptr<Impl, decltype(&Deleter)>(new Impl(callback, filter), Deleter);
-        initialization_in_progress_suppress_logging = false;
-    }
-#endif
     static void Initialize(std::string_view log_file) {
         if (instance) {
             LOG_WARNING(Log, "Reinitializing logging backend");
@@ -378,10 +311,6 @@ public:
     }
 
 private:
-#ifdef HAVE_LIBRETRO
-    Impl(retro_log_printf_t callback, const Filter& filter_)
-        : filter{filter_}, file_backend{""}, libretro_backend{callback} {}
-#endif
     Impl(const std::string& file_backend_filename, const Filter& filter_)
         : filter{filter_}, file_backend{file_backend_filename} {
 #ifdef CITRA_LINUX_GCC_BACKTRACE
@@ -487,16 +416,12 @@ private:
     }
 
     void ForEachBackend(auto lambda) {
-#ifdef HAVE_LIBRETRO
-        lambda(static_cast<Backend&>(libretro_backend));
-#else
         lambda(static_cast<Backend&>(debugger_backend));
         lambda(static_cast<Backend&>(color_console_backend));
         lambda(static_cast<Backend&>(file_backend));
 #ifdef ANDROID
         lambda(static_cast<Backend&>(lc_backend));
 #endif // ANDROID
-#endif // HAVE_LIBRETRO
     }
 
     static void Deleter(Impl* ptr) {
@@ -541,9 +466,6 @@ private:
 #ifdef ANDROID
     LogcatBackend lc_backend{};
 #endif
-#ifdef HAVE_LIBRETRO
-    LibRetroBackend libretro_backend;
-#endif
 
     MPSCQueue<Entry> message_queue{};
     std::chrono::steady_clock::time_point time_origin{std::chrono::steady_clock::now()};
@@ -558,13 +480,6 @@ private:
 #endif
 };
 } // namespace
-
-#ifdef HAVE_LIBRETRO
-void LibRetroStart(retro_log_printf_t callback) {
-    Impl::Initialize(callback);
-    Impl::Start();
-}
-#endif
 
 void Initialize(std::string_view log_file) {
     Impl::Initialize(log_file.empty() ? LOG_FILE : log_file);

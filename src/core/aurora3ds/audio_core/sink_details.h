@@ -19,9 +19,6 @@ enum class SinkType : u32 {
     Null = 1,
     Cubeb = 2,
     OpenAL = 3,
-#ifdef HAVE_LIBRETRO
-    LibRetro = 4,
-#endif
 };
 
 struct SinkDetails {

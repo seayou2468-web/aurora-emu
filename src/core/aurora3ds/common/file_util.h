@@ -16,9 +16,7 @@
 #include <ios>
 #include <limits>
 #include <memory>
-#ifdef HAVE_LIBRETRO
 #include <mutex>
-#endif
 #include <optional>
 #include <span>
 #include <string>
@@ -27,13 +25,7 @@
 #include <vector>
 #include "common/common_types.h"
 
-#ifdef HAVE_LIBRETRO_VFS
-#define SKIP_STDIO_REDEFINES
-#include <streams/file_stream_transforms.h>
-#define CORE_FILE RFILE
-#else
 #define CORE_FILE std::FILE
-#endif
 
 namespace FileUtil {
 
@@ -418,15 +410,9 @@ public:
         return m_good;
     }
     [[nodiscard]] virtual int GetFd() const {
-#ifdef HAVE_LIBRETRO_VFS
-        if (m_file == nullptr)
-            return -1;
-        return fileno(filestream_get_vfs_handle(m_file)->fp);
-#else
         if (m_file == nullptr)
             return -1;
         return fileno(m_file);
-#endif // HAVE_LIBRETRO_VFS
     }
     [[nodiscard]] explicit operator bool() const {
         return IsGood();
@@ -446,11 +432,7 @@ public:
     virtual void Clear() {
         m_good = true;
 
-#ifdef HAVE_LIBRETRO_VFS
-        filestream_rewind(m_file);
-#else
         std::clearerr(m_file);
-#endif
     }
 
     virtual bool IsCrypto() {
@@ -481,13 +463,9 @@ private:
     CORE_FILE* m_file = nullptr;
     int m_fd = -1;
     bool m_good = true;
-#ifdef HAVE_LIBRETRO_VFS
     // pread() doesn't touch the file position, so it's safe alongside
-    // concurrent fread/fwrite. Libretro VFS has no pread equivalent, so
-    // ReadAtImpl emulates it with seek+read+seek, which would corrupt the
-    // file position for concurrent Read/Write operations.
+    // concurrent fread/fwrite.
     mutable std::mutex m_file_pos_mutex;
-#endif
 
     std::string filename;
     std::string openmode;

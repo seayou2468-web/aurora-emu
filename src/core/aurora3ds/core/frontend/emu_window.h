@@ -27,7 +27,6 @@ enum class WindowSystemType : u8 {
     MacOS,
     X11,
     Wayland,
-    LibRetro,
 };
 
 struct Frame;

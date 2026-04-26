@@ -91,10 +91,10 @@ public:
 
     void ApplyPerProgramSettings(u64 program_ID);
 
-    /// Recreates the renderer (for GL context reset in libretro)
+    /// Recreates the renderer.
     void RecreateRenderer();
 
-    /// Releases the renderer (for GL context destroy in libretro)
+    /// Releases the renderer.
     void ReleaseRenderer();
 
 private:

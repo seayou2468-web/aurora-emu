@@ -31,9 +31,6 @@
 #include "core/hle/service/cfg/cfg_u.h"
 #include "core/hw/unique_data.h"
 #include "core/loader/loader.h"
-#ifdef HAVE_LIBRETRO
-#include "citra_libretro/core_settings.h"
-#endif
 
 SERVICE_CONSTRUCT_IMPL(Service::CFG::Module)
 SERIALIZE_EXPORT_IMPL(Service::CFG::Module)
@@ -1060,11 +1057,6 @@ void Module::UpdatePreferredRegionCode() {
     if (preferred_region_chosen || !system.IsPoweredOn()) {
         return;
     }
-#ifdef HAVE_LIBRETRO
-    // Apply language set in core options first
-    SetSystemLanguage(LibRetro::settings.language_value);
-#endif
-
     preferred_region_chosen = true;
 
     const auto preferred_regions = system.GetAppLoader().GetPreferredRegions();
