@@ -41,6 +41,28 @@ add_library(audio_core STATIC
 
 create_target_directory_groups(audio_core)
 
+if (NOT TARGET teakra)
+    add_library(teakra STATIC
+        ../../melonds/teakra/src/ahbm.cpp
+        ../../melonds/teakra/src/apbp.cpp
+        ../../melonds/teakra/src/btdmp.cpp
+        ../../melonds/teakra/src/disassembler.cpp
+        ../../melonds/teakra/src/dma.cpp
+        ../../melonds/teakra/src/memory_interface.cpp
+        ../../melonds/teakra/src/mmio.cpp
+        ../../melonds/teakra/src/parser.cpp
+        ../../melonds/teakra/src/processor.cpp
+        ../../melonds/teakra/src/teakra.cpp
+        ../../melonds/teakra/src/timer.cpp
+    )
+    target_include_directories(teakra PUBLIC
+        ../../melonds/teakra/include
+    )
+    target_include_directories(teakra PRIVATE
+        ../../melonds/teakra/src
+    )
+endif()
+
 target_link_libraries(audio_core PUBLIC citra_common citra_core)
 target_link_libraries(audio_core PRIVATE faad2 SoundTouch teakra)
 
