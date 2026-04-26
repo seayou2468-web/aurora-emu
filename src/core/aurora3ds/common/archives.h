@@ -5,18 +5,19 @@
 #pragma once
 
 
-#include "common/boost_compat/all.h"
-using iarchive = boost::archive::binary_iarchive;
-using oarchive = boost::archive::binary_oarchive;
+#include "common/serialization/compat.h"
+#include "common/serialization/std_archive.h"
+
+using iarchive = Common::Serialization::Std::BinaryInputArchive;
+using oarchive = Common::Serialization::Std::BinaryOutputArchive;
 
 #define SERIALIZE_IMPL(A)                                                                          \
     template void A::serialize<iarchive>(iarchive & ar, const unsigned int file_version);          \
     template void A::serialize<oarchive>(oarchive & ar, const unsigned int file_version);
 
 #define SERIALIZE_EXPORT_IMPL(A)                                                                   \
-    BOOST_CLASS_EXPORT_IMPLEMENT(A)                                                                \
-    BOOST_SERIALIZATION_REGISTER_ARCHIVE(iarchive)                                                 \
-    BOOST_SERIALIZATION_REGISTER_ARCHIVE(oarchive)
+    static_assert(Common::SerializationCompat::Export::ExportKey<A>::value != nullptr,            \
+                  "SERIALIZATION_CLASS_EXPORT_KEY must be declared for exported type");
 
 #define DEBUG_SERIALIZATION_POINT                                                                  \
     do {                                                                                           \

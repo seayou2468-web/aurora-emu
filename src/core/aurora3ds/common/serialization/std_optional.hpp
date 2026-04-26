@@ -4,17 +4,19 @@
 
 #pragma once
 
-#include "common/boost_compat/all.h"
 #include <optional>
 
-namespace boost::serialization {
+#include "common/serialization/compat.h"
+
+namespace Common::SerializationCompat {
 
 template <class Archive, typename T>
 void save(Archive& ar, const std::optional<T>& opt, const unsigned int) {
-    const bool has_value = opt.has_value();
+    bool has_value = opt.has_value();
     ar & has_value;
     if (has_value) {
-        ar & *opt;
+        T value = *opt;
+        ar & value;
     }
 }
 
@@ -22,18 +24,23 @@ template <class Archive, typename T>
 void load(Archive& ar, std::optional<T>& opt, const unsigned int) {
     bool has_value{};
     ar & has_value;
-    if (has_value) {
-        T value{};
-        ar & value;
-        opt = std::move(value);
-    } else {
+    if (!has_value) {
         opt.reset();
+        return;
     }
+
+    T value{};
+    ar & value;
+    opt = std::move(value);
 }
 
 template <class Archive, typename T>
 void serialize(Archive& ar, std::optional<T>& opt, const unsigned int file_version) {
-    split_free(ar, opt, file_version);
+    if constexpr (Archive::is_saving::value) {
+        save(ar, opt, file_version);
+    } else {
+        load(ar, opt, file_version);
+    }
 }
 
-} // namespace boost::serialization
+} // namespace Common::SerializationCompat

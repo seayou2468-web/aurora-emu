@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "common/boost_compat/icl.h"
 #include "common/boost_compat/all.h"
 #include "video_core/rasterizer_cache/surface_params.h"
 #include "video_core/rasterizer_cache/utils.h"

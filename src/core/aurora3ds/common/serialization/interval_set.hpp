@@ -4,15 +4,15 @@
 
 #pragma once
 
-#include "common/boost_compat/all.h"
 #include <vector>
-#include "common/interval_set.h"
 
-namespace boost::serialization {
+#include "common/interval_set.h"
+#include "common/serialization/compat.h"
+
+namespace Common::SerializationCompat {
 
 template <class Archive, typename T>
-void serialize(Archive& ar, typename Common::IntervalSet<T>::Interval& interval,
-               const unsigned int) {
+void serialize(Archive& ar, typename Common::IntervalSet<T>::Interval& interval, const unsigned int) {
     ar & interval.lo;
     ar & interval.hi;
 }
@@ -35,7 +35,11 @@ void load(Archive& ar, Common::IntervalSet<T>& set, const unsigned int) {
 
 template <class Archive, typename T>
 void serialize(Archive& ar, Common::IntervalSet<T>& set, const unsigned int file_version) {
-    split_free(ar, set, file_version);
+    if constexpr (Archive::is_saving::value) {
+        save(ar, set, file_version);
+    } else {
+        load(ar, set, file_version);
+    }
 }
 
-} // namespace boost::serialization
+} // namespace Common::SerializationCompat

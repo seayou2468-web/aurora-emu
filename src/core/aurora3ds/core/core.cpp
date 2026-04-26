@@ -16,9 +16,6 @@
 #include "core/hle/service/cam/cam.h"
 #include "core/hle/service/hid/hid.h"
 #include "core/hle/service/ir/ir_user.h"
-#if CITRA_ARCH(x86_64) || CITRA_ARCH(arm64)
-#include "core/arm/dynarmic/arm_dynarmic.h"
-#endif
 #include "core/arm/dyncom/arm_dyncom.h"
 #include "core/cheats/cheats.h"
 #include "core/core.h"
@@ -209,7 +206,7 @@ System::ResultStatus System::RunLoop(bool tight_loop) {
         }
     }
 
-    // jit sometimes overshoot by a few ticks which might lead to a minimal desync in the cores.
+    // Interpreter can overshoot by a few ticks which might lead to a minimal desync in the cores.
     // This small difference shouldn't make it necessary to sync the cores and would only cost
     // performance. Thus we don't sync delays below min_delay
     static constexpr s64 min_delay = 100;
@@ -522,24 +519,9 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window,
 
     exclusive_monitor = MakeExclusiveMonitor(*memory, num_cores);
     cpu_cores.reserve(num_cores);
-    if (Settings::values.use_cpu_jit) {
-#if CITRA_ARCH(x86_64) || CITRA_ARCH(arm64)
-        for (u32 i = 0; i < num_cores; ++i) {
-            cpu_cores.push_back(std::make_shared<ARM_Dynarmic>(
-                *this, *memory, i, timing->GetTimer(i), *exclusive_monitor));
-        }
-#else
-        for (u32 i = 0; i < num_cores; ++i) {
-            cpu_cores.push_back(
-                std::make_shared<ARM_DynCom>(*this, *memory, USER32MODE, i, timing->GetTimer(i)));
-        }
-        LOG_WARNING(Core, "CPU JIT requested, but Dynarmic not available");
-#endif
-    } else {
-        for (u32 i = 0; i < num_cores; ++i) {
-            cpu_cores.push_back(
-                std::make_shared<ARM_DynCom>(*this, *memory, USER32MODE, i, timing->GetTimer(i)));
-        }
+    for (u32 i = 0; i < num_cores; ++i) {
+        cpu_cores.push_back(
+            std::make_shared<ARM_DynCom>(*this, *memory, USER32MODE, i, timing->GetTimer(i)));
     }
     running_core = cpu_cores[0].get();
 

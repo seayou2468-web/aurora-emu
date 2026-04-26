@@ -449,7 +449,7 @@ void GPU::RecreateRenderer(Frontend::EmuWindow& emu_window, Frontend::EmuWindow*
     impl->pica.dirty_regs.SetAllDirty();
 
     // Also mark shader setups as dirty so uniforms get re-uploaded and
-    // stale pointers to the old rasterizer's JIT cache are cleared.
+    // stale pointers to the old rasterizer cache are cleared.
     impl->pica.vs_setup.uniforms_dirty = true;
     impl->pica.vs_setup.cached_shader = nullptr;
     impl->pica.gs_setup.uniforms_dirty = true;

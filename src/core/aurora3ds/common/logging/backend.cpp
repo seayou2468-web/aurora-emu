@@ -2,8 +2,8 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include "common/boost_compat/all.h"
 #include <chrono>
+#include <cstdlib>
 #include <optional>
 #include <regex>
 
@@ -17,8 +17,7 @@
 #endif
 
 #ifdef CITRA_LINUX_GCC_BACKTRACE
-#define BOOST_STACKTRACE_USE_BACKTRACE
-#undef BOOST_STACKTRACE_USE_BACKTRACE
+#include <execinfo.h>
 #include <signal.h>
 #endif
 
@@ -410,18 +409,21 @@ private:
                 backend.EnableForStacktrace();
                 backend.Write(signal_entry);
             });
-            const auto backtrace =
-                boost::stacktrace::stacktrace::from_dump(backtrace_storage.data(), 4096);
-            for (const auto& frame : backtrace.as_vector()) {
-                auto line = boost::stacktrace::detail::to_string(&frame, 1);
+            char** symbols = backtrace_symbols(backtrace_storage.data(),
+                                               static_cast<int>(backtrace_size.load()));
+            if (symbols == nullptr) {
+                abort();
+            }
+            for (std::size_t i = 0; i < backtrace_size.load(); ++i) {
+                std::string line = symbols[i] ? symbols[i] : "";
                 if (line.empty()) {
-                    abort();
+                    continue;
                 }
-                line.pop_back(); // Remove newline
                 const auto frame_entry = CreateEntry(Class::Log, Level::Critical, "?", 0, "?",
                                                      std::move(line), time_origin);
                 ForEachBackend([&frame_entry](Backend& backend) { backend.Write(frame_entry); });
             }
+            free(symbols);
             using namespace std::literals;
             const auto rip_entry =
                 CreateEntry(Class::Log, Level::Critical, "?", 0, "?", "RIP"s, time_origin);
@@ -518,10 +520,8 @@ private:
             }
             SleepForever();
         }
-        // Don't restart like boost suggests. We want to append to the log file and not lose dynamic
-        // symbols. This may segfault if it unwinds outside C/C++ code but we'll just have to fall
-        // back to core dumps.
-        boost::stacktrace::safe_dump_to(backtrace_storage.data(), 4096);
+        backtrace_size.store(static_cast<std::size_t>(
+            backtrace(backtrace_storage.data(), static_cast<int>(backtrace_storage.size()))));
         std::atomic_thread_fence(std::memory_order_seq_cst);
         for (const int anything = 0; write(backtrace_thread_waker_fd, &anything, 1) != 1;)
             ;
@@ -551,7 +551,8 @@ private:
 
 #ifdef CITRA_LINUX_GCC_BACKTRACE
     std::atomic_int received_signal{0};
-    std::array<u8, 4096> backtrace_storage{};
+    std::array<void*, 256> backtrace_storage{};
+    std::atomic<std::size_t> backtrace_size{};
     int backtrace_thread_waker_fd;
     int backtrace_done_printing_fd;
 #endif
