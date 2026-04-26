@@ -13,7 +13,7 @@
 #include "audio_core/input_details.h"
 #include "audio_core/sink_details.h"
 #include "common/common_types.h"
-#include "common/setting_keys.h"
+#include "setting_keys.h"
 #include "common/string_util.h"
 #include "core/hle/service/cam/cam_params.h"
 
