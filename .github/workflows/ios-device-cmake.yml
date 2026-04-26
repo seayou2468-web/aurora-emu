@@ -36,7 +36,13 @@ jobs:
           cat > .ci/cmake-ios-device/CMakeLists.txt <<'EOF'
           cmake_minimum_required(VERSION 3.20)
           project(AuroraIOSDeviceBuild LANGUAGES C CXX OBJC OBJCXX)
+          set(CMAKE_CXX_STANDARD 20)
+          set(CMAKE_CXX_STANDARD_REQUIRED ON)
+          set(CMAKE_CXX_EXTENSIONS OFF)
           add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../src/core/nanoboyadvance/nba nba)
+          if (TARGET nba)
+            target_compile_features(nba PUBLIC cxx_std_20)
+          endif()
           EOF
           cmake -S .ci/cmake-ios-device \
             -B build/ios-device \
