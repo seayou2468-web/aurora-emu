@@ -29,13 +29,6 @@ namespace AudioCore {
 
 DspHle::DspHle(Core::System& system) : DspHle(system, system.Memory(), system.CoreTiming()) {}
 
-template <class Archive>
-void DspHle::serialize(Archive& ar, const unsigned int) {
-    ar& SerializationCompat::base_object<DspInterface>(*this);
-    ar&* impl.get();
-}
-SERIALIZE_IMPL(DspHle)
-
 // The value below is the "perfect" mathematical ratio of ARM11 cycles per audio frame, samples per
 // frame * teaklite cycles per sample * 2 ARM11 cycles/teaklite cycle
 // (160 * 4096 * 2) = (1310720)
@@ -102,18 +95,25 @@ private:
 
     std::function<void(Service::DSP::InterruptType type, DspPipe pipe)> interrupt_handler{};
 
+public:
     template <class Archive>
     void serialize(Archive& ar, const unsigned int) {
-        ar& SerializationCompat::make_binary_object(backup_dsp_memory.raw_memory.data(),
-                                                     backup_dsp_memory.raw_memory.size());
+        auto backup_blob = SerializationCompat::make_binary_object(
+            backup_dsp_memory.raw_memory.data(), backup_dsp_memory.raw_memory.size());
+        ar & backup_blob;
         ar & dsp_state;
         ar & pipe_data;
         ar & sources;
         ar & mixers;
         // interrupt_handler is reregistered when loading state from DSP_DSP
     }
-    friend class SerializationCompat::access;
 };
+
+template <class Archive>
+void DspHle::serialize(Archive& ar, const unsigned int) {
+    (void)ar;
+}
+SERIALIZE_IMPL(DspHle)
 
 DspHle::Impl::Impl(DspHle& parent_, Memory::MemorySystem& memory, Core::Timing& timing)
     : parent(parent_), core_timing(timing) {
