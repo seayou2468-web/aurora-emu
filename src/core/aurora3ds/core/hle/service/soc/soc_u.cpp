@@ -21,12 +21,12 @@
 #include "core/hle/service/soc/soc_u.h"
 #include "network/socket_manager.h"
 
-#ifdef _WIN32
+#if 0
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
 // MinGW does not define several errno constants
-#ifndef _MSC_VER
+#if 1
 #define EBADMSG 104
 #define ENODATA 120
 #define ENOMSG 122
@@ -48,7 +48,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef _WIN32
+#if 0
 #define WSAEAGAIN WSAEWOULDBLOCK
 #define WSAEMULTIHOP -1 // Invalid dummy value
 #define ERRNO(x) WSA##x
@@ -166,7 +166,7 @@ static const std::unordered_map<int, int> error_map = {{
     {ERRNO(EADDRNOTAVAIL), 4},
     {ERRNO(EAFNOSUPPORT), 5},
     {EAGAIN, 6},
-#ifdef _WIN32
+#if 0
     {WSAEWOULDBLOCK, 6},
 #else
 #if EAGAIN != EWOULDBLOCK
@@ -231,12 +231,12 @@ static const std::unordered_map<int, int> error_map = {{
 #endif
     {ENOSYS, 55},
     {ERRNO(ENOTCONN), 56},
-#ifdef _WIN32
+#if 0
     {WSAESHUTDOWN, 56},
 #endif
     {ENOTDIR, 57},
     {ERRNO(ENOTEMPTY), 58},
-#ifdef _WIN32
+#if 0
     {ERRNO(ENOTSOCK), 8},
 #else
     {ERRNO(ENOTSOCK), 59},
@@ -409,7 +409,7 @@ bool SOC_U::GetSocketBlocking(const SocketHolder& socket_holder) {
 }
 u32 SOC_U::SetSocketBlocking(SocketHolder& socket_holder, bool blocking) {
     u32 posix_ret = 0;
-#ifdef _WIN32
+#if 0
     unsigned long nonblocking = (blocking) ? 0 : 1;
     int ret = ioctlsocket(socket_holder.socket_fd, FIONBIO, &nonblocking);
     if (ret == SOCKET_ERROR_VALUE) {
@@ -549,7 +549,7 @@ struct CTRPollFD {
         /// Translates the resulting events of a Poll operation from 3ds specific to platform
         /// specific
         static u32 TranslateToPlatform(Events input_event, bool isOutput, u8& has_libctru_bug) {
-#if _WIN32
+#if 0
             constexpr bool isWin = true;
 #else
             constexpr bool isWin = false;
@@ -853,7 +853,7 @@ void SOC_U::Socket(Kernel::HLERequestContext& ctx) {
             .shutdown_rd = false,
             .ownerProcess = pid,
         };
-#if _WIN32
+#if 0
         // Disable UDP connection reset
         int new_behavior = 0;
         unsigned long bytes_returned = 0;
@@ -1055,12 +1055,12 @@ void SOC_U::SockAtMark(Kernel::HLERequestContext& ctx) {
 
     bool is_at_mark = false;
     int func_res = 0;
-#ifdef _WIN32
+#if 0
     u_long atMark = 0;
     func_res = ::ioctlsocket(holder.socket_fd, SIOCATMARK, &atMark);
     is_at_mark = atMark != 0;
 #else
-#ifdef ANDROID
+#if 0
     func_res = 0;
     LOG_WARNING(Service_SOC, "(STUBBED) called");
 #else
@@ -1143,7 +1143,7 @@ void SOC_U::SendToOther(Kernel::HLERequestContext& ctx) {
 
     bool dont_wait = (flags & MSGCUSTOM_HANDLE_DONTWAIT) != 0;
     flags &= ~MSGCUSTOM_HANDLE_DONTWAIT;
-#ifdef _WIN32
+#if 0
     bool was_blocking = GetSocketBlocking(holder);
     if (dont_wait && was_blocking) {
         SetSocketBlocking(holder, false);
@@ -1174,7 +1174,7 @@ void SOC_U::SendToOther(Kernel::HLERequestContext& ctx) {
 
     const auto send_error = (ret == SOCKET_ERROR_VALUE) ? GET_ERRNO : 0;
 
-#ifdef _WIN32
+#if 0
     if (dont_wait && was_blocking) {
         SetSocketBlocking(holder, true);
     }
@@ -1197,7 +1197,7 @@ s32 SOC_U::SendToImpl(SocketHolder& holder, u32 len, u32 flags, u32 addr_len,
 
     bool dont_wait = (flags & MSGCUSTOM_HANDLE_DONTWAIT) != 0;
     flags &= ~MSGCUSTOM_HANDLE_DONTWAIT;
-#ifdef _WIN32
+#if 0
     bool was_blocking = GetSocketBlocking(holder);
     if (dont_wait && was_blocking) {
         SetSocketBlocking(holder, false);
@@ -1225,7 +1225,7 @@ s32 SOC_U::SendToImpl(SocketHolder& holder, u32 len, u32 flags, u32 addr_len,
 
     auto send_error = (ret == SOCKET_ERROR_VALUE) ? GET_ERRNO : 0;
 
-#ifdef _WIN32
+#if 0
     if (dont_wait && was_blocking) {
         SetSocketBlocking(holder, true);
     }
@@ -1297,7 +1297,7 @@ void SOC_U::RecvFromOther(Kernel::HLERequestContext& ctx) {
 
     bool dont_wait = (flags & MSGCUSTOM_HANDLE_DONTWAIT) != 0;
     flags &= ~MSGCUSTOM_HANDLE_DONTWAIT;
-#ifdef _WIN32
+#if 0
     bool was_blocking = GetSocketBlocking(holder);
     if (dont_wait && was_blocking) {
         SetSocketBlocking(holder, false);
@@ -1316,7 +1316,7 @@ void SOC_U::RecvFromOther(Kernel::HLERequestContext& ctx) {
         u32 addr_len{};
         SocketHolder* fd_info;
         u32 socket_handle;
-#ifdef _WIN32
+#if 0
         bool dont_wait;
         bool was_blocking;
 #endif
@@ -1340,7 +1340,7 @@ void SOC_U::RecvFromOther(Kernel::HLERequestContext& ctx) {
     async_data->addr_buff.resize(addr_len);
     async_data->fd_info = &holder;
     async_data->socket_handle = socket_handle;
-#ifdef _WIN32
+#if 0
     async_data->dont_wait = dont_wait;
     async_data->was_blocking = was_blocking;
 #endif
@@ -1381,7 +1381,7 @@ void SOC_U::RecvFromOther(Kernel::HLERequestContext& ctx) {
             } else {
                 async_data->buffer->Write(async_data->output_buff.data(), 0, async_data->ret);
             }
-#ifdef _WIN32
+#if 0
             if (async_data->dont_wait && async_data->was_blocking) {
                 SetSocketBlocking(*async_data->fd_info, true);
             }
@@ -1416,7 +1416,7 @@ void SOC_U::RecvFrom(Kernel::HLERequestContext& ctx) {
 
     bool dont_wait = (flags & MSGCUSTOM_HANDLE_DONTWAIT) != 0;
     flags &= ~MSGCUSTOM_HANDLE_DONTWAIT;
-#ifdef _WIN32
+#if 0
     bool was_blocking = GetSocketBlocking(holder);
     if (dont_wait && was_blocking) {
         SetSocketBlocking(holder, false);
@@ -1435,7 +1435,7 @@ void SOC_U::RecvFrom(Kernel::HLERequestContext& ctx) {
         u32 addr_len{};
         SocketHolder* fd_info;
         u32 socket_handle;
-#ifdef _WIN32
+#if 0
         bool dont_wait;
         bool was_blocking;
 #endif
@@ -1457,7 +1457,7 @@ void SOC_U::RecvFrom(Kernel::HLERequestContext& ctx) {
     async_data->addr_buff.resize(addr_len);
     async_data->fd_info = &holder;
     async_data->socket_handle = socket_handle;
-#ifdef _WIN32
+#if 0
     async_data->dont_wait = dont_wait;
     async_data->was_blocking = was_blocking;
 #endif
@@ -1494,7 +1494,7 @@ void SOC_U::RecvFrom(Kernel::HLERequestContext& ctx) {
         },
         [this, async_data](Kernel::HLERequestContext& ctx) {
 
-#ifdef _WIN32
+#if 0
             if (async_data->dont_wait && async_data->was_blocking) {
                 SetSocketBlocking(*async_data->fd_info, true);
             }
@@ -1901,7 +1901,7 @@ void SOC_U::GetSockOpt(Kernel::HLERequestContext& ctx) {
     std::vector<u8> optval(optlen);
 
     if (optname < 0) {
-#ifdef _WIN32
+#if 0
         err = WSAEINVAL;
 #else
         err = EINVAL;
@@ -1952,7 +1952,7 @@ void SOC_U::SetSockOpt(Kernel::HLERequestContext& ctx) {
     s32 err = 0;
 
     if (optname < 0) {
-#ifdef _WIN32
+#if 0
         err = WSAEINVAL;
 #else
         err = EINVAL;
@@ -2068,7 +2068,7 @@ void SOC_U::GetAddrInfoImpl(Kernel::HLERequestContext& ctx) {
     u32 count = 0;
 
     if (ret != 0) {
-#ifdef _WIN32
+#if 0
         ret = TranslateGaiError(ret);
 #else
         ret = ret == EAI_SYSTEM ? TranslateError(GET_ERRNO) : TranslateGaiError(ret);
@@ -2119,7 +2119,7 @@ void SOC_U::GetNameInfoImpl(Kernel::HLERequestContext& ctx) {
     s32 ret = getnameinfo(reinterpret_cast<sockaddr*>(&sa), sa_len, host_data, hostlen, serv_data,
                           servlen, flags);
     if (ret != 0) {
-#ifdef _WIN32
+#if 0
         ret = TranslateGaiError(ret);
 #else
         ret = ret == EAI_SYSTEM ? TranslateError(GET_ERRNO) : TranslateGaiError(ret);
@@ -2288,7 +2288,7 @@ std::optional<SOC_U::InterfaceInfo> SOC_U::GetDefaultInterfaceInfo() {
     }
     closesocket(sock_fd);
 
-#ifdef _WIN32
+#if 0
     sock_fd = WSASocket(AF_INET, SOCK_DGRAM, 0, 0, 0, 0);
     if (sock_fd == static_cast<SocketHolder::SOCKET>(SOCKET_ERROR)) {
         return std::nullopt;

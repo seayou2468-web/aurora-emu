@@ -182,7 +182,7 @@ void ARMul_State::ResetMPCoreCP15Registers() {
     CP15[CP15_MAIN_TLB_LOCKDOWN_ATTRIBUTE] = 0x00000000;
     CP15[CP15_TLB_DEBUG_CONTROL] = 0x00000000;
 }
-#ifdef ANDROID
+#if 0
 static void CheckMemoryBreakpoint(u32 address, GDBStub::BreakpointType type) {}
 #else
 static void CheckMemoryBreakpoint(u32 address, GDBStub::BreakpointType type) {

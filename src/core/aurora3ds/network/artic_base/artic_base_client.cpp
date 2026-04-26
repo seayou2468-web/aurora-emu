@@ -12,7 +12,7 @@
 #include "memory"
 #include "sstream"
 
-#ifdef _WIN32
+#if 0
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #else
@@ -29,7 +29,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef _WIN32
+#if 0
 #define WSAEAGAIN WSAEWOULDBLOCK
 #define WSAEMULTIHOP -1 // Invalid dummy value
 #define ERRNO(x) WSA##x
@@ -145,7 +145,7 @@ void Client::UDPStream::Handle() {
 
     // Limit receive buffer so that packets don't get qeued and are dropped instead.
     // macOS requires larger UDP buffer sizes for reliable operation
-#ifdef __APPLE__
+#if 1
     const int min_macos_buffer_size = 8192; // 8KB minimum for macOS
     int effective_buffer_size = std::max(static_cast<int>(buffer_size), min_macos_buffer_size);
 #else
@@ -541,7 +541,7 @@ bool Client::ConnectWithTimeout(SocketHolder sockFD, void* server_addr, size_t s
         tv.tv_sec = timeout_seconds;
         tv.tv_usec = 0;
         int select_res = ::select(static_cast<int>(sockFD + 1), NULL, &fdset, NULL, &tv);
-#ifdef _WIN32
+#if 0
         if (select_res == 0) {
             return false;
         }
@@ -570,7 +570,7 @@ bool Client::ConnectWithTimeout(SocketHolder sockFD, void* server_addr, size_t s
 
 bool Client::SetNonBlock(SocketHolder sockFD, bool nonBlocking) {
     bool blocking = !nonBlocking;
-#ifdef _WIN32
+#if 0
     unsigned long nonblocking = (blocking) ? 0 : 1;
     int ret = ioctlsocket(sockFD, FIONBIO, &nonblocking);
     if (ret == -1) {

@@ -2,7 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#ifdef ANDROID
+#if 0
 #include <array>
 #include <random>
 #include "common/android_storage.h"

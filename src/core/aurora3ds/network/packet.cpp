@@ -2,7 +2,7 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#ifdef _WIN32
+#if 0
 #include <winsock2.h>
 #else
 #include <arpa/inet.h>

@@ -5,7 +5,7 @@
 
 #include "common/common_types.h"
 
-#if _MSC_VER
+#if 0
 #include <intrin.h>
 #else
 #include <cstring>
@@ -13,7 +13,7 @@
 
 namespace Common {
 
-#if _MSC_VER
+#if 0
 
 [[nodiscard]] inline bool AtomicCompareAndSwap(volatile u8* pointer, u8 value, u8 expected) {
     const u8 result =

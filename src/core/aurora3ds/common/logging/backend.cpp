@@ -9,7 +9,7 @@
 
 #include <fmt/format.h>
 
-#ifdef _WIN32
+#if 0
 #include <share.h>   // For _SH_DENYWR
 #include <windows.h> // For OutputDebugStringW
 #else
@@ -162,7 +162,7 @@ public:
     ~DebuggerBackend() override = default;
 
     void Write(const Entry& entry) override {
-#ifdef _WIN32
+#if 0
         ::OutputDebugStringW(UTF8ToUTF16W(FormatLogMessage(entry).append(1, '\n')).c_str());
 #endif
     }
@@ -174,7 +174,7 @@ public:
     void EnableForStacktrace() override {}
 };
 
-#ifdef ANDROID
+#if 0
 /**
  * Backend that writes to the Android logcat
  */
@@ -419,7 +419,7 @@ private:
         lambda(static_cast<Backend&>(debugger_backend));
         lambda(static_cast<Backend&>(color_console_backend));
         lambda(static_cast<Backend&>(file_backend));
-#ifdef ANDROID
+#if 0
         lambda(static_cast<Backend&>(lc_backend));
 #endif // ANDROID
     }
@@ -463,7 +463,7 @@ private:
     DebuggerBackend debugger_backend{};
     ColorConsoleBackend color_console_backend{};
     FileBackend file_backend;
-#ifdef ANDROID
+#if 0
     LogcatBackend lc_backend{};
 #endif
 

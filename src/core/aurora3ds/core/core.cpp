@@ -739,7 +739,7 @@ void System::ApplySettings() {
     GDBStub::ToggleServer(Settings::values.use_gdbstub.GetValue());
 
     if (gpu) {
-#ifndef ANDROID
+#if 1
         gpu->Renderer().UpdateCurrentFramebufferLayout();
 #endif
         auto& settings = gpu->Renderer().Settings();

@@ -654,7 +654,7 @@ std::pair<unsigned, unsigned> GetMinimumSizeFromLayout(Settings::LayoutOption la
 
     switch (layout) {
     case Settings::LayoutOption::SingleScreen:
-#ifndef ANDROID
+#if 1
     case Settings::LayoutOption::SeparateWindows:
 #endif
         min_width = Settings::values.swap_screen ? Core::kScreenBottomWidth : Core::kScreenTopWidth;

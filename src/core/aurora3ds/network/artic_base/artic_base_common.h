@@ -53,7 +53,7 @@ struct RequestPacket {
 };
 static_assert(sizeof(RequestPacket) == 0x28);
 
-#ifdef _MSC_VER
+#if 0
 #pragma warning(push)
 #pragma warning(disable : 4200)
 #endif
@@ -63,7 +63,7 @@ struct Buffer {
 
     char data[];
 };
-#ifdef _MSC_VER
+#if 0
 #pragma warning(pop)
 #endif
 

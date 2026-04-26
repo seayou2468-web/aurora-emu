@@ -57,7 +57,7 @@ EmuWindow::~EmuWindow() = default;
 
 Settings::StereoRenderOption EmuWindow::get3DMode() const {
     Settings::StereoRenderOption render_3d_mode = Settings::values.render_3d.GetValue();
-#ifndef ANDROID
+#if 1
     // on desktop, if separate windows and this is the bottom screen, then no stereo
     if (Settings::values.layout_option.GetValue() == Settings::LayoutOption::SeparateWindows &&
         ((!is_secondary && Settings::values.swap_screen.GetValue()) ||
@@ -78,7 +78,7 @@ Settings::StereoRenderOption EmuWindow::get3DMode() const {
 
 bool EmuWindow::IsWithinTouchscreen(const Layout::FramebufferLayout& layout, unsigned framebuffer_x,
                                     unsigned framebuffer_y) {
-#ifndef ANDROID
+#if 1
     // If separate windows and the touch is in the primary (top) screen, ignore it.
     if (Settings::values.layout_option.GetValue() == Settings::LayoutOption::SeparateWindows &&
         ((!is_secondary && !Settings::values.swap_screen.GetValue()) ||
@@ -275,7 +275,7 @@ void EmuWindow::UpdateCurrentFramebufferLayout(u32 width, u32 height, bool is_po
                                          Settings::values.upright_screen.GetValue(), 1.0f,
                                          Settings::SmallScreenPosition::MiddleRight);
             break;
-#ifndef ANDROID
+#if 1
         case Settings::LayoutOption::SeparateWindows:
             layout = Layout::SeparateWindowsLayout(width, height, is_secondary,
                                                    Settings::values.upright_screen.GetValue());
@@ -289,7 +289,7 @@ void EmuWindow::UpdateCurrentFramebufferLayout(u32 width, u32 height, bool is_po
             break;
         }
     }
-#ifdef ANDROID
+#if 0
     if (is_secondary) {
         layout = Layout::AndroidSecondaryLayout(width, height);
     }

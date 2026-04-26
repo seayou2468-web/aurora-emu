@@ -1,5 +1,5 @@
 #pragma once
-#ifdef _MSC_VER
+#if 0
 // nonstandard extension used: zero-sized array in struct/union
 #pragma warning(disable : 4200)
 #endif

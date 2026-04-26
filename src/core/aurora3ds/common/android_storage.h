@@ -4,7 +4,7 @@
 
 #pragma once
 
-#ifdef ANDROID
+#if 0
 #include <string>
 #include <vector>
 #include <fcntl.h>

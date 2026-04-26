@@ -17,7 +17,7 @@
 #include "artic_base_common.h"
 #include "network/socket_manager.h"
 
-#ifdef _WIN32
+#if 0
 using SocketHolder = unsigned long long;
 #else
 using SocketHolder = int;

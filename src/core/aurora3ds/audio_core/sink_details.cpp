@@ -11,9 +11,6 @@
 #ifdef HAVE_CUBEB
 #include "audio_core/cubeb_sink.h"
 #endif
-#ifdef HAVE_OPENAL
-#include "audio_core/openal_sink.h"
-#endif
 #include "common/logging/log.h"
 
 namespace AudioCore {
@@ -26,13 +23,6 @@ constexpr std::array sink_details = {
                     return std::make_unique<CubebSink>(device_id);
                 },
                 &ListCubebSinkDevices},
-#endif
-#ifdef HAVE_OPENAL
-    SinkDetails{SinkType::OpenAL, "OpenAL",
-                [](std::string_view device_id) -> std::unique_ptr<Sink> {
-                    return std::make_unique<OpenALSink>(std::string(device_id));
-                },
-                &ListOpenALSinkDevices},
 #endif
     SinkDetails{SinkType::Null, "None",
                 [](std::string_view device_id) -> std::unique_ptr<Sink> {

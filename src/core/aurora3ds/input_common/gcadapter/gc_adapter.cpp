@@ -6,12 +6,12 @@
 #include <thread>
 #include <vector>
 
-#ifdef _MSC_VER
+#if 0
 #pragma warning(push)
 #pragma warning(disable : 4200) // nonstandard extension used : zero-sized array in struct/union
 #endif
 #include <libusb.h>
-#ifdef _MSC_VER
+#if 0
 #pragma warning(pop)
 #endif
 

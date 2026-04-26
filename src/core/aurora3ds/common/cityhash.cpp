@@ -33,7 +33,7 @@
 #include "common/swap.h"
 
 // #include "config.h"
-#ifdef __GNUC__
+#if 0
 #define HAVE_BUILTIN_EXPECT 1
 #endif
 #ifdef COMMON_BIG_ENDIAN
