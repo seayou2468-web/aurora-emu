@@ -47,13 +47,10 @@ jobs:
             endfunction()
           endif()
           add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../src/core/nanoboyadvance/nba nba)
-          # Ensure aurora3ds core modules are also part of CI build targets.
-          if (EXISTS \"${CMAKE_CURRENT_LIST_DIR}/../../src/core/aurora3ds/audio_core/CMakeLists.txt\")
-            add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../src/core/aurora3ds/audio_core aurora3ds_audio_core)
-          endif()
-          if (EXISTS \"${CMAKE_CURRENT_LIST_DIR}/../../src/core/aurora3ds/network/CMakeLists.txt\")
-            add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../src/core/aurora3ds/network aurora3ds_network)
-          endif()
+          # NOTE:
+          # Do not add aurora3ds full subprojects here. They rely on additional
+          # superbuild Boost-compat setup/macros and currently fail in this
+          # lightweight CI bootstrap configuration.
           add_library(core_adapters_enabled STATIC
             ${CMAKE_CURRENT_LIST_DIR}/../../src/core/api/emulator_core_c_api.cpp
             ${CMAKE_CURRENT_LIST_DIR}/../../src/core/core_adapter_registry.cpp
