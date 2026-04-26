@@ -1,0 +1,65 @@
+name: iOS Device App Build
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  build-ios-app:
+    runs-on: macos-15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.1.1.app/Contents/Developer
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 26.1.1 if available
+        shell: bash
+        run: |
+          if [ -d "/Applications/Xcode_26.1.1.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_26.1.1.app/Contents/Developer
+          fi
+          xcodebuild -version
+
+      - name: Install XcodeGen
+        shell: bash
+        run: |
+          brew update
+          brew install xcodegen
+          xcodegen --version
+
+      - name: Generate Xcode project
+        shell: bash
+        run: |
+          xcodegen generate --spec ios/project.yml --project ios/AuroraIOS.xcodeproj
+
+      - name: Build iOS app archive (.app inside .xcarchive)
+        shell: bash
+        run: |
+          mkdir -p build
+          xcodebuild \
+            -project ios/AuroraIOS.xcodeproj \
+            -scheme AuroraIOS \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            AURORA_DISABLE_JIT=1 \
+            GCC_PREPROCESSOR_DEFINITIONS='$(inherited) AURORA_IOS_MINIMAL_CORE=1 AURORA_DISABLE_JIT=1' \
+            archive \
+            -archivePath build/AuroraIOS.xcarchive
+
+      - name: Package .app artifact
+        shell: bash
+        run: |
+          APP_PATH="build/AuroraIOS.xcarchive/Products/Applications/AuroraIOS.app"
+          test -d "$APP_PATH"
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" build/AuroraIOS.app.zip
+
+      - name: Upload app artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AuroraIOS-app-iphoneos
+          path: build/AuroraIOS.app.zip

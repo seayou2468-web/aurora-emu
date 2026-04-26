@@ -1,0 +1,86 @@
+name: AuroraIOS
+options:
+  deploymentTarget:
+    iOS: "26.0"
+settings:
+  base:
+    PRODUCT_BUNDLE_IDENTIFIER: com.frappev.rn
+    PRODUCT_NAME: AuroraIOS
+    INFOPLIST_FILE: ../Config/Info.plist
+    IPHONEOS_DEPLOYMENT_TARGET: "26.0"
+    CLANG_CXX_LANGUAGE_STANDARD: "gnu++20"
+    CLANG_ENABLE_OBJC_ARC: YES
+    SUPPORTS_MACCATALYST: NO
+    SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
+    ENABLE_BITCODE: NO
+    CODE_SIGNING_ALLOWED: NO
+    CODE_SIGNING_REQUIRED: NO
+    HEADER_SEARCH_PATHS:
+      - "$(SRCROOT)"
+      - "$(SRCROOT)/.."
+      - "$(SRCROOT)/../src/core"
+      - "$(SRCROOT)/../src/core/api"
+      - "$(SRCROOT)/../src/core/aurora3ds/Core/include"
+    GCC_PREPROCESSOR_DEFINITIONS:
+      - "$(inherited)"
+      - AURORA_IOS_MINIMAL_CORE=1
+      - AURORA_DISABLE_JIT=1
+targets:
+  AuroraIOS:
+    type: application
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: AuroraIOS
+      - path: ../src/core/api/emulator_core_c_api.cpp
+      - path: ../src/core/core_adapter_registry.cpp
+      - path: ../src/core/aurora3ds/core_adapter.cpp
+    dependencies:
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libfaad.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libSDL3.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libGenericCodeGen.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libglslang.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libenet.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libopus.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/boost_iostreams.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libMachineIndependent.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libmbedtls.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libavformat.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libmcl.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/MoltenVK.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libfmt.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libSoundTouch.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libcryptopp.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libavfilter.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libteakra.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libSPIRV.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/boost_serialization.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libdynarmic.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libswresample.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libmbedx509.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/boost_context.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libswscale.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libavutil.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libsirit.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/boost_program_options.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libavcodec.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libopenal.xcframework
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: "1,2"
+        OTHER_LDFLAGS:
+          - "$(inherited)"
+          - "-ObjC"
+          - "-lc++"
+          - "-lz"
+          - "-liconv"
+          - "-framework Foundation"
+          - "-framework UIKit"
+          - "-framework QuartzCore"
+          - "-framework AVFoundation"
+          - "-framework GameController"
+          - "-framework Metal"
+          - "-framework MetalKit"
+          - "-framework UniformTypeIdentifiers"
+          - "-framework CoreGraphics"
+          - "-framework Security"
