@@ -33,42 +33,38 @@ jobs:
       - name: Configure (CMake / iOS device)
         run: |
           mkdir -p .ci/cmake-ios-device
-          python3 - <<'PY'
-          from pathlib import Path
-          import textwrap
-          Path(".ci/cmake-ios-device/CMakeLists.txt").write_text(textwrap.dedent("""\
-            cmake_minimum_required(VERSION 3.20)
-            project(AuroraIOSDeviceBuild LANGUAGES C CXX OBJC OBJCXX)
-            set(CMAKE_CXX_STANDARD 20)
-            set(CMAKE_CXX_STANDARD_REQUIRED ON)
-            set(CMAKE_CXX_EXTENSIONS OFF)
-            add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../src/core/nanoboyadvance/nba nba)
-            # Ensure aurora3ds core modules are also part of CI build targets.
-            if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/../../src/core/aurora3ds/audio_core/CMakeLists.txt")
-              add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../src/core/aurora3ds/audio_core aurora3ds_audio_core)
-            endif()
-            if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/../../src/core/aurora3ds/network/CMakeLists.txt")
-              add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../src/core/aurora3ds/network aurora3ds_network)
-            endif()
-            add_library(core_adapters_enabled STATIC
-              ${CMAKE_CURRENT_LIST_DIR}/../../src/core/api/emulator_core_c_api.cpp
-              ${CMAKE_CURRENT_LIST_DIR}/../../src/core/core_adapter_registry.cpp
-              ${CMAKE_CURRENT_LIST_DIR}/../../src/core/nanoboyadvance/core_adapter.cpp
-              ${CMAKE_CURRENT_LIST_DIR}/../../src/core/quick_nes/core_adapter.cpp
-              ${CMAKE_CURRENT_LIST_DIR}/../../src/core/sameboy/core_adapter.cpp
-              ${CMAKE_CURRENT_LIST_DIR}/../../src/core/melonds/core_adapter.cpp
-              ${CMAKE_CURRENT_LIST_DIR}/../../src/core/aurora3ds/core_adapter.cpp
-            )
-            target_include_directories(core_adapters_enabled PRIVATE
-              ${CMAKE_CURRENT_LIST_DIR}/../../src/core
-              ${CMAKE_CURRENT_LIST_DIR}/../../src/core/api
-            )
-            if (TARGET nba)
-              target_compile_features(nba PUBLIC cxx_std_20)
-            endif()
-            target_compile_features(core_adapters_enabled PUBLIC cxx_std_20)
-            """))
-          PY
+          python3 -c 'from pathlib import Path; import textwrap; Path(".ci/cmake-ios-device/CMakeLists.txt").write_text(textwrap.dedent("""\
+          cmake_minimum_required(VERSION 3.20)
+          project(AuroraIOSDeviceBuild LANGUAGES C CXX OBJC OBJCXX)
+          set(CMAKE_CXX_STANDARD 20)
+          set(CMAKE_CXX_STANDARD_REQUIRED ON)
+          set(CMAKE_CXX_EXTENSIONS OFF)
+          add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../src/core/nanoboyadvance/nba nba)
+          # Ensure aurora3ds core modules are also part of CI build targets.
+          if (EXISTS \"${CMAKE_CURRENT_LIST_DIR}/../../src/core/aurora3ds/audio_core/CMakeLists.txt\")
+            add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../src/core/aurora3ds/audio_core aurora3ds_audio_core)
+          endif()
+          if (EXISTS \"${CMAKE_CURRENT_LIST_DIR}/../../src/core/aurora3ds/network/CMakeLists.txt\")
+            add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../../src/core/aurora3ds/network aurora3ds_network)
+          endif()
+          add_library(core_adapters_enabled STATIC
+            ${CMAKE_CURRENT_LIST_DIR}/../../src/core/api/emulator_core_c_api.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/../../src/core/core_adapter_registry.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/../../src/core/nanoboyadvance/core_adapter.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/../../src/core/quick_nes/core_adapter.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/../../src/core/sameboy/core_adapter.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/../../src/core/melonds/core_adapter.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/../../src/core/aurora3ds/core_adapter.cpp
+          )
+          target_include_directories(core_adapters_enabled PRIVATE
+            ${CMAKE_CURRENT_LIST_DIR}/../../src/core
+            ${CMAKE_CURRENT_LIST_DIR}/../../src/core/api
+          )
+          if (TARGET nba)
+            target_compile_features(nba PUBLIC cxx_std_20)
+          endif()
+          target_compile_features(core_adapters_enabled PUBLIC cxx_std_20)
+          """))'
           cmake -S .ci/cmake-ios-device \
             -B build/ios-device \
             -G Ninja \
@@ -97,27 +93,23 @@ jobs:
             else
               echo "placeholder" > "${APP_PATH}/AuroraIOS"
             fi
-            python3 - <<'PY'
-            from pathlib import Path
-            import textwrap
-            Path("artifacts/AuroraIOS.app/Info.plist").write_text(textwrap.dedent("""\
-              <?xml version=\"1.0\" encoding=\"UTF-8\"?>
-              <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-              <plist version=\"1.0\">
-              <dict>
-                <key>CFBundleDevelopmentRegion</key><string>en</string>
-                <key>CFBundleExecutable</key><string>AuroraIOS</string>
-                <key>CFBundleIdentifier</key><string>dev.aurora.unsigned</string>
-                <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
-                <key>CFBundleName</key><string>AuroraIOS</string>
-                <key>CFBundlePackageType</key><string>APPL</string>
-                <key>CFBundleShortVersionString</key><string>0.0.0</string>
-                <key>CFBundleVersion</key><string>1</string>
-                <key>LSRequiresIPhoneOS</key><true/>
-              </dict>
-              </plist>
-              """))
-            PY
+            python3 -c 'from pathlib import Path; import textwrap; Path("artifacts/AuroraIOS.app/Info.plist").write_text(textwrap.dedent("""\
+            <?xml version=\"1.0\" encoding=\"UTF-8\"?>
+            <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+            <plist version=\"1.0\">
+            <dict>
+              <key>CFBundleDevelopmentRegion</key><string>en</string>
+              <key>CFBundleExecutable</key><string>AuroraIOS</string>
+              <key>CFBundleIdentifier</key><string>dev.aurora.unsigned</string>
+              <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+              <key>CFBundleName</key><string>AuroraIOS</string>
+              <key>CFBundlePackageType</key><string>APPL</string>
+              <key>CFBundleShortVersionString</key><string>0.0.0</string>
+              <key>CFBundleVersion</key><string>1</string>
+              <key>LSRequiresIPhoneOS</key><true/>
+            </dict>
+            </plist>
+            """))'
           else
             mkdir -p artifacts
             cp -R "${APP_PATH}" artifacts/
