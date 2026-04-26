@@ -62,7 +62,7 @@ private:
     void serialize(Archive& ar, const unsigned int) {
         ar & storage;
     }
-    friend class SerializationCompat::access;
+    friend class Common::SerializationCompat::access;
 };
 static_assert(std::is_trivially_copyable<u32_dsp>::value, "u32_dsp isn't trivially copyable");
 

@@ -2,8 +2,47 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include <neaacdec.h>
 #include "audio_core/hle/aac_decoder.h"
+
+#if __has_include(<neaacdec.h>)
+#include <neaacdec.h>
+#else
+struct NeAACDecFrameInfo {
+    unsigned long bytesconsumed = 0;
+    unsigned long samples = 0;
+    unsigned char channels = 0;
+    unsigned long samplerate = 0;
+    unsigned char error = 1;
+};
+
+struct NeAACDecConfiguration {
+    unsigned char defObjectType = 0;
+    unsigned char outputFormat = 0;
+};
+using NeAACDecConfigurationPtr = NeAACDecConfiguration*;
+
+constexpr unsigned char FAAD_FMT_16BIT = 1;
+constexpr unsigned char LC = 2;
+
+inline void* NeAACDecOpen() {
+    return nullptr;
+}
+inline void NeAACDecClose(void*) {}
+inline long NeAACDecInit(void*, const unsigned char*, unsigned long, unsigned long*,
+                         unsigned char*) {
+    return -1;
+}
+inline void* NeAACDecDecode(void*, NeAACDecFrameInfo*, const unsigned char*, unsigned long) {
+    return nullptr;
+}
+inline NeAACDecConfigurationPtr NeAACDecGetCurrentConfiguration(void*) {
+    static NeAACDecConfiguration config{};
+    return &config;
+}
+inline unsigned char NeAACDecSetConfiguration(void*, NeAACDecConfigurationPtr) {
+    return 0;
+}
+#endif
 
 namespace AudioCore::HLE {
 
