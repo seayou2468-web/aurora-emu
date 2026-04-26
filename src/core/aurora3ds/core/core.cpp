@@ -449,8 +449,7 @@ System::ResultStatus System::Load(const std::string& filepath) {
                   static_cast<u32>(load_result));
     }
 
-    cheat_engine.LoadCheatFile(title_id);
-    cheat_engine.Connect(process->process_id);
+    // Cheats are intentionally disabled for aurora3ds integration.
 
     perf_stats = std::make_unique<PerfStats>(title_id);
 
@@ -867,10 +866,10 @@ void System::serialize(Archive& ar, const unsigned int file_version) {
 
     // This needs to be set from somewhere - might as well be here!
     if (Archive::is_loading::value) {
-        u32 cheats_pid;
+        u32 cheats_pid{};
         ar & cheats_pid;
         timing->UnlockEventQueue();
-        cheat_engine.Connect(cheats_pid);
+        (void)cheats_pid;
 
         if (Settings::values.custom_textures) {
             custom_tex_manager->FindCustomTextures();
@@ -897,7 +896,7 @@ void System::serialize(Archive& ar, const unsigned int file_version) {
             }
         }
     } else {
-        u32 cheats_pid = cheat_engine.GetConnectedPID();
+        u32 cheats_pid = 0;
         ar & cheats_pid;
     }
 

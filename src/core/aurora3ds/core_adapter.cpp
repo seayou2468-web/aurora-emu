@@ -90,12 +90,10 @@ bool LoadStateFromBuffer(void* runtime, const void* state_buffer, size_t state_s
 }
 
 bool ApplyCheatCode(void* runtime, const char* cheat_code, std::string& last_error) {
-  if (runtime == nullptr) {
-    last_error = "core runtime is not initialized";
-    return false;
-  }
-  return core::melonds::ApplyCheatCode(
-      *static_cast<core::melonds::Runtime*>(runtime), cheat_code, last_error);
+  (void)runtime;
+  (void)cheat_code;
+  last_error = "cheat feature is disabled for aurora3ds";
+  return false;
 }
 
 }  // namespace
