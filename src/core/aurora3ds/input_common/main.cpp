@@ -9,6 +9,7 @@
 #ifdef ENABLE_GCADAPTER
 #include "input_common/gcadapter/gc_adapter.h"
 #include "input_common/gcadapter/gc_poller.h"
+#include "input_common/gcadapter/gc_adapter_bridge.h"
 #endif
 #include "input_common/keyboard.h"
 #include "input_common/main.h"
@@ -146,3 +147,26 @@ std::vector<std::unique_ptr<DevicePoller>> GetPollers(DeviceType type) {
 
 } // namespace Polling
 } // namespace InputCommon
+
+
+#ifdef ENABLE_GCADAPTER
+extern "C" void AURGCAdapterSetConnection(size_t port, bool connected, bool wireless) {
+    if (InputCommon::gcadapter) {
+        InputCommon::gcadapter->SetPadConnection(port, connected, wireless);
+    }
+}
+
+extern "C" void AURGCAdapterSetButton(size_t port, AURGCButton button, bool pressed) {
+    if (InputCommon::gcadapter) {
+        InputCommon::gcadapter->UpdatePadButtonState(
+            port, static_cast<GCAdapter::PadButton>(button), pressed);
+    }
+}
+
+extern "C" void AURGCAdapterSetAxis(size_t port, AURGCAxis axis, int16_t value) {
+    if (InputCommon::gcadapter) {
+        InputCommon::gcadapter->UpdatePadAxisState(
+            port, static_cast<GCAdapter::PadAxes>(axis), value);
+    }
+}
+#endif
