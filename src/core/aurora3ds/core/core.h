@@ -15,7 +15,6 @@
 #include "common/serialization/std_optional.hpp"
 #include "common/vector_math.h"
 #include "core/arm/arm_interface.h"
-#include "core/cheats/cheats.h"
 #include "core/hle/service/apt/applet_manager.h"
 #include "core/hle/service/plgldr/plgldr.h"
 #include "core/movie.h"
@@ -269,11 +268,6 @@ public:
     /// Gets a const reference to the memory system
     [[nodiscard]] const Memory::MemorySystem& Memory() const;
 
-    /// Gets a reference to the cheat engine
-    [[nodiscard]] Cheats::CheatEngine& CheatEngine();
-
-    /// Gets a const reference to the cheat engine
-    [[nodiscard]] const Cheats::CheatEngine& CheatEngine() const;
 
     /// Gets a reference to the custom texture cache system
     [[nodiscard]] VideoCore::CustomTexManager& CustomTexManager();
@@ -442,8 +436,6 @@ private:
     /// Movie recorder
     Core::Movie movie;
 
-    /// Cheats manager
-    Cheats::CheatEngine cheat_engine;
 
     /// Video dumper backend
     std::shared_ptr<VideoDumper::Backend> video_dumper;

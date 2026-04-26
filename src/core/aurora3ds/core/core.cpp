@@ -69,7 +69,7 @@ Core::Timing& Global() {
     return System::GetInstance().CoreTiming();
 }
 
-System::System() : movie{*this}, cheat_engine{*this} {}
+System::System() : movie{*this} {}
 
 System::~System() = default;
 
@@ -448,8 +448,6 @@ System::ResultStatus System::Load(const std::string& filepath) {
                   static_cast<u32>(load_result));
     }
 
-    // Cheats are intentionally disabled for aurora3ds integration.
-
     perf_stats = std::make_unique<PerfStats>(title_id);
 
     if (Settings::values.dump_textures) {
@@ -620,14 +618,6 @@ Memory::MemorySystem& System::Memory() {
 
 const Memory::MemorySystem& System::Memory() const {
     return *memory;
-}
-
-Cheats::CheatEngine& System::CheatEngine() {
-    return cheat_engine;
-}
-
-const Cheats::CheatEngine& System::CheatEngine() const {
-    return cheat_engine;
 }
 
 void System::RegisterVideoDumper(std::shared_ptr<VideoDumper::Backend> dumper) {
@@ -865,10 +855,7 @@ void System::serialize(Archive& ar, const unsigned int file_version) {
 
     // This needs to be set from somewhere - might as well be here!
     if (Archive::is_loading::value) {
-        u32 cheats_pid{};
-        ar & cheats_pid;
         timing->UnlockEventQueue();
-        (void)cheats_pid;
 
         if (Settings::values.custom_textures) {
             custom_tex_manager->FindCustomTextures();
@@ -894,9 +881,6 @@ void System::serialize(Archive& ar, const unsigned int file_version) {
                 }
             }
         }
-    } else {
-        u32 cheats_pid = 0;
-        ar & cheats_pid;
     }
 
     save_state_status = SaveStateStatus::NONE;

@@ -362,7 +362,7 @@ private:
     std::shared_ptr<Kernel::Event> event_debug_pad;
 
     // The HID module of a 3DS does not store the PadState.
-    // Storing this here was necessary for emulation specific tasks like cheats or scripting.
+    // Storing this here was necessary for emulation-specific integration tasks.
     PadState state;
 
     // xperia64: These are used to averate the previous N raw circle pad inputs with the current raw
