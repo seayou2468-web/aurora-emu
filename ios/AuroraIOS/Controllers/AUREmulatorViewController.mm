@@ -41,7 +41,7 @@
 
     // Setup Metal View(s)
     self.imageView = [[AURMetalView alloc] initWithFrame:CGRectZero];
-    if (_coreType == EMULATOR_CORE_TYPE_NDS) {
+    if (_coreType == EMULATOR_CORE_TYPE_NDS || _coreType == EMULATOR_CORE_TYPE_3DS) {
         [self.imageView setFramePixelFormat:AURFramePixelFormatBGRA8888];
         self.ndsContainerView = [[UIView alloc] initWithFrame:CGRectZero];
         self.ndsContainerView.backgroundColor = [UIColor blackColor];
@@ -86,9 +86,10 @@
     self.imageView.translatesAutoresizingMaskIntoConstraints = NO;
     self.controllerView.translatesAutoresizingMaskIntoConstraints = NO;
 
-    if (_coreType == EMULATOR_CORE_TYPE_NDS) {
+    if (_coreType == EMULATOR_CORE_TYPE_NDS || _coreType == EMULATOR_CORE_TYPE_3DS) {
         self.ndsContainerView.translatesAutoresizingMaskIntoConstraints = NO;
         self.ndsBottomImageView.translatesAutoresizingMaskIntoConstraints = NO;
+        CGFloat topAspect = (_coreType == EMULATOR_CORE_TYPE_3DS) ? (240.0 / 400.0) : (192.0 / 256.0);
         [NSLayoutConstraint activateConstraints:@[
             [self.ndsContainerView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor constant:8.0],
             [self.ndsContainerView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:12.0],
@@ -97,7 +98,7 @@
             [self.imageView.topAnchor constraintEqualToAnchor:self.ndsContainerView.topAnchor],
             [self.imageView.leadingAnchor constraintEqualToAnchor:self.ndsContainerView.leadingAnchor],
             [self.imageView.trailingAnchor constraintEqualToAnchor:self.ndsContainerView.trailingAnchor],
-            [self.imageView.heightAnchor constraintEqualToAnchor:self.imageView.widthAnchor multiplier:(192.0 / 256.0)],
+            [self.imageView.heightAnchor constraintEqualToAnchor:self.imageView.widthAnchor multiplier:topAspect],
 
             [self.ndsBottomImageView.topAnchor constraintEqualToAnchor:self.imageView.bottomAnchor constant:12.0],
             [self.ndsBottomImageView.leadingAnchor constraintEqualToAnchor:self.ndsContainerView.leadingAnchor],
@@ -157,7 +158,7 @@
     const char *path = self.romURL.path.fileSystemRepresentation;
     if (path && EmulatorCore_LoadROMFromPath(_core, path)) {
         EmulatorCore_GetVideoSpec(_core, &_videoSpec);
-        if (_coreType != EMULATOR_CORE_TYPE_NDS) {
+        if (_coreType != EMULATOR_CORE_TYPE_NDS && _coreType != EMULATOR_CORE_TYPE_3DS) {
             AURFramePixelFormat framePixelFormat = (_videoSpec.pixel_format == EMULATOR_PIXEL_FORMAT_ARGB8888)
                 ? AURFramePixelFormatBGRA8888
                 : AURFramePixelFormatRGBA8888;
@@ -214,6 +215,31 @@
             [self.ndsBottomImageView displayFrameRGBA:frameRGBA width:kScreenWidth height:kScreenHeight * 2 sourceRect:CGRectMake(0, kScreenHeight, kScreenWidth, kScreenHeight)];
             return;
         }
+        return;
+    }
+
+    if (_coreType == EMULATOR_CORE_TYPE_3DS) {
+        constexpr size_t kTopWidth = 400U;
+        constexpr size_t kTopHeight = 240U;
+        constexpr size_t kBottomWidth = 320U;
+        constexpr size_t kBottomHeight = 240U;
+
+        const size_t sourceWidth = (size_t)_videoSpec.width;
+        const size_t sourceHeight = (sourceWidth > 0) ? (pixelCount / sourceWidth) : 0;
+        if (sourceWidth < kTopWidth || sourceHeight < (kTopHeight + kBottomHeight)) {
+            return;
+        }
+
+        [self.imageView displayFrameRGBA:frameRGBA
+                                   width:sourceWidth
+                                  height:sourceHeight
+                              sourceRect:CGRectMake(0, 0, kTopWidth, kTopHeight)];
+
+        const CGFloat bottomX = (CGFloat)((kTopWidth - kBottomWidth) / 2U);
+        [self.ndsBottomImageView displayFrameRGBA:frameRGBA
+                                            width:sourceWidth
+                                           height:sourceHeight
+                                       sourceRect:CGRectMake(bottomX, kTopHeight, kBottomWidth, kBottomHeight)];
         return;
     }
 

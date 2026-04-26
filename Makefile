@@ -68,6 +68,7 @@ CORE_OBJS := \
 	$(BUILD_DIR)/src/core/quick_nes/core_adapter.o \
 	$(BUILD_DIR)/src/core/sameboy/core_adapter.o \
 	$(BUILD_DIR)/src/core/melonds/core_adapter.o \
+	$(BUILD_DIR)/src/core/aurora3ds/core_adapter.o \
 	$(BUILD_DIR)/src/core/nanoboyadvance/runtime.o \
 	$(BUILD_DIR)/src/core/nanoboyadvance/gba_core_c_api.o \
 	$(BUILD_DIR)/src/core/quick_nes/runtime.o \
