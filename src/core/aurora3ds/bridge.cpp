@@ -4,7 +4,14 @@
 #include <mutex>
 #include <vector>
 
-#if defined(__APPLE__) && defined(AURORA3DS_ENABLE_EMBEDDED_CORE)
+#if defined(__APPLE__) && defined(AURORA3DS_ENABLE_EMBEDDED_CORE) && \
+    __has_include(<boost/optional.hpp>) && __has_include(<boost/serialization/version.hpp>)
+#define AURORA3DS_EMBEDDED_CORE_ENABLED 1
+#else
+#define AURORA3DS_EMBEDDED_CORE_ENABLED 0
+#endif
+
+#if AURORA3DS_EMBEDDED_CORE_ENABLED
 #include "./Core/include/core/core.h"
 #include "./Core/include/core/dumping/backend.h"
 #include "./Core/include/core/frontend/emu_window.h"
@@ -13,7 +20,7 @@
 
 extern "C" {
 
-#if defined(__APPLE__)
+#if AURORA3DS_EMBEDDED_CORE_ENABLED
 
 namespace {
 
@@ -253,7 +260,11 @@ bool Aurora3DS_LoadStateFromBuffer(void*, const void*, size_t) { return false; }
 bool Aurora3DS_ApplyCheatCode(void*, const char*) { return false; }
 const char* Aurora3DS_GetLastError(void*) {
 #if defined(__APPLE__)
+#if defined(AURORA3DS_ENABLE_EMBEDDED_CORE)
+  return "aurora3ds embedded core prerequisites are missing (Boost headers not found)";
+#else
   return "aurora3ds embedded core is disabled (define AURORA3DS_ENABLE_EMBEDDED_CORE to enable)";
+#endif
 #else
   return "aurora3ds is only available on Apple targets";
 #endif
