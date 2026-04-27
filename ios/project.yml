@@ -22,8 +22,12 @@ settings:
       - "$(SRCROOT)/../src/core/api"
       - "$(SRCROOT)/../src/core/aurora3ds/Core/include"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies"
+      - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/jwt"
+      - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/nihstro"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/microprofile"
+      - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/oaknut"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/httplib"
+      - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/xbyak"
     FRAMEWORK_SEARCH_PATHS:
       - "$(inherited)"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/XCFrameworks"
