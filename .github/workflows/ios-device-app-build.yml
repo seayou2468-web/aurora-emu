@@ -99,10 +99,18 @@ jobs:
 
           VULKAN_INCLUDE_DIR="$(brew --prefix)/include/vulkan"
           test -d "$VULKAN_INCLUDE_DIR"
+          if [ ! -f "$VULKAN_INCLUDE_DIR/vk_video/vulkan_video_codec_h264std.h" ]; then
+            rm -rf /tmp/Vulkan-Headers
+            git clone --depth 1 https://github.com/KhronosGroup/Vulkan-Headers.git /tmp/Vulkan-Headers
+            mkdir -p "$VULKAN_INCLUDE_DIR/vk_video"
+            rsync -a /tmp/Vulkan-Headers/include/vk_video/ "$VULKAN_INCLUDE_DIR/vk_video/"
+          fi
+          test -f "$VULKAN_INCLUDE_DIR/vk_video/vulkan_video_codec_h264std.h"
           mkdir -p src/core/aurora3ds/Core/include/vulkan
           rsync -a "$VULKAN_INCLUDE_DIR/" src/core/aurora3ds/Core/include/vulkan/
           test -f src/core/aurora3ds/Core/include/vulkan/vulkan.hpp
           test -f src/core/aurora3ds/Core/include/vulkan/vulkan.h
+          test -f src/core/aurora3ds/Core/include/vulkan/vk_video/vulkan_video_codec_h264std.h
 
       - name: Verify Aurora3DS is permanently in build graph
         shell: bash
