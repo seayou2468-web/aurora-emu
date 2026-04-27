@@ -305,7 +305,7 @@ public:
     }
 
     virtual std::string GetFilePath() {
-        return file ? file->Filename() : "";
+        return "";
     }
 
 protected:
