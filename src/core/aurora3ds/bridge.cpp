@@ -4,7 +4,7 @@
 #include <mutex>
 #include <vector>
 
-#if defined(__APPLE__)
+#if defined(__APPLE__) && defined(AURORA3DS_ENABLE_EMBEDDED_CORE)
 #include "./Core/include/core/core.h"
 #include "./Core/include/core/dumping/backend.h"
 #include "./Core/include/core/frontend/emu_window.h"
@@ -251,7 +251,13 @@ const uint32_t* Aurora3DS_GetFrameBufferRGBA(void*, size_t* pixel_count) {
 bool Aurora3DS_SaveStateToBuffer(void*, void*, size_t, size_t*) { return false; }
 bool Aurora3DS_LoadStateFromBuffer(void*, const void*, size_t) { return false; }
 bool Aurora3DS_ApplyCheatCode(void*, const char*) { return false; }
-const char* Aurora3DS_GetLastError(void*) { return "aurora3ds is only available on Apple targets"; }
+const char* Aurora3DS_GetLastError(void*) {
+#if defined(__APPLE__)
+  return "aurora3ds embedded core is disabled (define AURORA3DS_ENABLE_EMBEDDED_CORE to enable)";
+#else
+  return "aurora3ds is only available on Apple targets";
+#endif
+}
 
 #endif
 
