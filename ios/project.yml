@@ -67,6 +67,10 @@ targets:
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/boost_serialization.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libswresample.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libsirit.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libSPIRV.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libglslang.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libMachineIndependent.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libGenericCodeGen.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libmbedx509.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/boost_context.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libswscale.xcframework
