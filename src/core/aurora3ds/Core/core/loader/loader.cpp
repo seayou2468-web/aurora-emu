@@ -1,4 +1,4 @@
-// Copyright 2014 Citra Emulator Project
+// Copyright Citra Emulator Project / Azahar Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
@@ -18,7 +18,7 @@ FileType IdentifyFile(FileUtil::IOFile& file) {
     FileType type;
 
 #define CHECK_TYPE(loader)                                                                         \
-    type = AppLoader_##loader::IdentifyType(file);                                                 \
+    type = AppLoader_##loader::IdentifyType(&file);                                                \
     if (FileType::Error != type)                                                                   \
         return type;
 
@@ -47,33 +47,33 @@ FileType GuessFromExtension(const std::string& extension_) {
     if (extension == ".elf" || extension == ".axf")
         return FileType::ELF;
 
-    if (extension == ".cci" || extension == ".3ds")
+    if (extension == ".cci" || extension == ".zcci" || extension == ".3ds")
         return FileType::CCI;
 
-    if (extension == ".cxi" || extension == ".app")
+    if (extension == ".cxi" || extension == ".app" || extension == ".zcxi")
         return FileType::CXI;
 
-    if (extension == ".3dsx")
+    if (extension == ".3dsx" || extension == ".z3dsx")
         return FileType::THREEDSX;
 
-    if (extension == ".cia")
+    if (extension == ".cia" || extension == ".zcia")
         return FileType::CIA;
 
     return FileType::Unknown;
 }
 
-const char* GetFileTypeString(FileType type) {
+const char* GetFileTypeString(FileType type, bool is_compressed) {
     switch (type) {
     case FileType::CCI:
-        return "NCSD";
+        return is_compressed ? "NCSD (Z)" : "NCSD";
     case FileType::CXI:
-        return "NCCH";
+        return is_compressed ? "NCCH (Z)" : "NCCH";
     case FileType::CIA:
-        return "CIA";
+        return is_compressed ? "CIA (Z)" : "CIA";
     case FileType::ELF:
         return "ELF";
     case FileType::THREEDSX:
-        return "3DSX";
+        return is_compressed ? "3DSX (Z)" : "3DSX";
     case FileType::Error:
     case FileType::Unknown:
         break;
@@ -127,7 +127,11 @@ std::unique_ptr<AppLoader> GetLoader(const std::string& filename) {
     FileType filename_type = GuessFromExtension(filename_extension);
 
     if (type != filename_type) {
-        LOG_WARNING(Loader, "File {} has a different type than its extension.", filename);
+        // Do not show the error for CIA files, as their type cannot be determined.
+        if (!(type == FileType::Unknown && filename_type == FileType::CIA)) {
+            LOG_WARNING(Loader, "File {} has a different type than its extension.", filename);
+        }
+
         if (FileType::Unknown == type)
             type = filename_type;
     }
