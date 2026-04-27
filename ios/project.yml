@@ -62,6 +62,7 @@ targets:
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libfmt.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libSoundTouch.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libcryptopp.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libdynarmic.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libavfilter.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libteakra.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/boost_serialization.xcframework
@@ -78,6 +79,7 @@ targets:
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/boost_program_options.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libavcodec.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libopenal.xcframework
+      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/MoltenVK.xcframework
     settings:
       base:
         TARGETED_DEVICE_FAMILY: "1,2"
