@@ -9,7 +9,6 @@
 #include "./Core/include/core/dumping/backend.h"
 #include "./Core/include/core/frontend/emu_window.h"
 #include "./Core/include/core/frontend/framebuffer_layout.h"
-#include "./Core/include/video_core/renderer_software/renderer_software.h"
 #endif
 
 extern "C" {
@@ -136,10 +135,6 @@ bool Aurora3DSBridge_LoadBIOSFromPath(void*, const char*) {
 bool Aurora3DSBridge_LoadROMFromPath(void* runtime_ptr, const char* rom_path) {
   auto* runtime = AsRuntime(runtime_ptr);
   if (!runtime || !runtime->system || !runtime->window || !rom_path) return false;
-  if (!SwRenderer::IsSoftwareRendererImplemented()) {
-    runtime->last_error = "software renderer is incomplete in this build";
-    return false;
-  }
   const auto status = runtime->system->Load(*runtime->window, std::string(rom_path));
   runtime->last_error = ToStatusString(status);
   return status == Core::System::ResultStatus::Success;

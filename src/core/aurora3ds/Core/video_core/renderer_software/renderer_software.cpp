@@ -1,55 +1,82 @@
-// Copyright 2026 Aurora Emulator Project
+// Copyright Citra Emulator Project / Azahar Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include "video_core/renderer_software/renderer_software.h"
-#include "common/microprofile.h"
+#include "common/color.h"
+#include "core/core.h"
+#include "video_core/gpu.h"
 #include "video_core/pica/pica_core.h"
+#include "video_core/renderer_software/renderer_software.h"
 
 namespace SwRenderer {
 
-MICROPROFILE_DEFINE(GPU_SoftwareFrame, "GPU", "Software Frame", MP_RGB(80, 200, 80));
-
-bool IsSoftwareRendererImplemented() {
-    return false;
-}
-
-void SoftwareRasterizer::AddTriangle(const Pica::OutputVertex&, const Pica::OutputVertex&,
-                                     const Pica::OutputVertex&) {}
-
-void SoftwareRasterizer::DrawTriangles() {}
-
-void SoftwareRasterizer::NotifyPicaRegisterChanged(u32) {}
-
-void SoftwareRasterizer::FlushAll() {}
-
-void SoftwareRasterizer::FlushRegion(PAddr, u32) {}
-
-void SoftwareRasterizer::InvalidateRegion(PAddr, u32) {}
-
-void SoftwareRasterizer::FlushAndInvalidateRegion(PAddr, u32) {}
-
-void SoftwareRasterizer::ClearAll(bool) {}
-
-RendererSoftware::RendererSoftware(Core::System& system, Pica::PicaCore& pica,
-                                   Frontend::EmuWindow& window,
-                                   Frontend::EmuWindow* secondary_window)
-    : RendererBase(system, window, secondary_window),
-      rasterizer{std::make_unique<SoftwareRasterizer>()} {
-    (void)pica;
-}
+RendererSoftware::RendererSoftware(Core::System& system, Pica::PicaCore& pica_,
+                                   Frontend::EmuWindow& window)
+    : VideoCore::RendererBase{system, window, nullptr}, memory{system.Memory()}, pica{pica_},
+      rasterizer{memory, pica} {}
 
 RendererSoftware::~RendererSoftware() = default;
 
-VideoCore::RasterizerInterface* RendererSoftware::Rasterizer() {
-    return rasterizer.get();
-}
-
 void RendererSoftware::SwapBuffers() {
-    MICROPROFILE_SCOPE(GPU_SoftwareFrame);
-    current_frame++;
+    system.perf_stats->StartSwap();
+    PrepareRenderTarget();
+    system.perf_stats->EndSwap();
+    EndFrame();
 }
 
-void RendererSoftware::TryPresent(int, bool) {}
+void RendererSoftware::PrepareRenderTarget() {
+    const auto& regs_lcd = pica.regs_lcd;
+    for (u32 i = 0; i < 3; i++) {
+        const u32 fb_id = i == 2 ? 1 : 0;
+
+        const auto color_fill = fb_id == 0 ? regs_lcd.color_fill_top : regs_lcd.color_fill_bottom;
+        LoadFBToScreenInfo(i, color_fill);
+    }
+}
+
+void RendererSoftware::LoadFBToScreenInfo(int i, const Pica::ColorFill& color_fill) {
+    const u32 fb_id = i == 2 ? 1 : 0;
+    const auto& framebuffer = pica.regs.framebuffer_config[fb_id];
+    auto& info = screen_infos[i];
+
+    const PAddr framebuffer_addr =
+        framebuffer.active_fb == 0 ? framebuffer.address_left1 : framebuffer.address_left2;
+    const s32 bpp = Pica::BytesPerPixel(framebuffer.color_format);
+    const u8* framebuffer_data = memory.GetPhysicalPointer(framebuffer_addr);
+
+    const s32 pixel_stride = framebuffer.stride / bpp;
+    info.height = framebuffer.height;
+    info.width = pixel_stride;
+    info.pixels.resize(info.width * info.height * 4);
+
+    for (u32 y = 0; y < info.height; y++) {
+        for (u32 x = 0; x < info.width; x++) {
+            const u8* pixel = framebuffer_data + (y * pixel_stride + pixel_stride - x) * bpp;
+            Common::Vec4 color = [&] {
+                if (color_fill.is_enabled) {
+                    return Common::Vec4<u8>(color_fill.color_r, color_fill.color_g,
+                                            color_fill.color_b, 255);
+                }
+
+                switch (framebuffer.color_format) {
+                case Pica::PixelFormat::RGBA8:
+                    return Common::Color::DecodeRGBA8(pixel);
+                case Pica::PixelFormat::RGB8:
+                    return Common::Color::DecodeRGB8(pixel);
+                case Pica::PixelFormat::RGB565:
+                    return Common::Color::DecodeRGB565(pixel);
+                case Pica::PixelFormat::RGB5A1:
+                    return Common::Color::DecodeRGB5A1(pixel);
+                case Pica::PixelFormat::RGBA4:
+                    return Common::Color::DecodeRGBA4(pixel);
+                }
+                UNREACHABLE();
+            }();
+            const u32 output_offset = (x * info.height + y) * 4;
+            u8* dest = info.pixels.data() + output_offset;
+            std::memcpy(dest, color.AsArray(), sizeof(color));
+        }
+    }
+}
 
 } // namespace SwRenderer

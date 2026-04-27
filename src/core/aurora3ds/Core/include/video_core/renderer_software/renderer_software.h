@@ -1,56 +1,50 @@
-// Copyright 2026 Aurora Emulator Project
+// Copyright Citra Emulator Project / Azahar Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
 #pragma once
 
-#include <memory>
 #include "video_core/renderer_base.h"
+#include "video_core/renderer_software/sw_rasterizer.h"
 
 namespace Core {
 class System;
 }
 
-namespace Frontend {
-class EmuWindow;
-}
-
-namespace Pica {
-class PicaCore;
-}
-
 namespace SwRenderer {
 
-[[nodiscard]] bool IsSoftwareRendererImplemented();
-
-class SoftwareRasterizer final : public VideoCore::RasterizerInterface {
-public:
-    ~SoftwareRasterizer() override = default;
-
-    void AddTriangle(const Pica::OutputVertex& v0, const Pica::OutputVertex& v1,
-                     const Pica::OutputVertex& v2) override;
-    void DrawTriangles() override;
-    void NotifyPicaRegisterChanged(u32 id) override;
-    void FlushAll() override;
-    void FlushRegion(PAddr addr, u32 size) override;
-    void InvalidateRegion(PAddr addr, u32 size) override;
-    void FlushAndInvalidateRegion(PAddr addr, u32 size) override;
-    void ClearAll(bool flush) override;
+struct ScreenInfo {
+    u32 width;
+    u32 height;
+    std::vector<u8> pixels;
 };
 
-class RendererSoftware final : public VideoCore::RendererBase {
+class RendererSoftware : public VideoCore::RendererBase {
 public:
     explicit RendererSoftware(Core::System& system, Pica::PicaCore& pica,
-                              Frontend::EmuWindow& window,
-                              Frontend::EmuWindow* secondary_window = nullptr);
+                              Frontend::EmuWindow& window);
     ~RendererSoftware() override;
 
-    VideoCore::RasterizerInterface* Rasterizer() override;
+    [[nodiscard]] VideoCore::RasterizerInterface* Rasterizer() override {
+        return &rasterizer;
+    }
+
+    [[nodiscard]] const ScreenInfo& Screen(VideoCore::ScreenId id) const noexcept {
+        return screen_infos[static_cast<u32>(id)];
+    }
+
     void SwapBuffers() override;
-    void TryPresent(int timeout_ms, bool is_secondary) override;
+    void TryPresent(int timeout_ms, bool is_secondary) override {}
 
 private:
-    std::unique_ptr<SoftwareRasterizer> rasterizer;
+    void PrepareRenderTarget();
+    void LoadFBToScreenInfo(int i, const Pica::ColorFill& color_fill);
+
+private:
+    Memory::MemorySystem& memory;
+    Pica::PicaCore& pica;
+    RasterizerSoftware rasterizer;
+    std::array<ScreenInfo, 3> screen_infos{};
 };
 
 } // namespace SwRenderer

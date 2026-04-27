@@ -15,7 +15,6 @@
     EmulatorCoreType    _coreType;
     EmulatorVideoSpec   _videoSpec;
     BOOL                _running;
-    BOOL                _didShowRuntimeError;
 }
 @property (nonatomic, strong) AURMetalView *imageView;
 @property (nonatomic, strong) AURMetalView *ndsBottomImageView;
@@ -131,7 +130,6 @@
 
 - (void)startEmulator {
     [self stopEmulator];
-    _didShowRuntimeError = NO;
     _core = EmulatorCore_Create(_coreType);
     if (!_core) {
         NSLog(@"[AUR][Emu] Failed to create core: %d", (int)_coreType);
@@ -205,19 +203,8 @@
     if (!_running || !_core) return;
     EmulatorCore_StepFrame(_core);
     const char *stepError = EmulatorCore_GetLastError(_core);
-    if (stepError && stepError[0] != '\0' && strcmp(stepError, "success") != 0) {
-        NSLog(@"[AUR][Emu] frame step error: %s", stepError);
-        if (!_didShowRuntimeError) {
-            _didShowRuntimeError = YES;
-            NSString *message = [NSString stringWithFormat:@"%s", stepError];
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Emulation Stopped"
-                                                                           message:message
-                                                                    preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
-            [self presentViewController:alert animated:YES completion:nil];
-        }
-        [self stopEmulator];
-        return;
+    if (stepError && stepError[0] != '\0') {
+        NSLog(@"[AUR][Emu] frame step warning: %s", stepError);
     }
 
     size_t pixelCount = 0;
