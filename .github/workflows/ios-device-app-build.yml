@@ -63,21 +63,21 @@ jobs:
       - name: Verify Aurora3DS is permanently in build graph
         shell: bash
         run: |
-          rg -n "path: ../src/core/aurora3ds/core_adapter.cpp" ios/project.yml
-          rg -n "path: ../src/core/aurora3ds/bridge.cpp" ios/project.yml
-          rg -n "path: ../src/core/aurora3ds/Core" ios/project.yml
-          rg -n "path: ../src/core/aurora3ds/CitraObjC" ios/project.yml
-          rg -n "\\$\\(BUILD_DIR\\)/src/core/aurora3ds/bridge\\.o" Makefile
-          rg -n "pod 'boost'" ios/Podfile
-          rg -n "pod 'libzstd'" ios/Podfile
+          grep -nF "path: ../src/core/aurora3ds/core_adapter.cpp" ios/project.yml
+          grep -nF "path: ../src/core/aurora3ds/bridge.cpp" ios/project.yml
+          grep -nF "path: ../src/core/aurora3ds/Core" ios/project.yml
+          grep -nF "path: ../src/core/aurora3ds/CitraObjC" ios/project.yml
+          grep -nF "\$(BUILD_DIR)/src/core/aurora3ds/bridge.o" Makefile
+          grep -nF "pod 'boost'" ios/Podfile
+          grep -nF "pod 'libzstd'" ios/Podfile
 
       - name: Verify iOS device-only build target
         shell: bash
         run: |
-          rg -n "SDKROOT: iphoneos" ios/project.yml
-          rg -n "SUPPORTED_PLATFORMS: iphoneos" ios/project.yml
-          rg -n "\\-sdk iphoneos" .github/workflows/ios-device-app-build.yml
-          rg -n "generic/platform=iOS" .github/workflows/ios-device-app-build.yml
+          grep -nF "SDKROOT: iphoneos" ios/project.yml
+          grep -nF "SUPPORTED_PLATFORMS: iphoneos" ios/project.yml
+          grep -nF -- "-sdk iphoneos" .github/workflows/ios-device-app-build.yml
+          grep -nF "generic/platform=iOS" .github/workflows/ios-device-app-build.yml
 
       - name: Build iOS app archive (.app inside .xcarchive)
         shell: bash
