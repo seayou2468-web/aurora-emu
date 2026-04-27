@@ -49,6 +49,8 @@ targets:
       - path: ../src/core/aurora3ds/core_adapter.cpp
       - path: ../src/core/aurora3ds/bridge.cpp
       - path: ../src/core/aurora3ds/Dependencies/lodepng/lodepng.cpp
+      - path: ../src/core/aurora3ds/Dependencies/inih/INIReader.cpp
+      - path: ../src/core/aurora3ds/Dependencies/inih/ini.c
       - path: ../src/core/aurora3ds/Core
       - path: ../src/core/aurora3ds/CitraObjC
     dependencies:
@@ -104,3 +106,4 @@ targets:
           - "-framework CoreMedia"
           - "-framework CoreVideo"
           - "-framework Security"
+          - "-framework CoreMotion"

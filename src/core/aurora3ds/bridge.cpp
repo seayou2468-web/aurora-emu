@@ -464,30 +464,7 @@ const char* Aurora3DS_GetLastError(void* runtime) {
 
 extern "C" {
 
-void* Aurora3DSBridge_Create(void) { return nullptr; }
-void Aurora3DSBridge_Destroy(void*) {}
-bool Aurora3DSBridge_LoadBIOSFromPath(void*, const char*) { return false; }
-bool Aurora3DSBridge_LoadROMFromPath(void*, const char*) { return false; }
 bool Aurora3DSBridge_ProbeROMFromPath(const char*, Aurora3DSROMProbeInfo*) { return false; }
-bool Aurora3DSBridge_LoadROMFromMemory(void*, const void*, size_t) { return false; }
-bool Aurora3DSBridge_StepFrame(void*) { return false; }
-bool Aurora3DSBridge_SetRenderSurfaces(void*, void*, void*, uint32_t, uint32_t, uint32_t, uint32_t, float) { return false; }
-void Aurora3DSBridge_SetKeyStatus(void*, int, bool) {}
-bool Aurora3DSBridge_GetVideoSpec(void*, EmulatorVideoSpec*) { return false; }
-const uint32_t* Aurora3DSBridge_GetFrameBufferRGBA(void*, size_t* pixel_count) {
-  if (pixel_count) *pixel_count = 0;
-  return nullptr;
-}
-bool Aurora3DSBridge_SaveStateToBuffer(void*, void*, size_t, size_t*) { return false; }
-bool Aurora3DSBridge_LoadStateFromBuffer(void*, const void*, size_t) { return false; }
-bool Aurora3DSBridge_ApplyCheatCode(void*, const char*) { return false; }
-const char* Aurora3DSBridge_GetLastError(void*) {
-#if defined(__APPLE__)
-  return "aurora3ds backend bridge is not linked";
-#else
-  return "aurora3ds is only available on Apple targets";
-#endif
-}
 
 void* Aurora3DS_Create(void) { return nullptr; }
 void Aurora3DS_Destroy(void*) {}
