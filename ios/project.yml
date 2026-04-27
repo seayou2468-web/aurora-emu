@@ -34,7 +34,6 @@ settings:
     GCC_PREPROCESSOR_DEFINITIONS:
       - "$(inherited)"
       - AURORA_IOS_MINIMAL_CORE=1
-      - AURORA_DISABLE_JIT=1
       - ENABLE_SOFTWARE_RENDERER=1
 targets:
   AuroraIOS:
@@ -64,7 +63,6 @@ targets:
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libavfilter.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libteakra.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/boost_serialization.xcframework
-      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libdynarmic.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libswresample.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libmbedx509.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/boost_context.xcframework

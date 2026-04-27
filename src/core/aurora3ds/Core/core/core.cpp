@@ -8,7 +8,6 @@
 #include "audio_core/dsp_interface.h"
 #include "audio_core/hle/hle.h"
 #include "audio_core/lle/lle.h"
-#include "common/arch.h"
 #include "common/logging/log.h"
 #include "common/settings.h"
 #include "core/arm/arm_interface.h"
@@ -16,9 +15,6 @@
 #include "core/hle/service/cam/cam.h"
 #include "core/hle/service/hid/hid.h"
 #include "core/hle/service/ir/ir_user.h"
-#if CYTRUS_ARCH(x86_64) || CYTRUS_ARCH(arm64)
-#include "core/arm/dynarmic/arm_dynarmic.h"
-#endif
 #include "core/arm/dyncom/arm_dyncom.h"
 #include "core/cheats/cheats.h"
 #include "core/core.h"
@@ -404,30 +400,11 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window,
         *memory, *timing, [this] { PrepareReschedule(); }, memory_mode, num_cores, n3ds_hw_caps,
         movie.GetOverrideInitTime());
 
-#if defined(AURORA_DISABLE_JIT)
-    Settings::values.use_cpu_jit = false;
-#endif
-
     exclusive_monitor = MakeExclusiveMonitor(*memory, num_cores);
     cpu_cores.reserve(num_cores);
-    if (Settings::values.use_cpu_jit) {
-#if CYTRUS_ARCH(x86_64) || CYTRUS_ARCH(arm64)
-        for (u32 i = 0; i < num_cores; ++i) {
-            cpu_cores.push_back(std::make_shared<ARM_Dynarmic>(
-                *this, *memory, i, timing->GetTimer(i), *exclusive_monitor));
-        }
-#else
-        for (u32 i = 0; i < num_cores; ++i) {
-            cpu_cores.push_back(
-                std::make_shared<ARM_DynCom>(this, *memory, USER32MODE, i, timing->GetTimer(i)));
-        }
-        LOG_WARNING(Core, "CPU JIT requested, but Dynarmic not available");
-#endif
-    } else {
-        for (u32 i = 0; i < num_cores; ++i) {
-            cpu_cores.push_back(
-                std::make_shared<ARM_DynCom>(*this, *memory, USER32MODE, i, timing->GetTimer(i)));
-        }
+    for (u32 i = 0; i < num_cores; ++i) {
+        cpu_cores.push_back(
+            std::make_shared<ARM_DynCom>(*this, *memory, USER32MODE, i, timing->GetTimer(i)));
     }
     running_core = cpu_cores[0].get();
 

@@ -131,7 +131,6 @@ void Configuration::ReadValues() {
                                                  InputCommon::CemuhookUDP::DEFAULT_PORT));
 
     // Core
-    ReadSetting("Core", Settings::values.use_cpu_jit);
     ReadSetting("Core", Settings::values.cpu_clock_percentage);
 
     // Renderer
@@ -144,7 +143,6 @@ void Configuration::ReadValues() {
     ReadSetting("Renderer", Settings::values.async_shader_compilation);
     ReadSetting("Renderer", Settings::values.spirv_shader_gen);
     ReadSetting("Renderer", Settings::values.use_hw_shader);
-    ReadSetting("Renderer", Settings::values.use_shader_jit);
     ReadSetting("Renderer", Settings::values.resolution_factor);
     ReadSetting("Renderer", Settings::values.use_disk_shader_cache);
     ReadSetting("Renderer", Settings::values.use_vsync_new);

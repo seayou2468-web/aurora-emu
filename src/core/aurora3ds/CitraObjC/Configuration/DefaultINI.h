@@ -11,10 +11,6 @@ namespace DefaultINI {
 
 const char* sdl3_config_file = R"(
 [Core]
-# Whether to use the Just-In-Time (JIT) compiler for CPU emulation
-# 0: Interpreter (slow), 1 (default): JIT (fast)
-use_cpu_jit=1
-
 # Change the Clock Frequency of the emulated 3DS CPU.
 # Underclocking can increase the performance of the game at the risk of freezing.
 # Overclocking may fix lag that happens on console, but also comes with the risk of freezing.
@@ -41,10 +37,6 @@ use_hw_shader=1
 # Whether to use accurate multiplication in hardware shaders
 # 0: Off (Default. Faster, but causes issues in some games) 1: On (Slower, but correct)
 shaders_accurate_mul=0
-
-# Whether to use the Just-In-Time (JIT) compiler for shader emulation
-# 0: Interpreter (slow), 1 (default): JIT (fast)
-use_shader_jit=1
 
 # Forces VSync on the display thread. Usually doesn't impact performance, but on some drivers it can
 # so only turn this off if you notice a speed difference.
