@@ -48,26 +48,23 @@ targets:
       - path: ../src/core/aurora3ds/core_adapter.cpp
       - path: ../src/core/aurora3ds/bridge.cpp
       - path: ../src/core/aurora3ds/Core
+        excludes:
+          - video_core/renderer_vulkan/**
       - path: ../src/core/aurora3ds/CitraObjC
     dependencies:
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libfaad.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libSDL3.xcframework
-      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libGenericCodeGen.xcframework
-      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libglslang.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libenet.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libopus.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/boost_iostreams.xcframework
-      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libMachineIndependent.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libmbedtls.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libavformat.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libmcl.xcframework
-      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/MoltenVK.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libfmt.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libSoundTouch.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libcryptopp.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libavfilter.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libteakra.xcframework
-      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libSPIRV.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/boost_serialization.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libdynarmic.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libswresample.xcframework
@@ -75,7 +72,6 @@ targets:
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/boost_context.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libswscale.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libavutil.xcframework
-      - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libsirit.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/boost_program_options.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libavcodec.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libopenal.xcframework
