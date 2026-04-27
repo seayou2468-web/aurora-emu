@@ -119,7 +119,7 @@ jobs:
         run: |
           mkdir -p build
           xcodebuild \
-            -project ios/AuroraIOS.xcodeproj \
+            -workspace ios/AuroraIOS.xcworkspace \
             -scheme AuroraIOS \
             -configuration Release \
             -sdk iphoneos \
