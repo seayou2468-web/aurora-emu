@@ -62,7 +62,8 @@ public:
 public:
   constexpr char at(size_t pos) const noexcept
   {
-    return X_ASSERT(pos < chars_.size()), chars_.at(pos);
+    static_cast<void>(X_ASSERT(pos < chars_.size()));
+    return chars_.at(pos);
   }
 
 private:
@@ -155,7 +156,8 @@ public:
 public:
   constexpr signed char at(size_t pos) const noexcept
   {
-    return X_ASSERT(pos < map_.size()), map_[pos];
+    static_cast<void>(X_ASSERT(pos < map_.size()));
+    return map_[pos];
   }
 
 private:

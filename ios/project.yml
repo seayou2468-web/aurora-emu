@@ -28,6 +28,10 @@ settings:
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/oaknut"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/httplib"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/xbyak"
+      - "$(SRCROOT)/Pods"
+      - "$(SRCROOT)/Pods/Headers/Public"
+      - "$(SRCROOT)/Pods/Headers/Public/OpenSSL-Universal"
+      - "$(SRCROOT)/Pods/OpenSSL-Universal"
     FRAMEWORK_SEARCH_PATHS:
       - "$(inherited)"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/XCFrameworks"
