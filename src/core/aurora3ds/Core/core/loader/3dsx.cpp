@@ -320,13 +320,12 @@ ResultStatus AppLoader_THREEDSX::ReadRomFS(std::shared_ptr<FileSys::RomFSReader>
         LOG_DEBUG(Loader, "RomFS size:             {:#010X}", romfs_size);
 
         // We reopen the file, to allow its position to be independent from file's
-        std::unique_ptr<FileUtil::IOFile> romfs_file_inner =
-            std::make_unique<FileUtil::IOFile>(filepath, "rb");
-        if (!romfs_file_inner->IsOpen())
+        FileUtil::IOFile romfs_file_inner(filepath, "rb");
+        if (!romfs_file_inner.IsOpen())
             return ResultStatus::Error;
 
-        romfs_file = std::make_shared<FileSys::DirectRomFSReader>(std::move(romfs_file_inner),
-                                                                  romfs_offset, romfs_size);
+        romfs_file = std::make_shared<FileSys::DirectRomFSReader>(
+            std::move(romfs_file_inner), romfs_offset, romfs_size);
 
         return ResultStatus::Success;
     }
