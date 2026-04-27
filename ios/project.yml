@@ -28,7 +28,6 @@ settings:
     GCC_PREPROCESSOR_DEFINITIONS:
       - "$(inherited)"
       - AURORA_IOS_MINIMAL_CORE=1
-      - AURORA3DS_ENABLE_EMBEDDED_CORE=1
       - AURORA_DISABLE_JIT=1
       - ENABLE_SOFTWARE_RENDERER=1
 targets:
@@ -75,6 +74,8 @@ targets:
     settings:
       base:
         TARGETED_DEVICE_FAMILY: "1,2"
+        SDKROOT: iphoneos
+        SUPPORTED_PLATFORMS: iphoneos
         OTHER_LDFLAGS:
           - "$(inherited)"
           - "-ObjC"
