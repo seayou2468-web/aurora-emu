@@ -29,15 +29,19 @@ jobs:
           brew install xcodegen
           xcodegen --version
 
-      - name: Install C++ Boost
+      - name: Install Aurora3DS build prerequisites
         shell: bash
         run: |
-          brew install boost zstd
-          BOOST_PREFIX="$(brew --prefix boost)"
-          test -f "$BOOST_PREFIX/include/boost/optional.hpp"
+          brew install zstd
           zstd --version
+          BOOST_VERSION="1.87.0"
+          BOOST_UNDERSCORE="${BOOST_VERSION//./_}"
+          BOOST_TARBALL="boost_${BOOST_UNDERSCORE}.tar.gz"
+          curl -fsSL "https://archives.boost.io/release/${BOOST_VERSION}/source/${BOOST_TARBALL}" -o "/tmp/${BOOST_TARBALL}"
+          tar -xzf "/tmp/${BOOST_TARBALL}" -C /tmp
           mkdir -p src/core/aurora3ds/Core/include
-          rsync -a --delete "$BOOST_PREFIX/include/boost/" src/core/aurora3ds/Core/include/boost/
+          rsync -a --delete "/tmp/boost_${BOOST_UNDERSCORE}/boost/" src/core/aurora3ds/Core/include/boost/
+          test -f src/core/aurora3ds/Core/include/boost/optional.hpp
 
       - name: Generate Xcode project
         shell: bash
