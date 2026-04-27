@@ -390,6 +390,7 @@ void Context::MakeRequestNonSSL(httplib::Request& request, const URLInfo& url_in
 
 void Context::MakeRequestSSL(httplib::Request& request, const URLInfo& url_info,
                              std::vector<Context::RequestHeader>& pending_headers) {
+#if defined(CPPHTTPLIB_OPENSSL_SUPPORT)
     httplib::Error error{-1};
     X509* cert = nullptr;
     EVP_PKEY* key = nullptr;
@@ -444,6 +445,13 @@ void Context::MakeRequestSSL(httplib::Request& request, const URLInfo& url_info,
         LOG_DEBUG(Service_HTTP, "Request successful");
         state = RequestState::ReadyToDownloadContent;
     }
+#else
+    (void)request;
+    (void)url_info;
+    (void)pending_headers;
+    LOG_ERROR(Service_HTTP, "HTTPS request attempted without SSL backend support");
+    state = RequestState::TimedOut;
+#endif
 }
 
 bool Context::ContentProvider(size_t offset, size_t length, httplib::DataSink& sink) {
