@@ -56,6 +56,8 @@ jobs:
             -configuration Release \
             -sdk iphoneos \
             -destination "generic/platform=iOS" \
+            CLANG_CXX_LANGUAGE_STANDARD=gnu++20 \
+            CLANG_CXX_LIBRARY=libc++ \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             build
@@ -89,6 +91,8 @@ jobs:
             -configuration Release \
             -sdk iphoneos \
             -destination "generic/platform=iOS" \
+            CLANG_CXX_LANGUAGE_STANDARD=gnu++20 \
+            CLANG_CXX_LIBRARY=libc++ \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             AURORA_DISABLE_JIT=1 \
