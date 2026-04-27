@@ -22,7 +22,6 @@ settings:
       - "$(SRCROOT)/../src/core/api"
       - "$(SRCROOT)/../src/core/aurora3ds/Core/include"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies"
-      - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/**"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/jwt"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/nihstro"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/microprofile"
@@ -31,7 +30,6 @@ settings:
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/xbyak"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/dds-ktx"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/lodepng"
-      - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/XCFrameworks/libsirit.xcframework/ios-arm64/Headers"
     FRAMEWORK_SEARCH_PATHS:
       - "$(inherited)"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/XCFrameworks"
