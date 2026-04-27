@@ -4,7 +4,8 @@
 #include <mutex>
 #include <vector>
 
-#if defined(__APPLE__) && __has_include(<boost/optional.hpp>) && \
+#if defined(__APPLE__) && defined(AURORA3DS_EMBEDDED_CORE_LINKED) && \
+    __has_include(<boost/optional.hpp>) && \
     __has_include(<boost/predef.h>) && __has_include(<boost/serialization/version.hpp>) && \
     __has_include(<boost/serialization/access.hpp>) && \
     __has_include(<boost/serialization/array.hpp>) && \
@@ -270,7 +271,7 @@ bool Aurora3DS_LoadStateFromBuffer(void*, const void*, size_t) { return false; }
 bool Aurora3DS_ApplyCheatCode(void*, const char*) { return false; }
 const char* Aurora3DS_GetLastError(void*) {
 #if defined(__APPLE__)
-  return "aurora3ds embedded dependencies are missing (boost headers)";
+  return "aurora3ds backend bridge is not linked";
 #else
   return "aurora3ds is only available on Apple targets";
 #endif
