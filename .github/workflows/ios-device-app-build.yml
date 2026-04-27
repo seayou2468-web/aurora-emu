@@ -32,9 +32,10 @@ jobs:
       - name: Install C++ Boost
         shell: bash
         run: |
-          brew install boost
+          brew install boost zstd
           BOOST_PREFIX="$(brew --prefix boost)"
           test -f "$BOOST_PREFIX/include/boost/optional.hpp"
+          zstd --version
           mkdir -p src/core/aurora3ds/Core/include
           rsync -a --delete "$BOOST_PREFIX/include/boost/" src/core/aurora3ds/Core/include/boost/
 
