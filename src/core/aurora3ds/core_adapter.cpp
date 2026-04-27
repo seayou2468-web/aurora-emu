@@ -95,6 +95,36 @@ void SetKeyStatus(void* runtime_ptr, int key, bool pressed) {
   Aurora3DS_SetKeyStatus(runtime->backend, key, pressed);
 }
 
+bool SetRenderSurfaces(
+    void* runtime_ptr,
+    void* top_surface,
+    void* bottom_surface,
+    uint32_t top_width,
+    uint32_t top_height,
+    uint32_t bottom_width,
+    uint32_t bottom_height,
+    float render_surface_scale,
+    std::string& last_error) {
+  auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
+  if (!runtime || !runtime->backend) {
+    SetBridgeMissingError(last_error);
+    return false;
+  }
+  if (Aurora3DS_SetRenderSurfaces(
+          runtime->backend,
+          top_surface,
+          bottom_surface,
+          top_width,
+          top_height,
+          bottom_width,
+          bottom_height,
+          render_surface_scale)) {
+    return true;
+  }
+  SetBackendError(runtime, last_error);
+  return false;
+}
+
 const uint32_t* GetFrameBufferRGBA(void* runtime_ptr, size_t* pixel_count) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   if (pixel_count) *pixel_count = 0;
@@ -149,6 +179,7 @@ extern const CoreAdapter kAurora3DSAdapter = {
     .load_rom_from_memory = LoadROMFromMemory,
     .step_frame = StepFrame,
     .set_key_status = SetKeyStatus,
+    .set_render_surfaces = SetRenderSurfaces,
     .get_video_spec = [](EmulatorVideoSpec* out_spec) -> bool {
       if (!out_spec) return false;
       out_spec->width = 400;

@@ -2,13 +2,24 @@
 
 #include <string>
 #include <mutex>
+#include <memory>
 #include <vector>
 
 #if defined(__APPLE__)
+#include <dlfcn.h>
+#include "./Core/include/common/dynamic_library/dynamic_library.h"
 #include "./Core/include/core/core.h"
 #include "./Core/include/core/dumping/backend.h"
 #include "./Core/include/core/frontend/emu_window.h"
+#include "./Core/include/core/frontend/applets/default_applets.h"
 #include "./Core/include/core/frontend/framebuffer_layout.h"
+#include "./Core/include/common/logging/backend.h"
+#include "./Core/include/common/logging/filter.h"
+#include "./Core/include/network/network.h"
+#include "./CitraObjC/Camera/CameraFactory.h"
+#include "./CitraObjC/Configuration/Configuration.h"
+#include "./CitraObjC/EmulationWindow/GraphicsContext_Apple.h"
+#include "./CitraObjC/InputManager/InputManager.h"
 #endif
 
 extern "C" {
@@ -17,24 +28,48 @@ extern "C" {
 
 namespace {
 
-class AURBridgeEmuWindow final : public Frontend::EmuWindow {
+class AURBridgeVulkanWindow final : public Frontend::EmuWindow {
 public:
-  AURBridgeEmuWindow() : Frontend::EmuWindow(false) {
-    window_info.type = Frontend::WindowSystemType::Headless;
+  AURBridgeVulkanWindow(void* render_surface, float render_surface_scale,
+                        std::shared_ptr<Common::DynamicLibrary> driver_library)
+      : Frontend::EmuWindow(false), driver_library_(std::move(driver_library)) {
+    window_info.type = Frontend::WindowSystemType::MacOS;
     window_info.display_connection = nullptr;
-    window_info.render_surface = nullptr;
-    window_info.render_surface_scale = 1.0f;
+    window_info.render_surface = render_surface;
+    window_info.render_surface_scale = render_surface_scale;
     NotifyFramebufferLayoutChanged(Layout::DefaultFrameLayout(400, 480, false, false));
   }
 
   void PollEvents() override {}
+
+  std::unique_ptr<Frontend::GraphicsContext> CreateSharedContext() const override {
+    if (!driver_library_ || !driver_library_->IsLoaded()) {
+      return nullptr;
+    }
+    return std::make_unique<GraphicsContext_Apple>(driver_library_);
+  }
+
+  void UpdateRenderSurface(void* render_surface, float render_surface_scale) {
+    window_info.type = Frontend::WindowSystemType::MacOS;
+    window_info.render_surface = render_surface;
+    window_info.render_surface_scale = render_surface_scale;
+  }
+
+private:
+  std::shared_ptr<Common::DynamicLibrary> driver_library_;
 };
 
 struct AURBridgeRuntime {
   Core::System* system = nullptr;
-  std::unique_ptr<AURBridgeEmuWindow> window;
+  std::unique_ptr<AURBridgeVulkanWindow> window;
   std::shared_ptr<class AURBridgeCaptureBackend> capture;
+  std::shared_ptr<Common::DynamicLibrary> moltenvk_library;
+  std::unique_ptr<Configuration> configuration;
+  void* top_surface = nullptr;
+  void* bottom_surface = nullptr;
+  float render_surface_scale = 1.0f;
   std::vector<uint32_t> frame_rgba;
+  size_t no_frame_counter = 0;
   std::string last_error;
 };
 
@@ -110,9 +145,35 @@ AURBridgeRuntime* AsRuntime(void* runtime) {
 }  // namespace
 
 void* Aurora3DSBridge_Create(void) {
+  static bool logging_initialized = false;
+  if (!logging_initialized) {
+    Common::Log::Initialize();
+    Common::Log::SetColorConsoleBackendEnabled(false);
+    Common::Log::Start();
+    Common::Log::Filter filter;
+    filter.ParseFilterString(Settings::values.log_filter.GetValue());
+    Common::Log::SetGlobalFilter(filter);
+    logging_initialized = true;
+  }
+
   auto* runtime = new AURBridgeRuntime();
   runtime->system = &Core::System::GetInstance();
-  runtime->window = std::make_unique<AURBridgeEmuWindow>();
+  runtime->configuration = std::make_unique<Configuration>();
+  runtime->system->ApplySettings();
+  runtime->moltenvk_library =
+      std::make_shared<Common::DynamicLibrary>(dlopen("@rpath/MoltenVK.framework/MoltenVK", RTLD_NOW));
+
+  auto front_camera = std::make_unique<Camera::iOSFrontCameraFactory>();
+  auto rear_camera = std::make_unique<Camera::iOSRearCameraFactory>();
+  Camera::RegisterFactory("av_front", std::move(front_camera));
+  Camera::RegisterFactory("av_rear", std::move(rear_camera));
+
+  InputManager::Init();
+  Network::Init();
+  Frontend::RegisterDefaultApplets(*runtime->system);
+
+  runtime->window = std::make_unique<AURBridgeVulkanWindow>(
+      runtime->top_surface, runtime->render_surface_scale, runtime->moltenvk_library);
   runtime->capture = std::make_shared<AURBridgeCaptureBackend>();
   runtime->system->RegisterVideoDumper(runtime->capture);
   runtime->capture->StartDumping("", runtime->window->GetFramebufferLayout());
@@ -125,6 +186,8 @@ void Aurora3DSBridge_Destroy(void* runtime_ptr) {
   if (runtime->system && runtime->system->IsPoweredOn()) {
     runtime->system->Shutdown();
   }
+  Network::Shutdown();
+  InputManager::Shutdown();
   delete runtime;
 }
 
@@ -144,12 +207,40 @@ bool Aurora3DSBridge_LoadROMFromMemory(void*, const void*, size_t) {
   return false;
 }
 
+bool Aurora3DSBridge_SetRenderSurfaces(
+    void* runtime_ptr,
+    void* top_surface,
+    void* bottom_surface,
+    uint32_t,
+    uint32_t,
+    uint32_t,
+    uint32_t,
+    float render_surface_scale) {
+  auto* runtime = AsRuntime(runtime_ptr);
+  if (!runtime) return false;
+  runtime->top_surface = top_surface;
+  runtime->bottom_surface = bottom_surface;
+  runtime->render_surface_scale = (render_surface_scale > 0.0f) ? render_surface_scale : 1.0f;
+  if (runtime->window) {
+    runtime->window->UpdateRenderSurface(runtime->top_surface, runtime->render_surface_scale);
+  }
+  return true;
+}
+
 bool Aurora3DSBridge_StepFrame(void* runtime_ptr) {
   auto* runtime = AsRuntime(runtime_ptr);
   if (!runtime || !runtime->system) return false;
   const auto status = runtime->system->RunLoop(true);
   runtime->last_error = ToStatusString(status);
-  runtime->capture->CopyLatestRGBA(runtime->frame_rgba);
+  if (runtime->capture->CopyLatestRGBA(runtime->frame_rgba)) {
+    runtime->no_frame_counter = 0;
+  } else if (runtime->top_surface == nullptr) {
+    runtime->no_frame_counter++;
+    if (runtime->no_frame_counter > 120) {
+      runtime->last_error =
+          "no video frame captured (bridge path is incomplete; integrate Cytrus surface rendering path)";
+    }
+  }
   return status == Core::System::ResultStatus::Success ||
          status == Core::System::ResultStatus::ShutdownRequested;
 }
@@ -206,6 +297,26 @@ bool Aurora3DS_StepFrame(void* runtime) {
   return Aurora3DSBridge_StepFrame(runtime);
 }
 
+bool Aurora3DS_SetRenderSurfaces(
+    void* runtime,
+    void* top_surface,
+    void* bottom_surface,
+    uint32_t top_width,
+    uint32_t top_height,
+    uint32_t bottom_width,
+    uint32_t bottom_height,
+    float render_surface_scale) {
+  return Aurora3DSBridge_SetRenderSurfaces(
+      runtime,
+      top_surface,
+      bottom_surface,
+      top_width,
+      top_height,
+      bottom_width,
+      bottom_height,
+      render_surface_scale);
+}
+
 void Aurora3DS_SetKeyStatus(void* runtime, int key, bool pressed) {
   Aurora3DSBridge_SetKeyStatus(runtime, key, pressed);
 }
@@ -242,6 +353,7 @@ bool Aurora3DS_LoadBIOSFromPath(void*, const char*) { return false; }
 bool Aurora3DS_LoadROMFromPath(void*, const char*) { return false; }
 bool Aurora3DS_LoadROMFromMemory(void*, const void*, size_t) { return false; }
 bool Aurora3DS_StepFrame(void*) { return false; }
+bool Aurora3DS_SetRenderSurfaces(void*, void*, void*, uint32_t, uint32_t, uint32_t, uint32_t, float) { return false; }
 void Aurora3DS_SetKeyStatus(void*, int, bool) {}
 bool Aurora3DS_GetVideoSpec(void*, EmulatorVideoSpec*) { return false; }
 const uint32_t* Aurora3DS_GetFrameBufferRGBA(void*, size_t* pixel_count) {

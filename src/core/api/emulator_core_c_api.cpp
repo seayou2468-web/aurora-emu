@@ -96,6 +96,32 @@ void EmulatorCore_SetKeyStatus(EmulatorCoreHandle* handle, EmulatorKey key, bool
   handle->adapter->set_key_status(handle->runtime, static_cast<int>(key), pressed);
 }
 
+bool EmulatorCore_SetRenderSurfaces(
+    EmulatorCoreHandle* handle,
+    void* top_surface,
+    void* bottom_surface,
+    uint32_t top_width,
+    uint32_t top_height,
+    uint32_t bottom_width,
+    uint32_t bottom_height,
+    float render_surface_scale) {
+  if (handle == nullptr || handle->adapter == nullptr || handle->adapter->set_render_surfaces == nullptr) {
+    return false;
+  }
+
+  handle->last_error.clear();
+  return handle->adapter->set_render_surfaces(
+      handle->runtime,
+      top_surface,
+      bottom_surface,
+      top_width,
+      top_height,
+      bottom_width,
+      bottom_height,
+      render_surface_scale,
+      handle->last_error);
+}
+
 bool EmulatorCore_GetVideoSpec(const EmulatorCoreHandle* handle, EmulatorVideoSpec* out_spec) {
   if (handle == nullptr || handle->adapter == nullptr || handle->adapter->get_video_spec == nullptr) {
     return false;

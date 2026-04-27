@@ -16,6 +16,15 @@ bool Aurora3DSBridge_LoadBIOSFromPath(void* runtime, const char* bios_path);
 bool Aurora3DSBridge_LoadROMFromPath(void* runtime, const char* rom_path);
 bool Aurora3DSBridge_LoadROMFromMemory(void* runtime, const void* rom_data, size_t rom_size);
 bool Aurora3DSBridge_StepFrame(void* runtime);
+bool Aurora3DSBridge_SetRenderSurfaces(
+    void* runtime,
+    void* top_surface,
+    void* bottom_surface,
+    uint32_t top_width,
+    uint32_t top_height,
+    uint32_t bottom_width,
+    uint32_t bottom_height,
+    float render_surface_scale);
 void Aurora3DSBridge_SetKeyStatus(void* runtime, int key, bool pressed);
 bool Aurora3DSBridge_GetVideoSpec(void* runtime, EmulatorVideoSpec* out_spec);
 const uint32_t* Aurora3DSBridge_GetFrameBufferRGBA(void* runtime, size_t* pixel_count);
@@ -31,6 +40,15 @@ bool Aurora3DS_LoadBIOSFromPath(void* runtime, const char* bios_path);
 bool Aurora3DS_LoadROMFromPath(void* runtime, const char* rom_path);
 bool Aurora3DS_LoadROMFromMemory(void* runtime, const void* rom_data, size_t rom_size);
 bool Aurora3DS_StepFrame(void* runtime);
+bool Aurora3DS_SetRenderSurfaces(
+    void* runtime,
+    void* top_surface,
+    void* bottom_surface,
+    uint32_t top_width,
+    uint32_t top_height,
+    uint32_t bottom_width,
+    uint32_t bottom_height,
+    float render_surface_scale);
 void Aurora3DS_SetKeyStatus(void* runtime, int key, bool pressed);
 bool Aurora3DS_GetVideoSpec(void* runtime, EmulatorVideoSpec* out_spec);
 const uint32_t* Aurora3DS_GetFrameBufferRGBA(void* runtime, size_t* pixel_count);

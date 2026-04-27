@@ -8,6 +8,7 @@
 #import <QuartzCore/QuartzCore.h>
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstring>
 
 @interface AUREmulatorViewController () <AURControllerViewDelegate, AURExternalControllerDelegate, AURInGameMenuDelegate> {
@@ -15,6 +16,7 @@
     EmulatorCoreType    _coreType;
     EmulatorVideoSpec   _videoSpec;
     BOOL                _running;
+    BOOL                _usesVulkanPresenter;
 }
 @property (nonatomic, strong) AURMetalView *imageView;
 @property (nonatomic, strong) AURMetalView *ndsBottomImageView;
@@ -162,6 +164,29 @@
         if (gbc) EmulatorCore_LoadBIOSFromPath(_core, gbc.UTF8String);
     }
 
+    _usesVulkanPresenter = NO;
+    if (_coreType == EMULATOR_CORE_TYPE_3DS) {
+        [self.view layoutIfNeeded];
+        CGFloat scale = UIScreen.mainScreen.nativeScale;
+        if (scale <= 0.0) {
+            scale = 1.0;
+        }
+        CGSize topSize = self.imageView.bounds.size;
+        CGSize bottomSize = self.ndsBottomImageView.bounds.size;
+        _usesVulkanPresenter = EmulatorCore_SetRenderSurfaces(
+            _core,
+            (__bridge void *)self.imageView.layer,
+            (__bridge void *)self.ndsBottomImageView.layer,
+            (uint32_t)llround(topSize.width * scale),
+            (uint32_t)llround(topSize.height * scale),
+            (uint32_t)llround(bottomSize.width * scale),
+            (uint32_t)llround(bottomSize.height * scale),
+            (float)scale);
+        if (!_usesVulkanPresenter) {
+            NSLog(@"[AUR][Emu] 3DS Vulkan renderer surface connect failed: %s", EmulatorCore_GetLastError(_core) ?: "unknown");
+        }
+    }
+
     const char *path = self.romURL.path.fileSystemRepresentation;
     if (path && EmulatorCore_LoadROMFromPath(_core, path)) {
         EmulatorCore_GetVideoSpec(_core, &_videoSpec);
@@ -205,6 +230,9 @@
     const char *stepError = EmulatorCore_GetLastError(_core);
     if (stepError && stepError[0] != '\0') {
         NSLog(@"[AUR][Emu] frame step warning: %s", stepError);
+    }
+    if (_coreType == EMULATOR_CORE_TYPE_3DS && _usesVulkanPresenter) {
+        return;
     }
 
     size_t pixelCount = 0;

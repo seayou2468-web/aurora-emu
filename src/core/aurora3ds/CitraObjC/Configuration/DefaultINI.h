@@ -22,6 +22,14 @@ cpu_clock_percentage=100
 # 0: enable, 1: disable (default)
 disable_right_eye_render=1
 
+# Graphics API
+# 0: Software, 1: OpenGL, 2: Vulkan (default)
+graphics_api=2
+
+# Whether to force OpenGL ES backend behavior.
+# 0 (default): Off, 1: On
+use_gles=0
+
 # Whether to compile shaders on multiple worker threads (Vulkan only)
 # 0: Off (default), 1: On 
 async_shader_compilation=0

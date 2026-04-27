@@ -61,6 +61,15 @@ bool EmulatorCore_LoadROMFromPath(EmulatorCoreHandle* handle, const char* rom_pa
 bool EmulatorCore_LoadROMFromMemory(EmulatorCoreHandle* handle, const void* rom_data, size_t rom_size);
 void EmulatorCore_StepFrame(EmulatorCoreHandle* handle);
 void EmulatorCore_SetKeyStatus(EmulatorCoreHandle* handle, EmulatorKey key, bool pressed);
+bool EmulatorCore_SetRenderSurfaces(
+    EmulatorCoreHandle* handle,
+    void* top_surface,
+    void* bottom_surface,
+    uint32_t top_width,
+    uint32_t top_height,
+    uint32_t bottom_width,
+    uint32_t bottom_height,
+    float render_surface_scale);
 
 bool EmulatorCore_GetVideoSpec(const EmulatorCoreHandle* handle, EmulatorVideoSpec* out_spec);
 const uint32_t* EmulatorCore_GetFrameBufferRGBA(EmulatorCoreHandle* handle, size_t* pixel_count);

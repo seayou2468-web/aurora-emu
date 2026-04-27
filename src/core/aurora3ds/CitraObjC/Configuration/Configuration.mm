@@ -134,7 +134,7 @@ void Configuration::ReadValues() {
     ReadSetting("Core", Settings::values.cpu_clock_percentage);
 
     // Renderer
-    Settings::values.use_gles = sdl3_config->GetBoolean("Renderer", "use_gles", true);
+    Settings::values.use_gles = sdl3_config->GetBoolean("Renderer", "use_gles", false);
     Settings::values.shaders_accurate_mul =
         sdl3_config->GetBoolean("Renderer", "shaders_accurate_mul", false);
     ReadSetting("Renderer", Settings::values.graphics_api);

@@ -20,6 +20,16 @@ struct CoreAdapter {
   bool (*load_rom_from_memory)(void* runtime, const void* rom_data, size_t rom_size, std::string& last_error);
   void (*step_frame)(void* runtime, std::string& last_error);
   void (*set_key_status)(void* runtime, int key, bool pressed);
+  bool (*set_render_surfaces)(
+      void* runtime,
+      void* top_surface,
+      void* bottom_surface,
+      uint32_t top_width,
+      uint32_t top_height,
+      uint32_t bottom_width,
+      uint32_t bottom_height,
+      float render_surface_scale,
+      std::string& last_error);
   bool (*get_video_spec)(EmulatorVideoSpec* out_spec);
   const uint32_t* (*get_framebuffer_rgba)(void* runtime, size_t* pixel_count);
   bool (*save_state_to_buffer)(void* runtime, void* out_buffer, size_t buffer_size, size_t* out_size, std::string& last_error);

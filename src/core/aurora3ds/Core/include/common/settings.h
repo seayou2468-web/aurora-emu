@@ -457,8 +457,8 @@ struct Values {
     // Renderer
     SwitchableSetting<bool> disable_right_eye_render{true, "disable_right_eye_render"};
     SwitchableSetting<GraphicsAPI, true> graphics_api{
-        GraphicsAPI::Software,
-        GraphicsAPI::Software, GraphicsAPI::Software, "graphics_api"};
+        GraphicsAPI::Vulkan,
+        GraphicsAPI::Vulkan, GraphicsAPI::Vulkan, "graphics_api"};
     SwitchableSetting<u32> physical_device{0, "physical_device"};
     Setting<bool> use_gles{false, "use_gles"};
     Setting<bool> renderer_debug{false, "renderer_debug"};
