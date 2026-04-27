@@ -330,10 +330,11 @@ bool Aurora3DSBridge_SetRenderSurfaces(
   runtime->top_surface = top_surface;
   runtime->bottom_surface = bottom_surface;
   runtime->render_surface_scale = (render_surface_scale > 0.0f) ? render_surface_scale : 1.0f;
-  if (runtime->window) {
-    runtime->window->UpdateRenderSurface(runtime->top_surface, runtime->render_surface_scale);
-  }
-  return true;
+  if (!runtime->window) return false;
+  runtime->window->UpdateRenderSurface(runtime->top_surface, runtime->render_surface_scale);
+  runtime->last_error =
+      "direct surface presenter is unavailable in this core build; using RGBA framebuffer fallback";
+  return false;
 }
 
 bool Aurora3DSBridge_StepFrame(void* runtime_ptr) {
@@ -343,11 +344,10 @@ bool Aurora3DSBridge_StepFrame(void* runtime_ptr) {
   runtime->last_error = ToStatusString(status);
   if (runtime->capture->CopyLatestRGBA(runtime->frame_rgba)) {
     runtime->no_frame_counter = 0;
-  } else if (runtime->top_surface == nullptr) {
+  } else {
     runtime->no_frame_counter++;
     if (runtime->no_frame_counter > 120) {
-      runtime->last_error =
-          "no video frame captured (bridge path is incomplete; integrate Cytrus surface rendering path)";
+      runtime->last_error = "no video frame captured from software renderer output";
     }
   }
   return status == Core::System::ResultStatus::Success ||
