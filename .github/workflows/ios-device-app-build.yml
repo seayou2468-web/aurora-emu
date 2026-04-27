@@ -34,9 +34,9 @@ jobs:
         run: |
           brew install boost
           BOOST_PREFIX="$(brew --prefix boost)"
-          echo "CPLUS_INCLUDE_PATH=$BOOST_PREFIX/include${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}" >> "$GITHUB_ENV"
-          echo "CPATH=$BOOST_PREFIX/include${CPATH:+:$CPATH}" >> "$GITHUB_ENV"
           test -f "$BOOST_PREFIX/include/boost/optional.hpp"
+          mkdir -p src/core/aurora3ds/Core/include
+          rsync -a --delete "$BOOST_PREFIX/include/boost/" src/core/aurora3ds/Core/include/boost/
 
       - name: Generate Xcode project
         shell: bash
