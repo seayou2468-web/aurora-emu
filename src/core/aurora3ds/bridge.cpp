@@ -164,6 +164,38 @@ const char* ToLoaderStatusString(Loader::ResultStatus status) {
   return "unknown";
 }
 
+Aurora3DSROMFileType ToBridgeFileType(Loader::FileType type) {
+  switch (type) {
+    case Loader::FileType::CCI: return AURORA3DS_ROM_FILE_TYPE_CCI;
+    case Loader::FileType::CXI: return AURORA3DS_ROM_FILE_TYPE_CXI;
+    case Loader::FileType::CIA: return AURORA3DS_ROM_FILE_TYPE_CIA;
+    case Loader::FileType::ELF: return AURORA3DS_ROM_FILE_TYPE_ELF;
+    case Loader::FileType::THREEDSX: return AURORA3DS_ROM_FILE_TYPE_3DSX;
+    case Loader::FileType::Error: return AURORA3DS_ROM_FILE_TYPE_ERROR;
+    case Loader::FileType::Unknown: return AURORA3DS_ROM_FILE_TYPE_UNKNOWN;
+  }
+  return AURORA3DS_ROM_FILE_TYPE_UNKNOWN;
+}
+
+Aurora3DSROMLoaderStatus ToBridgeLoaderStatus(Loader::ResultStatus status) {
+  switch (status) {
+    case Loader::ResultStatus::Success: return AURORA3DS_ROM_LOADER_STATUS_SUCCESS;
+    case Loader::ResultStatus::Error: return AURORA3DS_ROM_LOADER_STATUS_ERROR;
+    case Loader::ResultStatus::ErrorInvalidFormat: return AURORA3DS_ROM_LOADER_STATUS_INVALID_FORMAT;
+    case Loader::ResultStatus::ErrorNotImplemented: return AURORA3DS_ROM_LOADER_STATUS_NOT_IMPLEMENTED;
+    case Loader::ResultStatus::ErrorNotLoaded: return AURORA3DS_ROM_LOADER_STATUS_NOT_LOADED;
+    case Loader::ResultStatus::ErrorNotUsed: return AURORA3DS_ROM_LOADER_STATUS_NOT_USED;
+    case Loader::ResultStatus::ErrorAlreadyLoaded: return AURORA3DS_ROM_LOADER_STATUS_ALREADY_LOADED;
+    case Loader::ResultStatus::ErrorMemoryAllocationFailed:
+      return AURORA3DS_ROM_LOADER_STATUS_MEMORY_ALLOCATION_FAILED;
+    case Loader::ResultStatus::ErrorEncrypted: return AURORA3DS_ROM_LOADER_STATUS_ENCRYPTED;
+    case Loader::ResultStatus::ErrorGbaTitle: return AURORA3DS_ROM_LOADER_STATUS_GBA_TITLE;
+    case Loader::ResultStatus::ErrorArtic: return AURORA3DS_ROM_LOADER_STATUS_ARTIC;
+    case Loader::ResultStatus::ErrorNotFound: return AURORA3DS_ROM_LOADER_STATUS_NOT_FOUND;
+  }
+  return AURORA3DS_ROM_LOADER_STATUS_ERROR;
+}
+
 std::string BuildLoaderInfo(const AURBridgeRuntime& runtime, bool is_compressed) {
   std::ostringstream oss;
   oss << "loader="
@@ -262,6 +294,28 @@ bool Aurora3DSBridge_LoadROMFromPath(void* runtime_ptr, const char* rom_path) {
   return status == Core::System::ResultStatus::Success;
 }
 
+bool Aurora3DSBridge_ProbeROMFromPath(const char* rom_path, Aurora3DSROMProbeInfo* out_info) {
+  if (!rom_path || !out_info) return false;
+  out_info->file_type = AURORA3DS_ROM_FILE_TYPE_UNKNOWN;
+  out_info->loader_status = AURORA3DS_ROM_LOADER_STATUS_ERROR;
+  out_info->program_id = 0;
+  out_info->has_program_id = false;
+  out_info->is_compressed = false;
+
+  auto app_loader = Loader::GetLoader(std::string(rom_path));
+  if (!app_loader) {
+    out_info->loader_status = AURORA3DS_ROM_LOADER_STATUS_NOT_FOUND;
+    return false;
+  }
+
+  out_info->file_type = ToBridgeFileType(app_loader->GetFileType());
+  out_info->is_compressed = app_loader->IsFileCompressed();
+  const auto program_id_status = app_loader->ReadProgramId(out_info->program_id);
+  out_info->has_program_id = program_id_status == Loader::ResultStatus::Success;
+  out_info->loader_status = ToBridgeLoaderStatus(program_id_status);
+  return true;
+}
+
 bool Aurora3DSBridge_LoadROMFromMemory(void*, const void*, size_t) {
   return false;
 }
@@ -348,6 +402,10 @@ bool Aurora3DS_LoadROMFromPath(void* runtime, const char* rom_path) {
   return Aurora3DSBridge_LoadROMFromPath(runtime, rom_path);
 }
 
+bool Aurora3DS_ProbeROMFromPath(const char* rom_path, Aurora3DSROMProbeInfo* out_info) {
+  return Aurora3DSBridge_ProbeROMFromPath(rom_path, out_info);
+}
+
 bool Aurora3DS_LoadROMFromMemory(void* runtime, const void* rom_data, size_t rom_size) {
   return Aurora3DSBridge_LoadROMFromMemory(runtime, rom_data, rom_size);
 }
@@ -406,10 +464,12 @@ const char* Aurora3DS_GetLastError(void* runtime) {
 
 #else
 
+bool Aurora3DSBridge_ProbeROMFromPath(const char*, Aurora3DSROMProbeInfo*) { return false; }
 void* Aurora3DS_Create(void) { return nullptr; }
 void Aurora3DS_Destroy(void*) {}
 bool Aurora3DS_LoadBIOSFromPath(void*, const char*) { return false; }
 bool Aurora3DS_LoadROMFromPath(void*, const char*) { return false; }
+bool Aurora3DS_ProbeROMFromPath(const char*, Aurora3DSROMProbeInfo*) { return false; }
 bool Aurora3DS_LoadROMFromMemory(void*, const void*, size_t) { return false; }
 bool Aurora3DS_StepFrame(void*) { return false; }
 bool Aurora3DS_SetRenderSurfaces(void*, void*, void*, uint32_t, uint32_t, uint32_t, uint32_t, float) { return false; }
