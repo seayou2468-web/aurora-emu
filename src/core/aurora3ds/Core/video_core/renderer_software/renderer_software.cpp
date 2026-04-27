@@ -10,6 +10,10 @@ namespace SwRenderer {
 
 MICROPROFILE_DEFINE(GPU_SoftwareFrame, "GPU", "Software Frame", MP_RGB(80, 200, 80));
 
+bool IsSoftwareRendererImplemented() {
+    return false;
+}
+
 void SoftwareRasterizer::AddTriangle(const Pica::OutputVertex&, const Pica::OutputVertex&,
                                      const Pica::OutputVertex&) {}
 

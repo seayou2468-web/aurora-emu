@@ -21,6 +21,8 @@ class PicaCore;
 
 namespace SwRenderer {
 
+[[nodiscard]] bool IsSoftwareRendererImplemented();
+
 class SoftwareRasterizer final : public VideoCore::RasterizerInterface {
 public:
     ~SoftwareRasterizer() override = default;
