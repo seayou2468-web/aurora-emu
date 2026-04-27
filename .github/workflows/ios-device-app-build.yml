@@ -46,13 +46,14 @@ jobs:
           pod install --project-directory=ios --repo-update
           test -d ios/Pods/boost
           test -d ios/Pods/libzstd
+          test -f ios/Pods/Pods.xcodeproj/project.pbxproj
 
       - name: Build CocoaPods dependencies for iOS device
         shell: bash
         run: |
           xcodebuild \
-            -workspace ios/AuroraIOS.xcworkspace \
-            -scheme Pods-AuroraIOS \
+            -project ios/Pods/Pods.xcodeproj \
+            -scheme boost \
             -configuration Release \
             -sdk iphoneos \
             -destination "generic/platform=iOS" \
@@ -61,6 +62,38 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             build
+          xcodebuild \
+            -project ios/Pods/Pods.xcodeproj \
+            -scheme libzstd \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            CLANG_CXX_LANGUAGE_STANDARD=gnu++20 \
+            CLANG_CXX_LIBRARY=libc++ \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+
+      - name: Stage Aurora3DS third-party headers for in-tree core build
+        shell: bash
+        run: |
+          BOOST_VERSION="1.87.0"
+          BOOST_UNDERSCORE="${BOOST_VERSION//./_}"
+          BOOST_TARBALL="boost_${BOOST_UNDERSCORE}.tar.gz"
+          curl -fsSL "https://archives.boost.io/release/${BOOST_VERSION}/source/${BOOST_TARBALL}" -o "/tmp/${BOOST_TARBALL}"
+          tar -xzf "/tmp/${BOOST_TARBALL}" -C /tmp
+          mkdir -p src/core/aurora3ds/Core/include
+          rsync -a --delete "/tmp/boost_${BOOST_UNDERSCORE}/boost/" src/core/aurora3ds/Core/include/boost/
+          test -f src/core/aurora3ds/Core/include/boost/optional.hpp
+          test -f src/core/aurora3ds/Core/include/boost/align/align.hpp
+
+          ZSTD_HEADER_PATH="$(find ios/Pods/libzstd -type f -name 'zstd.h' | head -n 1)"
+          test -n "$ZSTD_HEADER_PATH"
+          ZSTD_HEADER_DIR="$(dirname "$ZSTD_HEADER_PATH")"
+          rsync -a "$ZSTD_HEADER_DIR/" src/core/aurora3ds/Core/include/
+          test -f src/core/aurora3ds/Core/include/zstd.h
+          test -f src/core/aurora3ds/Core/include/zdict.h
+          test -f src/core/aurora3ds/Core/include/zstd_errors.h
 
       - name: Verify Aurora3DS is permanently in build graph
         shell: bash
@@ -86,7 +119,7 @@ jobs:
         run: |
           mkdir -p build
           xcodebuild \
-            -workspace ios/AuroraIOS.xcworkspace \
+            -project ios/AuroraIOS.xcodeproj \
             -scheme AuroraIOS \
             -configuration Release \
             -sdk iphoneos \
