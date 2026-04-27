@@ -2,7 +2,11 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <algorithm>
 #include <atomic>
+#include <charconv>
+#include <cctype>
+#include <cstring>
 #include <tuple>
 #include <unordered_map>
 #include <boost/algorithm/string/replace.hpp>
@@ -22,6 +26,22 @@
 #include "core/hle/service/fs/archive.h"
 #include "core/hle/service/http/http_c.h"
 #include "core/hw/aes/key.h"
+
+#if !defined(CPPHTTPLIB_OPENSSL_SUPPORT) && defined(__has_include)
+#if __has_include(<mbedtls/ctr_drbg.h>) && __has_include(<mbedtls/entropy.h>) && \
+    __has_include(<mbedtls/error.h>) && __has_include(<mbedtls/net_sockets.h>) && \
+    __has_include(<mbedtls/pk.h>) && __has_include(<mbedtls/ssl.h>) && \
+    __has_include(<mbedtls/x509_crt.h>)
+#define AURORA_HTTP_MBEDTLS_FALLBACK 1
+#include <mbedtls/ctr_drbg.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/error.h>
+#include <mbedtls/net_sockets.h>
+#include <mbedtls/pk.h>
+#include <mbedtls/ssl.h>
+#include <mbedtls/x509_crt.h>
+#endif
+#endif
 
 SERIALIZE_EXPORT_IMPL(Service::HTTP::HTTP_C)
 SERIALIZE_EXPORT_IMPL(Service::HTTP::SessionData)
@@ -200,6 +220,204 @@ static void SerializeChunkedMultipartPostData(httplib::DataSink& sink,
 
     sink.os << httplib::detail::serialize_multipart_formdata_finish(boundary);
 }
+
+
+#if defined(AURORA_HTTP_MBEDTLS_FALLBACK)
+namespace {
+
+struct MbedTLSContext {
+    mbedtls_net_context server_fd;
+    mbedtls_ssl_context ssl;
+    mbedtls_ssl_config conf;
+    mbedtls_entropy_context entropy;
+    mbedtls_ctr_drbg_context ctr_drbg;
+    mbedtls_x509_crt cert;
+    mbedtls_pk_context pkey;
+
+    MbedTLSContext() {
+        mbedtls_net_init(&server_fd);
+        mbedtls_ssl_init(&ssl);
+        mbedtls_ssl_config_init(&conf);
+        mbedtls_entropy_init(&entropy);
+        mbedtls_ctr_drbg_init(&ctr_drbg);
+        mbedtls_x509_crt_init(&cert);
+        mbedtls_pk_init(&pkey);
+    }
+
+    ~MbedTLSContext() {
+        mbedtls_ssl_free(&ssl);
+        mbedtls_ssl_config_free(&conf);
+        mbedtls_ctr_drbg_free(&ctr_drbg);
+        mbedtls_entropy_free(&entropy);
+        mbedtls_net_free(&server_fd);
+        mbedtls_x509_crt_free(&cert);
+        mbedtls_pk_free(&pkey);
+    }
+};
+
+[[maybe_unused]] static std::string ToLower(std::string value) {
+    std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) {
+        return static_cast<char>(std::tolower(c));
+    });
+    return value;
+}
+
+[[maybe_unused]] static bool ReadUntil(mbedtls_ssl_context* ssl, std::string& out,
+                                       const std::string& delimiter) {
+    char buf[2048];
+    while (out.find(delimiter) == std::string::npos) {
+        const int ret = mbedtls_ssl_read(ssl, reinterpret_cast<unsigned char*>(buf), sizeof(buf));
+        if (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE) {
+            continue;
+        }
+        if (ret <= 0) {
+            return false;
+        }
+        out.append(buf, static_cast<size_t>(ret));
+    }
+    return true;
+}
+
+[[maybe_unused]] static bool ReadExact(mbedtls_ssl_context* ssl, std::string& out, size_t need) {
+    char buf[2048];
+    while (out.size() < need) {
+        const auto to_read = std::min(sizeof(buf), need - out.size());
+        const int ret = mbedtls_ssl_read(ssl, reinterpret_cast<unsigned char*>(buf), to_read);
+        if (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE) {
+            continue;
+        }
+        if (ret <= 0) {
+            return false;
+        }
+        out.append(buf, static_cast<size_t>(ret));
+    }
+    return true;
+}
+
+[[maybe_unused]] static bool ReadAll(mbedtls_ssl_context* ssl, std::string& out) {
+    char buf[2048];
+    while (true) {
+        const int ret = mbedtls_ssl_read(ssl, reinterpret_cast<unsigned char*>(buf), sizeof(buf));
+        if (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE) {
+            continue;
+        }
+        if (ret == 0 || ret == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY) {
+            return true;
+        }
+        if (ret < 0) {
+            return false;
+        }
+        out.append(buf, static_cast<size_t>(ret));
+    }
+}
+
+[[maybe_unused]] static bool DecodeChunkedBody(const std::string& src, std::string& dst) {
+    size_t pos = 0;
+    while (true) {
+        const auto line_end = src.find("\r\n", pos);
+        if (line_end == std::string::npos) {
+            return false;
+        }
+        const auto semi = src.find(';', pos);
+        const auto num_end = (semi != std::string::npos && semi < line_end) ? semi : line_end;
+        const auto len_str = src.substr(pos, num_end - pos);
+        unsigned long chunk_len = 0;
+        const auto conv = std::from_chars(len_str.data(), len_str.data() + len_str.size(), chunk_len, 16);
+        if (conv.ec != std::errc()) {
+            return false;
+        }
+        pos = line_end + 2;
+        if (chunk_len == 0) {
+            return true;
+        }
+        if (pos + chunk_len + 2 > src.size()) {
+            return false;
+        }
+        dst.append(src.data() + pos, chunk_len);
+        pos += chunk_len;
+        if (src.compare(pos, 2, "\r\n") != 0) {
+            return false;
+        }
+        pos += 2;
+    }
+}
+
+[[maybe_unused]] static bool ParseHTTPResponse(const std::string& raw, httplib::Response& response) {
+    const auto hdr_end = raw.find("\r\n\r\n");
+    if (hdr_end == std::string::npos) {
+        return false;
+    }
+
+    const auto status_line_end = raw.find("\r\n");
+    if (status_line_end == std::string::npos) {
+        return false;
+    }
+    const auto status_line = raw.substr(0, status_line_end);
+    const auto sp1 = status_line.find(' ');
+    const auto sp2 = sp1 == std::string::npos ? std::string::npos : status_line.find(' ', sp1 + 1);
+    if (sp1 == std::string::npos || sp2 == std::string::npos) {
+        return false;
+    }
+    int status = 0;
+    const auto status_str = status_line.substr(sp1 + 1, sp2 - sp1 - 1);
+    const auto conv = std::from_chars(status_str.data(), status_str.data() + status_str.size(), status);
+    if (conv.ec != std::errc()) {
+        return false;
+    }
+    response.status = status;
+    response.reason = status_line.substr(sp2 + 1);
+
+    size_t line_start = status_line_end + 2;
+    while (line_start < hdr_end) {
+        const auto line_end = raw.find("\r\n", line_start);
+        if (line_end == std::string::npos || line_end > hdr_end) {
+            break;
+        }
+        const auto line = raw.substr(line_start, line_end - line_start);
+        const auto colon = line.find(':');
+        if (colon != std::string::npos) {
+            auto key = line.substr(0, colon);
+            auto value = line.substr(colon + 1);
+            if (!value.empty() && value.front() == ' ') {
+                value.erase(value.begin());
+            }
+            response.headers.emplace(std::move(key), std::move(value));
+        }
+        line_start = line_end + 2;
+    }
+
+    const auto body = raw.substr(hdr_end + 4);
+    const auto transfer = response.get_header_value("Transfer-Encoding");
+    if (ToLower(transfer).find("chunked") != std::string::npos) {
+        std::string decoded;
+        if (!DecodeChunkedBody(body, decoded)) {
+            return false;
+        }
+        response.body = std::move(decoded);
+    } else {
+        response.body = body;
+    }
+    return true;
+}
+
+[[maybe_unused]] static bool SendAll(mbedtls_ssl_context* ssl, const std::string& payload) {
+    size_t offset = 0;
+    while (offset < payload.size()) {
+        const int ret = mbedtls_ssl_write(
+            ssl, reinterpret_cast<const unsigned char*>(payload.data() + offset), payload.size() - offset);
+        if (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE) {
+            continue;
+        }
+        if (ret <= 0) {
+            return false;
+        }
+        offset += static_cast<size_t>(ret);
+    }
+    return true;
+}
+
+} // namespace
+#endif
 
 std::size_t Context::HandleHeaderWrite(std::vector<Context::RequestHeader>& pending_headers,
                                        httplib::Stream& strm, httplib::Headers& httplib_headers) {
@@ -445,6 +663,199 @@ void Context::MakeRequestSSL(httplib::Request& request, const URLInfo& url_info,
         LOG_DEBUG(Service_HTTP, "Request successful");
         state = RequestState::ReadyToDownloadContent;
     }
+#elif defined(AURORA_HTTP_MBEDTLS_FALLBACK)
+    MbedTLSContext tls;
+    int ret = 0;
+
+    const char* personal = "aurora-http";
+    ret = mbedtls_ctr_drbg_seed(&tls.ctr_drbg, mbedtls_entropy_func, &tls.entropy,
+                                reinterpret_cast<const unsigned char*>(personal),
+                                std::strlen(personal));
+    if (ret != 0) {
+        LOG_ERROR(Service_HTTP, "mbedTLS RNG seed failed: {}", ret);
+        state = RequestState::TimedOut;
+        return;
+    }
+
+    const auto port_str = fmt::format("{}", url_info.port);
+    ret = mbedtls_net_connect(&tls.server_fd, url_info.host.c_str(), port_str.c_str(), MBEDTLS_NET_PROTO_TCP);
+    if (ret != 0) {
+        LOG_ERROR(Service_HTTP, "mbedTLS connect failed: {}", ret);
+        state = RequestState::TimedOut;
+        return;
+    }
+
+    ret = mbedtls_ssl_config_defaults(&tls.conf, MBEDTLS_SSL_IS_CLIENT, MBEDTLS_SSL_TRANSPORT_STREAM,
+                                      MBEDTLS_SSL_PRESET_DEFAULT);
+    if (ret != 0) {
+        LOG_ERROR(Service_HTTP, "mbedTLS config defaults failed: {}", ret);
+        state = RequestState::TimedOut;
+        return;
+    }
+
+    mbedtls_ssl_conf_authmode(&tls.conf, MBEDTLS_SSL_VERIFY_NONE);
+    mbedtls_ssl_conf_rng(&tls.conf, mbedtls_ctr_drbg_random, &tls.ctr_drbg);
+
+    const unsigned char* cert_data = nullptr;
+    const unsigned char* key_data = nullptr;
+    size_t cert_size = 0;
+    size_t key_size = 0;
+    if (uses_default_client_cert) {
+        cert_data = clcert_data->certificate.data();
+        key_data = clcert_data->private_key.data();
+        cert_size = clcert_data->certificate.size();
+        key_size = clcert_data->private_key.size();
+    } else if (auto client_cert = ssl_config.client_cert_ctx.lock()) {
+        cert_data = client_cert->certificate.data();
+        key_data = client_cert->private_key.data();
+        cert_size = client_cert->certificate.size();
+        key_size = client_cert->private_key.size();
+    }
+
+    if (cert_data && key_data && cert_size > 0 && key_size > 0) {
+        ret = mbedtls_x509_crt_parse_der(&tls.cert, cert_data, cert_size);
+        if (ret != 0) {
+            LOG_ERROR(Service_HTTP, "mbedTLS cert parse failed: {}", ret);
+            state = RequestState::TimedOut;
+            return;
+        }
+        ret = mbedtls_pk_parse_key(&tls.pkey, key_data, key_size, nullptr, 0);
+        if (ret != 0) {
+            LOG_ERROR(Service_HTTP, "mbedTLS key parse failed: {}", ret);
+            state = RequestState::TimedOut;
+            return;
+        }
+        ret = mbedtls_ssl_conf_own_cert(&tls.conf, &tls.cert, &tls.pkey);
+        if (ret != 0) {
+            LOG_ERROR(Service_HTTP, "mbedTLS client cert setup failed: {}", ret);
+            state = RequestState::TimedOut;
+            return;
+        }
+    }
+
+    ret = mbedtls_ssl_setup(&tls.ssl, &tls.conf);
+    if (ret != 0) {
+        LOG_ERROR(Service_HTTP, "mbedTLS ssl setup failed: {}", ret);
+        state = RequestState::TimedOut;
+        return;
+    }
+
+    ret = mbedtls_ssl_set_hostname(&tls.ssl, url_info.host.c_str());
+    if (ret != 0) {
+        LOG_ERROR(Service_HTTP, "mbedTLS set hostname failed: {}", ret);
+        state = RequestState::TimedOut;
+        return;
+    }
+
+    mbedtls_ssl_set_bio(&tls.ssl, &tls.server_fd, mbedtls_net_send, mbedtls_net_recv, nullptr);
+
+    while ((ret = mbedtls_ssl_handshake(&tls.ssl)) != 0) {
+        if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE) {
+            LOG_ERROR(Service_HTTP, "mbedTLS handshake failed: {}", ret);
+            state = RequestState::TimedOut;
+            return;
+        }
+    }
+
+    std::string req_payload = fmt::format("{} {} HTTP/1.1\r\n", request.method, request.path);
+    bool has_host = false;
+    bool has_connection = false;
+    for (const auto& h : pending_headers) {
+        if (h.name == "Host") {
+            has_host = true;
+        }
+        if (h.name == "Connection") {
+            has_connection = true;
+        }
+        req_payload += fmt::format("{}: {}\r\n", h.name, h.value);
+    }
+    if (!has_host) {
+        req_payload += fmt::format("Host: {}\r\n", url_info.host);
+    }
+    if (!has_connection) {
+        req_payload += "Connection: close\r\n";
+    }
+
+    if (!chunked_request && !post_data_raw.empty()) {
+        const bool has_content_length = std::any_of(
+            pending_headers.begin(), pending_headers.end(), [](const auto& h) { return h.name == "Content-Length"; });
+        if (!has_content_length) {
+            req_payload += fmt::format("Content-Length: {}\r\n", post_data_raw.size());
+        }
+    }
+
+    req_payload += "\r\n";
+    if (!chunked_request && !post_data_raw.empty()) {
+        req_payload += post_data_raw;
+    }
+
+    if (!SendAll(&tls.ssl, req_payload)) {
+        LOG_ERROR(Service_HTTP, "mbedTLS request send failed");
+        state = RequestState::TimedOut;
+        return;
+    }
+
+    std::string raw_response;
+    if (!ReadUntil(&tls.ssl, raw_response, "\r\n\r\n")) {
+        LOG_ERROR(Service_HTTP, "mbedTLS failed reading response headers");
+        state = RequestState::TimedOut;
+        return;
+    }
+
+    const auto header_end = raw_response.find("\r\n\r\n");
+    const auto headers_and_sep = header_end + 4;
+    const auto lower_headers = ToLower(raw_response.substr(0, header_end));
+
+    if (const auto pos = lower_headers.find("content-length:"); pos != std::string::npos) {
+        auto line_end = lower_headers.find("\r\n", pos);
+        if (line_end == std::string::npos) {
+            line_end = lower_headers.size();
+        }
+        const auto value_start = pos + std::strlen("content-length:");
+        auto value = lower_headers.substr(value_start, line_end - value_start);
+        while (!value.empty() && value.front() == ' ') {
+            value.erase(value.begin());
+        }
+        size_t expected = 0;
+        const auto conv = std::from_chars(value.data(), value.data() + value.size(), expected);
+        if (conv.ec == std::errc()) {
+            const size_t have_body = raw_response.size() - headers_and_sep;
+            if (have_body < expected) {
+                std::string rest;
+                if (!ReadExact(&tls.ssl, rest, expected - have_body)) {
+                    LOG_ERROR(Service_HTTP, "mbedTLS failed reading response body");
+                    state = RequestState::TimedOut;
+                    return;
+                }
+                raw_response += rest;
+            }
+        }
+    } else if (lower_headers.find("transfer-encoding: chunked") != std::string::npos) {
+        std::string rest;
+        if (!ReadAll(&tls.ssl, rest)) {
+            LOG_ERROR(Service_HTTP, "mbedTLS failed reading chunked response body");
+            state = RequestState::TimedOut;
+            return;
+        }
+        raw_response += rest;
+    } else {
+        std::string rest;
+        if (!ReadAll(&tls.ssl, rest)) {
+            LOG_ERROR(Service_HTTP, "mbedTLS failed reading response body (EOF mode)");
+            state = RequestState::TimedOut;
+            return;
+        }
+        raw_response += rest;
+    }
+
+    if (!ParseHTTPResponse(raw_response, response)) {
+        LOG_ERROR(Service_HTTP, "mbedTLS failed to parse HTTP response");
+        state = RequestState::TimedOut;
+        return;
+    }
+
+    LOG_DEBUG(Service_HTTP, "Request successful (mbedTLS fallback)");
+    state = RequestState::ReadyToDownloadContent;
 #else
     (void)request;
     (void)url_info;
