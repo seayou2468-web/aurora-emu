@@ -29,6 +29,15 @@ jobs:
           brew install xcodegen
           xcodegen --version
 
+      - name: Install C++ Boost
+        shell: bash
+        run: |
+          brew install boost
+          BOOST_PREFIX="$(brew --prefix boost)"
+          test -f "$BOOST_PREFIX/include/boost/optional.hpp"
+          mkdir -p src/core/aurora3ds/Core/include
+          rsync -a --delete "$BOOST_PREFIX/include/boost/" src/core/aurora3ds/Core/include/boost/
+
       - name: Generate Xcode project
         shell: bash
         run: |

@@ -240,22 +240,62 @@
         constexpr size_t kBottomWidth = 320U;
         constexpr size_t kBottomHeight = 240U;
 
-        const size_t sourceWidth = (size_t)_videoSpec.width;
-        const size_t sourceHeight = (sourceWidth > 0) ? (pixelCount / sourceWidth) : 0;
-        if (sourceWidth < kTopWidth || sourceHeight < (kTopHeight + kBottomHeight)) {
+        size_t sourceWidth = (size_t)_videoSpec.width;
+        size_t sourceHeight = (sourceWidth > 0) ? (pixelCount / sourceWidth) : 0;
+
+        // 3DS backend may provide different packing layouts than 400x480.
+        // Recover width from common layouts when the advertised spec does not match pixelCount.
+        if (sourceWidth == 0 || pixelCount % sourceWidth != 0 || sourceHeight < kTopHeight) {
+            const std::array<size_t, 4> candidates = {400U, 720U, 320U, 800U};
+            for (size_t w : candidates) {
+                if (pixelCount % w != 0) continue;
+                const size_t h = pixelCount / w;
+                if (h >= kTopHeight && h <= (kTopHeight + kBottomHeight)) {
+                    sourceWidth = w;
+                    sourceHeight = h;
+                    break;
+                }
+            }
+        }
+
+        if (sourceWidth < kTopWidth || sourceHeight < kTopHeight) {
             return;
         }
 
+        // Layout A: stacked (top 400x240, bottom 320x240 centered in the lower half)
+        if (sourceHeight >= (kTopHeight + kBottomHeight)) {
+            [self.imageView displayFrameRGBA:frameRGBA
+                                       width:sourceWidth
+                                      height:sourceHeight
+                                  sourceRect:CGRectMake(0, 0, kTopWidth, kTopHeight)];
+
+            const CGFloat bottomX = (CGFloat)((kTopWidth - kBottomWidth) / 2U);
+            [self.ndsBottomImageView displayFrameRGBA:frameRGBA
+                                                width:sourceWidth
+                                               height:sourceHeight
+                                           sourceRect:CGRectMake(bottomX, kTopHeight, kBottomWidth, kBottomHeight)];
+            return;
+        }
+
+        // Layout B: side-by-side (top 400x240 on left, bottom 320x240 on right)
+        if (sourceWidth >= (kTopWidth + kBottomWidth) && sourceHeight >= kTopHeight) {
+            [self.imageView displayFrameRGBA:frameRGBA
+                                       width:sourceWidth
+                                      height:sourceHeight
+                                  sourceRect:CGRectMake(0, 0, kTopWidth, kTopHeight)];
+            [self.ndsBottomImageView displayFrameRGBA:frameRGBA
+                                                width:sourceWidth
+                                               height:sourceHeight
+                                           sourceRect:CGRectMake(kTopWidth, 0, kBottomWidth, kBottomHeight)];
+            return;
+        }
+
+        // Layout C: top-only frame; keep lower screen black instead of dropping all rendering.
         [self.imageView displayFrameRGBA:frameRGBA
                                    width:sourceWidth
-                                  height:sourceHeight
+                                   height:sourceHeight
                               sourceRect:CGRectMake(0, 0, kTopWidth, kTopHeight)];
-
-        const CGFloat bottomX = (CGFloat)((kTopWidth - kBottomWidth) / 2U);
-        [self.ndsBottomImageView displayFrameRGBA:frameRGBA
-                                            width:sourceWidth
-                                           height:sourceHeight
-                                       sourceRect:CGRectMake(bottomX, kTopHeight, kBottomWidth, kBottomHeight)];
+        [self.ndsBottomImageView clearFrame];
         return;
     }
 

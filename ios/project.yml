@@ -21,10 +21,14 @@ settings:
       - "$(SRCROOT)/../src/core"
       - "$(SRCROOT)/../src/core/api"
       - "$(SRCROOT)/../src/core/aurora3ds/Core/include"
+    FRAMEWORK_SEARCH_PATHS:
+      - "$(inherited)"
+      - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/XCFrameworks"
     GCC_PREPROCESSOR_DEFINITIONS:
       - "$(inherited)"
       - AURORA_IOS_MINIMAL_CORE=1
       - AURORA_DISABLE_JIT=1
+      - ENABLE_SOFTWARE_RENDERER=1
 targets:
   AuroraIOS:
     type: application
@@ -35,6 +39,7 @@ targets:
       - path: ../src/core/api/emulator_core_c_api.cpp
       - path: ../src/core/core_adapter_registry.cpp
       - path: ../src/core/aurora3ds/core_adapter.cpp
+      - path: ../src/core/aurora3ds/bridge.cpp
     dependencies:
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libfaad.xcframework
       - framework: ../src/core/aurora3ds/Dependencies/XCFrameworks/libSDL3.xcframework
@@ -68,6 +73,8 @@ targets:
     settings:
       base:
         TARGETED_DEVICE_FAMILY: "1,2"
+        SDKROOT: iphoneos
+        SUPPORTED_PLATFORMS: iphoneos
         OTHER_LDFLAGS:
           - "$(inherited)"
           - "-ObjC"
