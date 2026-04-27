@@ -34,6 +34,7 @@ jobs:
         run: |
           brew install zstd
           zstd --version
+
           BOOST_VERSION="1.87.0"
           BOOST_UNDERSCORE="${BOOST_VERSION//./_}"
           BOOST_TARBALL="boost_${BOOST_UNDERSCORE}.tar.gz"
@@ -42,6 +43,15 @@ jobs:
           mkdir -p src/core/aurora3ds/Core/include
           rsync -a --delete "/tmp/boost_${BOOST_UNDERSCORE}/boost/" src/core/aurora3ds/Core/include/boost/
           test -f src/core/aurora3ds/Core/include/boost/optional.hpp
+
+          ZSTD_VERSION="1.5.7"
+          ZSTD_TARBALL="zstd-${ZSTD_VERSION}.tar.gz"
+          curl -fsSL "https://github.com/facebook/zstd/releases/download/v${ZSTD_VERSION}/${ZSTD_TARBALL}" -o "/tmp/${ZSTD_TARBALL}"
+          tar -xzf "/tmp/${ZSTD_TARBALL}" -C /tmp
+          rsync -a "/tmp/zstd-${ZSTD_VERSION}/lib/" src/core/aurora3ds/Core/include/
+          test -f src/core/aurora3ds/Core/include/zstd.h
+          test -f src/core/aurora3ds/Core/include/zdict.h
+          test -f src/core/aurora3ds/Core/include/zstd_errors.h
 
       - name: Generate Xcode project
         shell: bash
