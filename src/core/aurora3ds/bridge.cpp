@@ -196,17 +196,6 @@ Aurora3DSROMLoaderStatus ToBridgeLoaderStatus(Loader::ResultStatus status) {
   return AURORA3DS_ROM_LOADER_STATUS_ERROR;
 }
 
-std::string BuildLoaderInfo(const AURBridgeRuntime& runtime, bool is_compressed) {
-  std::ostringstream oss;
-  oss << "loader="
-      << Loader::GetFileTypeString(runtime.loader_file_type, is_compressed)
-      << ",status=" << ToLoaderStatusString(runtime.loader_status);
-  if (runtime.loader_program_id_valid) {
-    oss << ",program_id=0x" << std::hex << runtime.loader_program_id;
-  }
-  return oss.str();
-}
-
 AURBridgeRuntime* AsRuntime(void* runtime) {
   return static_cast<AURBridgeRuntime*>(runtime);
 }
@@ -289,7 +278,14 @@ bool Aurora3DSBridge_LoadROMFromPath(void* runtime_ptr, const char* rom_path) {
   if (status == Core::System::ResultStatus::Success) {
     runtime->last_error.clear();
   } else {
-    runtime->last_error = std::string(ToStatusString(status)) + " (" + BuildLoaderInfo(*runtime, app_loader->IsFileCompressed()) + ")";
+    std::ostringstream loader_info;
+    loader_info << "loader="
+                << Loader::GetFileTypeString(runtime->loader_file_type, app_loader->IsFileCompressed())
+                << ",status=" << ToLoaderStatusString(runtime->loader_status);
+    if (runtime->loader_program_id_valid) {
+      loader_info << ",program_id=0x" << std::hex << runtime->loader_program_id;
+    }
+    runtime->last_error = std::string(ToStatusString(status)) + " (" + loader_info.str() + ")";
   }
   return status == Core::System::ResultStatus::Success;
 }
