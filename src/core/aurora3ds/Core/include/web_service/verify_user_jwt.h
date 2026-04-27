@@ -6,7 +6,6 @@
 
 #include <fmt/format.h>
 #include "network/verify_user.h"
-#include "web_service/web_backend.h"
 
 namespace WebService {
 
@@ -19,7 +18,7 @@ public:
                                                const std::string& token) override;
 
 private:
-    std::string pub_key;
+    std::string host_url;
 };
 
 } // namespace WebService
