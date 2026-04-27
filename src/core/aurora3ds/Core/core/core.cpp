@@ -404,6 +404,10 @@ System::ResultStatus System::Init(Frontend::EmuWindow& emu_window,
         *memory, *timing, [this] { PrepareReschedule(); }, memory_mode, num_cores, n3ds_hw_caps,
         movie.GetOverrideInitTime());
 
+#if defined(AURORA_DISABLE_JIT)
+    Settings::values.use_cpu_jit = false;
+#endif
+
     exclusive_monitor = MakeExclusiveMonitor(*memory, num_cores);
     cpu_cores.reserve(num_cores);
     if (Settings::values.use_cpu_jit) {

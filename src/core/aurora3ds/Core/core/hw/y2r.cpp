@@ -209,7 +209,7 @@ static void WriteTileToOutput(u32* output, const ImageTile& tile, int height, in
     }
 }
 
-MICROPROFILE_DEFINE(Y2R_PerformConversion, "Y2R", "PerformConversion", MP_RGB(185, 66, 245));
+MICROPROFILE_DEFINE(Y2R_ConversionScope, "Y2R", "PerformConversion", MP_RGB(185, 66, 245));
 
 /**
  * Performs a Y2R colorspace conversion.
@@ -262,7 +262,7 @@ MICROPROFILE_DEFINE(Y2R_PerformConversion, "Y2R", "PerformConversion", MP_RGB(18
  * so they are believed to be invalid configurations anyway.
  */
 void PerformConversion(Memory::MemorySystem& memory, ConversionConfiguration cvt) {
-    MICROPROFILE_SCOPE(Y2R_PerformConversion);
+    MICROPROFILE_SCOPE(Y2R_ConversionScope);
 
     ASSERT(cvt.input_line_width % 8 == 0);
     ASSERT(cvt.block_alignment != BlockAlignment::Block8x8 || cvt.input_lines % 8 == 0);
