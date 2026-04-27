@@ -30,6 +30,21 @@
     return NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;
 }
 
+
+- (NSString *)threeDSUserDirectory {
+    return [[self documentsDirectory] stringByAppendingPathComponent:@"3DS"];
+}
+
+- (NSString *)threeDSSysDataDirectory {
+    return [[self threeDSUserDirectory] stringByAppendingPathComponent:@"sysdata"];
+}
+
+- (NSString *)systemDataFileNameForIdentifier:(NSString *)identifier {
+    if ([identifier isEqualToString:@"3ds_aes_keys"]) return @"aes_keys.txt";
+    if ([identifier isEqualToString:@"3ds_seeddb"]) return @"seeddb.bin";
+    return nil;
+}
+
 - (void)loadDatabase {
     NSString *dbPath = [[self documentsDirectory] stringByAppendingPathComponent:@"aurora_database.plist"];
     NSDictionary *payload = [NSDictionary dictionaryWithContentsOfFile:dbPath];
@@ -96,6 +111,37 @@
     return [@"BIOS" stringByAppendingPathComponent:fileName]; // Return relative path
 }
 
+- (NSString *)persistSystemDataFileAtURL:(NSURL *)url identifier:(NSString *)identifier {
+    if (!url || !url.isFileURL || identifier.length == 0) return nil;
+
+    NSString *targetFileName = [self systemDataFileNameForIdentifier:identifier];
+    if (targetFileName.length == 0) return nil;
+
+    BOOL didAccess = [url startAccessingSecurityScopedResource];
+
+    NSString *sysDataDir = [self threeDSSysDataDirectory];
+    [[NSFileManager defaultManager] createDirectoryAtPath:sysDataDir
+                              withIntermediateDirectories:YES
+                                               attributes:nil
+                                                    error:nil];
+
+    NSString *destPath = [sysDataDir stringByAppendingPathComponent:targetFileName];
+    NSError *error = nil;
+    if ([[NSFileManager defaultManager] fileExistsAtPath:destPath]) {
+        [[NSFileManager defaultManager] removeItemAtPath:destPath error:nil];
+    }
+    [[NSFileManager defaultManager] copyItemAtURL:url toURL:[NSURL fileURLWithPath:destPath] error:&error];
+
+    if (didAccess) [url stopAccessingSecurityScopedResource];
+
+    if (error) {
+        NSLog(@"[AUR][DB] SysData Copy failed: %@", error);
+        return nil;
+    }
+
+    return [@"3DS/sysdata" stringByAppendingPathComponent:targetFileName];
+}
+
 - (NSArray<AURGame *> *)gamesForCoreType:(EmulatorCoreType)coreType {
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"coreType == %ld", (long)coreType];
     return [self.allGames filteredArrayUsingPredicate:predicate];
@@ -158,13 +204,20 @@
     if ([identifier isEqualToString:@"gba"]) return @(EMULATOR_CORE_TYPE_GBA);
     if ([identifier isEqualToString:@"gb"]) return @1004; // Use 1004 for GB
     if ([identifier isEqualToString:@"gbc"]) return @1005; // Use 1005 for GBC
+    if ([identifier isEqualToString:@"3ds_aes_keys"]) return @2001;
+    if ([identifier isEqualToString:@"3ds_seeddb"]) return @2002;
     return nil;
 }
 
 - (void)setBIOSURL:(NSURL *)url forIdentifier:(NSString *)identifier {
     NSNumber *key = [self biosStorageKeyForIdentifier:identifier];
     if (!key) return;
-    NSString *relPath = [self persistBIOSFileAtURL:url storageKey:identifier];
+    NSString *relPath = nil;
+    if ([self systemDataFileNameForIdentifier:identifier].length > 0) {
+        relPath = [self persistSystemDataFileAtURL:url identifier:identifier];
+    } else {
+        relPath = [self persistBIOSFileAtURL:url storageKey:identifier];
+    }
     if (relPath) {
         self.biosPaths[key.stringValue] = relPath;
         [self saveDatabase];

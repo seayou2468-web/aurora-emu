@@ -31,12 +31,14 @@
     NSString *ndsArm9Bios = [[AURDatabaseManager sharedManager] BIOSPathForIdentifier:@"nds_arm9"].lastPathComponent ?: @"Required (4KB)";
     NSString *ndsArm7Bios = [[AURDatabaseManager sharedManager] BIOSPathForIdentifier:@"nds_arm7"].lastPathComponent ?: @"Required (16KB)";
     NSString *ndsFirmware = [[AURDatabaseManager sharedManager] BIOSPathForIdentifier:@"nds_firmware"].lastPathComponent ?: @"Optional";
+    NSString *aesKeys = [[AURDatabaseManager sharedManager] BIOSPathForIdentifier:@"3ds_aes_keys"].lastPathComponent ?: @"Optional (aes_keys.txt)";
+    NSString *seedDb = [[AURDatabaseManager sharedManager] BIOSPathForIdentifier:@"3ds_seeddb"].lastPathComponent ?: @"Optional (seeddb.bin)";
 
     self.sections = @[
         @{@"title": @"User Interface", @"items": @[@"Appearance", @"App Icon"]},
         @{@"title": @"Core Settings (BIOS)",
-          @"items": @[@"GBA BIOS", @"GB BIOS", @"GBC BIOS", @"NDS ARM9 BIOS", @"NDS ARM7 BIOS", @"NDS Firmware"],
-          @"details": @[gbaBios, gbBios, gbcBios, ndsArm9Bios, ndsArm7Bios, ndsFirmware]},
+          @"items": @[@"GBA BIOS", @"GB BIOS", @"GBC BIOS", @"NDS ARM9 BIOS", @"NDS ARM7 BIOS", @"NDS Firmware", @"3DS aes_keys.txt", @"3DS seeddb.bin"],
+          @"details": @[gbaBios, gbBios, gbcBios, ndsArm9Bios, ndsArm7Bios, ndsFirmware, aesKeys, seedDb]},
         @{@"title": @"Controllers", @"items": @[@"Preferred Skins", @"Import Skin"]},
         @{@"title": @"About", @"items": @[@"Version 1.0"]}
     ];
@@ -64,7 +66,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     if (indexPath.section == 1) {
-        NSArray *ids = @[@"gba", @"gb", @"gbc", @"nds_arm9", @"nds_arm7", @"nds_firmware"];
+        NSArray *ids = @[@"gba", @"gb", @"gbc", @"nds_arm9", @"nds_arm7", @"nds_firmware", @"3ds_aes_keys", @"3ds_seeddb"];
         if (indexPath.row < ids.count) {
             self.pickingBIOSIdentifier = ids[indexPath.row];
             UIDocumentPickerViewController *picker = [[UIDocumentPickerViewController alloc] initForOpeningContentTypes:@[UTTypeData] asCopy:YES];
