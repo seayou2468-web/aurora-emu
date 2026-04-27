@@ -177,7 +177,7 @@ protected:
      * Only sets the setting to the given initializer, leaving the other members to their default
      * initializers.
      *
-     * @param global_val Initial value of the setting
+     * @param val Initial value of the setting
      */
     explicit Setting(const Type& val) : value{val} {}
 
@@ -330,9 +330,7 @@ public:
 
     /**
      * Returns either the global or custom setting depending on the values of this setting's global
-     * state or if the global value was specifically requested.
-     *
-     * @param need_global Request global value regardless of setting's state; defaults to false
+     * state.
      *
      * @returns The required value of the setting
      */
@@ -342,6 +340,14 @@ public:
         }
         return custom;
     }
+    /**
+     * Returns either the global or custom setting depending on the value of this setting's global
+     * state or if the global value was specifically requested.
+     *
+     * @param need_global Request global value regardless of setting's state; defaults to false
+     *
+     * @returns The required value of the setting
+     */
     [[nodiscard]] virtual const Type& GetValue(bool need_global) const {
         if (use_global || need_global) {
             return this->value;
