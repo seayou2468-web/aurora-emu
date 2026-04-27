@@ -109,7 +109,7 @@ FramebufferLayout SingleFrameLayout(u32 width, u32 height, bool is_swapped, bool
  * This is useful in particular because it matches well with a 1920x1080 resolution monitor
  * @param width Window framebuffer width in pixels
  * @param height Window framebuffer height in pixels
- * @param is_swapped if true, the bottom screen will be the large display
+ * @param swapped if true, the bottom screen will be the large display
  * @param upright if true, the screens will be rotated 90 degrees anti-clockwise
  * @param scale_factor The ratio between the large screen with respect to the smaller screen
  * @param vertical_alignment The vertical alignment of the smaller screen relative to the larger
@@ -123,7 +123,7 @@ FramebufferLayout LargeFrameLayout(u32 width, u32 height, bool is_swapped, bool 
  * and 1x top and bottom screen on the left
  * @param width Window framebuffer width in pixels
  * @param height Window framebuffer height in pixels
- * @param is_swapped if true, the bottom screen will be the large display
+ * @param swapped if true, the bottom screen will be the large display
  * @param upright if true, the screens will be rotated 90 degrees anti-clockwise
  * @return Newly created FramebufferLayout object with default screen regions initialized
  */

@@ -23,7 +23,8 @@
 #include "video_core/renderer_base.h"
 #include "video_core/video_core.h"
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
 #endif
 
 EmulationWindow_Apple::EmulationWindow_Apple(CA::MetalLayer* surface, bool is_secondary, CGSize size) : Frontend::EmuWindow(is_secondary), host_window(surface), m_size(size) {
