@@ -1,7 +1,8 @@
-install! 'cocoapods', :integrate_targets => false
 platform :ios, '26.0'
 use_frameworks!
 inhibit_all_warnings!
+
+project 'AuroraIOS.xcodeproj'
 
 target 'AuroraIOS' do
   pod 'boost'

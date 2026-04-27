@@ -34,28 +34,31 @@ jobs:
         run: |
           brew install cocoapods
           pod --version
-          pod install --project-directory=ios --repo-update
-
-          mkdir -p src/core/aurora3ds/Core/include
-
-          BOOST_OPTIONAL_PATH="$(find ios/Pods -type f -path '*/boost/optional.hpp' | head -n 1)"
-          test -n "$BOOST_OPTIONAL_PATH"
-          BOOST_ROOT_DIR="$(dirname "$(dirname "$BOOST_OPTIONAL_PATH")")"
-          rsync -a --delete "$BOOST_ROOT_DIR/boost/" src/core/aurora3ds/Core/include/boost/
-          test -f src/core/aurora3ds/Core/include/boost/optional.hpp
-
-          ZSTD_HEADER_PATH="$(find ios/Pods -type f -name 'zstd.h' | head -n 1)"
-          test -n "$ZSTD_HEADER_PATH"
-          ZSTD_HEADER_DIR="$(dirname "$ZSTD_HEADER_PATH")"
-          rsync -a "$ZSTD_HEADER_DIR/" src/core/aurora3ds/Core/include/
-          test -f src/core/aurora3ds/Core/include/zstd.h
-          test -f src/core/aurora3ds/Core/include/zdict.h
-          test -f src/core/aurora3ds/Core/include/zstd_errors.h
 
       - name: Generate Xcode project
         shell: bash
         run: |
           xcodegen generate --spec ios/project.yml --project ios
+
+      - name: Install CocoaPods dependencies (Boost & zstd)
+        shell: bash
+        run: |
+          pod install --project-directory=ios --repo-update
+          test -d ios/Pods/boost
+          test -d ios/Pods/zstd
+
+      - name: Build CocoaPods dependencies for iOS device
+        shell: bash
+        run: |
+          xcodebuild \
+            -workspace ios/AuroraIOS.xcworkspace \
+            -scheme Pods-AuroraIOS \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
 
       - name: Verify Aurora3DS is permanently in build graph
         shell: bash
@@ -65,6 +68,8 @@ jobs:
           rg -n "path: ../src/core/aurora3ds/Core" ios/project.yml
           rg -n "path: ../src/core/aurora3ds/CitraObjC" ios/project.yml
           rg -n "\\$\\(BUILD_DIR\\)/src/core/aurora3ds/bridge\\.o" Makefile
+          rg -n "pod 'boost'" ios/Podfile
+          rg -n "pod 'zstd'" ios/Podfile
 
       - name: Verify iOS device-only build target
         shell: bash
@@ -79,7 +84,7 @@ jobs:
         run: |
           mkdir -p build
           xcodebuild \
-            -project ios/AuroraIOS.xcodeproj \
+            -workspace ios/AuroraIOS.xcworkspace \
             -scheme AuroraIOS \
             -configuration Release \
             -sdk iphoneos \
