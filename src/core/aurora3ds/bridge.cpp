@@ -3,18 +3,22 @@
 #include <string>
 #include <mutex>
 #include <memory>
+#include <sstream>
 #include <vector>
 
 #if defined(__APPLE__)
 #include <dlfcn.h>
 #include "./Core/include/common/dynamic_library/dynamic_library.h"
+#include "./Core/include/common/file_util.h"
 #include "./Core/include/core/core.h"
 #include "./Core/include/core/dumping/backend.h"
 #include "./Core/include/core/frontend/emu_window.h"
 #include "./Core/include/core/frontend/applets/default_applets.h"
 #include "./Core/include/core/frontend/framebuffer_layout.h"
+#include "./Core/include/core/loader/loader.h"
 #include "./Core/include/common/logging/backend.h"
 #include "./Core/include/common/logging/filter.h"
+#include "./Core/include/common/settings.h"
 #include "./Core/include/network/network.h"
 #include "./CitraObjC/Camera/CameraFactory.h"
 #include "./CitraObjC/Configuration/Configuration.h"
@@ -70,6 +74,10 @@ struct AURBridgeRuntime {
   float render_surface_scale = 1.0f;
   std::vector<uint32_t> frame_rgba;
   size_t no_frame_counter = 0;
+  Loader::FileType loader_file_type = Loader::FileType::Unknown;
+  Loader::ResultStatus loader_status = Loader::ResultStatus::ErrorNotLoaded;
+  u64 loader_program_id = 0;
+  bool loader_program_id_valid = false;
   std::string last_error;
 };
 
@@ -138,6 +146,35 @@ const char* ToStatusString(Core::System::ResultStatus status) {
   return "unknown error";
 }
 
+const char* ToLoaderStatusString(Loader::ResultStatus status) {
+  switch (status) {
+    case Loader::ResultStatus::Success: return "success";
+    case Loader::ResultStatus::Error: return "error";
+    case Loader::ResultStatus::ErrorInvalidFormat: return "invalid format";
+    case Loader::ResultStatus::ErrorNotImplemented: return "not implemented";
+    case Loader::ResultStatus::ErrorNotLoaded: return "not loaded";
+    case Loader::ResultStatus::ErrorNotUsed: return "not used";
+    case Loader::ResultStatus::ErrorAlreadyLoaded: return "already loaded";
+    case Loader::ResultStatus::ErrorMemoryAllocationFailed: return "memory allocation failed";
+    case Loader::ResultStatus::ErrorEncrypted: return "encrypted";
+    case Loader::ResultStatus::ErrorGbaTitle: return "gba title";
+    case Loader::ResultStatus::ErrorArtic: return "artic";
+    case Loader::ResultStatus::ErrorNotFound: return "not found";
+  }
+  return "unknown";
+}
+
+std::string BuildLoaderInfo(const AURBridgeRuntime& runtime, bool is_compressed) {
+  std::ostringstream oss;
+  oss << "loader="
+      << Loader::GetFileTypeString(runtime.loader_file_type, is_compressed)
+      << ",status=" << ToLoaderStatusString(runtime.loader_status);
+  if (runtime.loader_program_id_valid) {
+    oss << ",program_id=0x" << std::hex << runtime.loader_program_id;
+  }
+  return oss.str();
+}
+
 AURBridgeRuntime* AsRuntime(void* runtime) {
   return static_cast<AURBridgeRuntime*>(runtime);
 }
@@ -198,8 +235,30 @@ bool Aurora3DSBridge_LoadBIOSFromPath(void*, const char*) {
 bool Aurora3DSBridge_LoadROMFromPath(void* runtime_ptr, const char* rom_path) {
   auto* runtime = AsRuntime(runtime_ptr);
   if (!runtime || !runtime->system || !runtime->window || !rom_path) return false;
+  FileUtil::SetCurrentRomPath(std::string(rom_path));
+  auto app_loader = Loader::GetLoader(std::string(rom_path));
+  if (!app_loader) {
+    runtime->loader_file_type = Loader::FileType::Unknown;
+    runtime->loader_status = Loader::ResultStatus::ErrorNotFound;
+    runtime->loader_program_id_valid = false;
+    runtime->last_error = "loader not found";
+    return false;
+  }
+
+  runtime->loader_file_type = app_loader->GetFileType();
+  runtime->loader_status = Loader::ResultStatus::Success;
+  runtime->loader_program_id = 0;
+  runtime->loader_program_id_valid =
+      app_loader->ReadProgramId(runtime->loader_program_id) == Loader::ResultStatus::Success;
+
+  runtime->system->ApplySettings();
+  Settings::LogSettings();
   const auto status = runtime->system->Load(*runtime->window, std::string(rom_path));
-  runtime->last_error = ToStatusString(status);
+  if (status == Core::System::ResultStatus::Success) {
+    runtime->last_error.clear();
+  } else {
+    runtime->last_error = std::string(ToStatusString(status)) + " (" + BuildLoaderInfo(*runtime, app_loader->IsFileCompressed()) + ")";
+  }
   return status == Core::System::ResultStatus::Success;
 }
 
