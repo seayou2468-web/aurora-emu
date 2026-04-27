@@ -33,7 +33,9 @@ jobs:
         shell: bash
         run: |
           brew install cocoapods
+          brew install vulkan-headers
           pod --version
+          test -f "$(brew --prefix)/include/vulkan/vulkan.hpp"
 
       - name: Generate Xcode project
         shell: bash
@@ -94,6 +96,13 @@ jobs:
           test -f src/core/aurora3ds/Core/include/zstd.h
           test -f src/core/aurora3ds/Core/include/zdict.h
           test -f src/core/aurora3ds/Core/include/zstd_errors.h
+
+          VULKAN_INCLUDE_DIR="$(brew --prefix)/include/vulkan"
+          test -d "$VULKAN_INCLUDE_DIR"
+          mkdir -p src/core/aurora3ds/Core/include/vulkan
+          rsync -a "$VULKAN_INCLUDE_DIR/" src/core/aurora3ds/Core/include/vulkan/
+          test -f src/core/aurora3ds/Core/include/vulkan/vulkan.hpp
+          test -f src/core/aurora3ds/Core/include/vulkan/vulkan.h
 
       - name: Verify Aurora3DS is permanently in build graph
         shell: bash
