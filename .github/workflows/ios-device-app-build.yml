@@ -29,6 +29,15 @@ jobs:
           brew install xcodegen
           xcodegen --version
 
+      - name: Install C++ Boost
+        shell: bash
+        run: |
+          brew install boost
+          BOOST_PREFIX="$(brew --prefix boost)"
+          echo "CPLUS_INCLUDE_PATH=$BOOST_PREFIX/include${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}" >> "$GITHUB_ENV"
+          echo "CPATH=$BOOST_PREFIX/include${CPATH:+:$CPATH}" >> "$GITHUB_ENV"
+          test -f "$BOOST_PREFIX/include/boost/optional.hpp"
+
       - name: Generate Xcode project
         shell: bash
         run: |
