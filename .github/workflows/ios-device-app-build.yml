@@ -32,23 +32,22 @@ jobs:
       - name: Install Aurora3DS build prerequisites
         shell: bash
         run: |
-          brew install zstd
-          zstd --version
+          brew install cocoapods
+          pod --version
+          pod install --project-directory=ios --repo-update
 
-          BOOST_VERSION="1.87.0"
-          BOOST_UNDERSCORE="${BOOST_VERSION//./_}"
-          BOOST_TARBALL="boost_${BOOST_UNDERSCORE}.tar.gz"
-          curl -fsSL "https://archives.boost.io/release/${BOOST_VERSION}/source/${BOOST_TARBALL}" -o "/tmp/${BOOST_TARBALL}"
-          tar -xzf "/tmp/${BOOST_TARBALL}" -C /tmp
           mkdir -p src/core/aurora3ds/Core/include
-          rsync -a --delete "/tmp/boost_${BOOST_UNDERSCORE}/boost/" src/core/aurora3ds/Core/include/boost/
+
+          BOOST_OPTIONAL_PATH="$(find ios/Pods -type f -path '*/boost/optional.hpp' | head -n 1)"
+          test -n "$BOOST_OPTIONAL_PATH"
+          BOOST_ROOT_DIR="$(dirname "$(dirname "$BOOST_OPTIONAL_PATH")")"
+          rsync -a --delete "$BOOST_ROOT_DIR/boost/" src/core/aurora3ds/Core/include/boost/
           test -f src/core/aurora3ds/Core/include/boost/optional.hpp
 
-          ZSTD_VERSION="1.5.7"
-          ZSTD_TARBALL="zstd-${ZSTD_VERSION}.tar.gz"
-          curl -fsSL "https://github.com/facebook/zstd/releases/download/v${ZSTD_VERSION}/${ZSTD_TARBALL}" -o "/tmp/${ZSTD_TARBALL}"
-          tar -xzf "/tmp/${ZSTD_TARBALL}" -C /tmp
-          rsync -a "/tmp/zstd-${ZSTD_VERSION}/lib/" src/core/aurora3ds/Core/include/
+          ZSTD_HEADER_PATH="$(find ios/Pods -type f -name 'zstd.h' | head -n 1)"
+          test -n "$ZSTD_HEADER_PATH"
+          ZSTD_HEADER_DIR="$(dirname "$ZSTD_HEADER_PATH")"
+          rsync -a "$ZSTD_HEADER_DIR/" src/core/aurora3ds/Core/include/
           test -f src/core/aurora3ds/Core/include/zstd.h
           test -f src/core/aurora3ds/Core/include/zdict.h
           test -f src/core/aurora3ds/Core/include/zstd_errors.h

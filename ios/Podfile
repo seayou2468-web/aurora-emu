@@ -1,0 +1,9 @@
+install! 'cocoapods', :integrate_targets => false
+platform :ios, '26.0'
+use_frameworks!
+inhibit_all_warnings!
+
+target 'AuroraIOS' do
+  pod 'boost'
+  pod 'zstd'
+end
