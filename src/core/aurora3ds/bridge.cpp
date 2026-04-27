@@ -4,25 +4,7 @@
 #include <mutex>
 #include <vector>
 
-#if defined(__APPLE__) && defined(AURORA3DS_EMBEDDED_CORE_LINKED) && \
-    __has_include(<boost/optional.hpp>) && \
-    __has_include(<boost/predef.h>) && __has_include(<boost/serialization/version.hpp>) && \
-    __has_include(<boost/serialization/access.hpp>) && \
-    __has_include(<boost/serialization/array.hpp>) && \
-    __has_include(<boost/serialization/export.hpp>) && \
-    __has_include(<boost/serialization/optional.hpp>) && \
-    __has_include(<boost/serialization/shared_ptr.hpp>) && \
-    __has_include(<boost/serialization/split_free.hpp>) && \
-    __has_include(<boost/serialization/split_member.hpp>) && \
-    __has_include(<boost/serialization/vector.hpp>) && \
-    __has_include(<boost/icl/discrete_interval.hpp>) && \
-    __has_include(<boost/icl/interval_set.hpp>)
-#define AURORA3DS_EMBEDDED_CORE_AVAILABLE 1
-#else
-#define AURORA3DS_EMBEDDED_CORE_AVAILABLE 0
-#endif
-
-#if AURORA3DS_EMBEDDED_CORE_AVAILABLE
+#if defined(__APPLE__)
 #include "./Core/include/core/core.h"
 #include "./Core/include/core/dumping/backend.h"
 #include "./Core/include/core/frontend/emu_window.h"
@@ -31,7 +13,7 @@
 
 extern "C" {
 
-#if AURORA3DS_EMBEDDED_CORE_AVAILABLE
+#if defined(__APPLE__)
 
 namespace {
 
