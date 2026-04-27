@@ -19,9 +19,7 @@ RendererSoftware::RendererSoftware(Core::System& system, Pica::PicaCore& pica_,
 RendererSoftware::~RendererSoftware() = default;
 
 void RendererSoftware::SwapBuffers() {
-    system.perf_stats->StartSwap();
     PrepareRenderTarget();
-    system.perf_stats->EndSwap();
     EndFrame();
 }
 
