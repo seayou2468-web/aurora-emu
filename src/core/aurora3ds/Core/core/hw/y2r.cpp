@@ -2,6 +2,8 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <sys/types.h>
+#include <time.h>
 #include <algorithm>
 #include <array>
 #include <cstddef>
