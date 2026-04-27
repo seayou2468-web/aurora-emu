@@ -48,6 +48,7 @@ targets:
       - path: ../src/core/core_adapter_registry.cpp
       - path: ../src/core/aurora3ds/core_adapter.cpp
       - path: ../src/core/aurora3ds/bridge.cpp
+      - path: ../src/core/aurora3ds/Dependencies/lodepng/lodepng.cpp
       - path: ../src/core/aurora3ds/Core
       - path: ../src/core/aurora3ds/CitraObjC
     dependencies:
@@ -90,6 +91,7 @@ targets:
           - "-ObjC"
           - "-lc++"
           - "-lz"
+          - "-lzstd"
           - "-liconv"
           - "-framework Foundation"
           - "-framework UIKit"
@@ -100,4 +102,6 @@ targets:
           - "-framework MetalKit"
           - "-framework UniformTypeIdentifiers"
           - "-framework CoreGraphics"
+          - "-framework CoreMedia"
+          - "-framework CoreVideo"
           - "-framework Security"

@@ -23,6 +23,7 @@
 #include "video_core/renderer_base.h"
 #include "video_core/video_core.h"
 
+#define SDL_MAIN_HANDLED
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #endif
