@@ -28,6 +28,7 @@ settings:
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/oaknut"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/httplib"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/xbyak"
+      - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/dds-ktx"
       - "$(SRCROOT)/../src/core/aurora3ds/Dependencies/XCFrameworks/libsirit.xcframework/ios-arm64/Headers"
     FRAMEWORK_SEARCH_PATHS:
       - "$(inherited)"
