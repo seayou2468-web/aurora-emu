@@ -314,7 +314,7 @@ static void AURFillIdentityLUT(float *lutData, NSUInteger width, NSUInteger heig
     if (!layer || !self.window) return;
     
     CGFloat scale = self.window.screen.nativeScale;
-    if (scale == 0.0) scale = [UIScreen mainScreen].nativeScale;
+    if (scale == 0.0) scale = 1.0;
     
     CGSize size = self.bounds.size;
     if (size.width > 0.0 && size.height > 0.0) {

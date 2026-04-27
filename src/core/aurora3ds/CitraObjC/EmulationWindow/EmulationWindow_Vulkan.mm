@@ -47,7 +47,8 @@ bool EmulationWindow_Vulkan::CreateWindowSurface() {
     
     window_info.render_surface = host_window;
     window_info.type = Frontend::WindowSystemType::MacOS;
-    window_info.render_surface_scale = [[UIScreen mainScreen] nativeScale];
+    const auto scale = host_window ? host_window->contentsScale() : 1.0;
+    window_info.render_surface_scale = scale > 0.0 ? static_cast<float>(scale) : 1.0f;
     
     return true;
 };

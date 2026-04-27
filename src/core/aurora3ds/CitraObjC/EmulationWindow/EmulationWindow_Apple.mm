@@ -7,8 +7,6 @@
 
 #import "EmulationWindow_Apple.h"
 
-#import <UIKit/UIKit.h>
-
 #ifdef __cplusplus
 #include <algorithm>
 #include <array>
@@ -50,7 +48,8 @@ void EmulationWindow_Apple::OnSurfaceChanged(CA::MetalLayer* surface) {
     
     window_info.type = Frontend::WindowSystemType::MacOS;
     window_info.render_surface = surface;
-    window_info.render_surface_scale = [[UIScreen mainScreen] nativeScale];
+    const auto scale = surface ? surface->contentsScale() : 1.0;
+    window_info.render_surface_scale = scale > 0.0 ? static_cast<float>(scale) : 1.0f;
 
     StopPresenting();
     OnFramebufferSizeChanged();
