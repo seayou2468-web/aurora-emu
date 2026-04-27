@@ -6,6 +6,7 @@
 //
 
 #import "EmulationWindow_Apple.h"
+#import <QuartzCore/CAMetalLayer.h>
 
 #ifdef __cplusplus
 #include <algorithm>
@@ -48,7 +49,8 @@ void EmulationWindow_Apple::OnSurfaceChanged(CA::MetalLayer* surface) {
     
     window_info.type = Frontend::WindowSystemType::MacOS;
     window_info.render_surface = surface;
-    const auto scale = surface ? surface->contentsScale() : 1.0;
+    CAMetalLayer* metal_layer = (__bridge CAMetalLayer*)surface;
+    const CGFloat scale = metal_layer ? metal_layer.contentsScale : 1.0;
     window_info.render_surface_scale = scale > 0.0 ? static_cast<float>(scale) : 1.0f;
 
     StopPresenting();

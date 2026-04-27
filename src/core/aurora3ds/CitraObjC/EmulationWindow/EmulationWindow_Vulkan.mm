@@ -9,6 +9,7 @@
 #include "GraphicsContext_Apple.h"
 
 #import <UIKit/UIKit.h>
+#import <QuartzCore/CAMetalLayer.h>
 
 EmulationWindow_Vulkan::EmulationWindow_Vulkan(CA::MetalLayer* surface, std::shared_ptr<Common::DynamicLibrary> driver_library, bool is_secondary, CGSize size) : EmulationWindow_Apple(surface, is_secondary, size), surface{surface}, driver_library(driver_library) {
     CreateWindowSurface();
@@ -47,7 +48,8 @@ bool EmulationWindow_Vulkan::CreateWindowSurface() {
     
     window_info.render_surface = host_window;
     window_info.type = Frontend::WindowSystemType::MacOS;
-    const auto scale = host_window ? host_window->contentsScale() : 1.0;
+    CAMetalLayer* metal_layer = (__bridge CAMetalLayer*)host_window;
+    const CGFloat scale = metal_layer ? metal_layer.contentsScale : 1.0;
     window_info.render_surface_scale = scale > 0.0 ? static_cast<float>(scale) : 1.0f;
     
     return true;
