@@ -3,10 +3,12 @@
 // Refer to the license.txt file included.
 
 #include <memory>
+#include <limits>
 #include <string>
 #include "common/logging/log.h"
 #include "common/string_util.h"
 #include "core/core.h"
+#include "core/file_sys/cia_container.h"
 #include "core/hle/kernel/process.h"
 #include "core/loader/3dsx.h"
 #include "core/loader/elf.h"
@@ -107,6 +109,18 @@ static std::unique_ptr<AppLoader> GetFileLoader(Core::System& system, FileUtil::
     case FileType::CXI:
     case FileType::CCI:
         return std::make_unique<AppLoader_NCCH>(system, std::move(file), filepath);
+    case FileType::CIA: {
+        FileSys::CIAContainer cia;
+        if (cia.Load(filepath) != ResultStatus::Success) {
+            return nullptr;
+        }
+        const u64 content_offset = cia.GetContentOffset(0);
+        if (content_offset > static_cast<u64>(std::numeric_limits<u32>::max())) {
+            return nullptr;
+        }
+        return std::make_unique<AppLoader_NCCH>(
+            system, std::move(file), filepath, static_cast<u32>(content_offset), FileType::CIA);
+    }
 
     default:
         return nullptr;
