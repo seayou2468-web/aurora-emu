@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <vector>
 #include "common/logging/log.h"
-#include "common/zstd_compression.h"
 #include "core/core.h"
 #include "core/hle/kernel/process.h"
 #include "core/hle/kernel/resource_limit.h"
@@ -254,20 +253,13 @@ AppLoader_THREEDSX::AppLoader_THREEDSX(Core::System& system_, FileUtil::IOFile&&
     : AppLoader(system_, std::move(file)), filename(filename), filepath(filepath) {
 
     filetype = IdentifyType(this->file.get());
-
-    if (FileUtil::Z3DSReadIOFile::GetUnderlyingFileMagic(this->file.get()) != std::nullopt) {
-        this->file = std::make_unique<FileUtil::Z3DSReadIOFile>(std::move(this->file));
-    }
 }
 
 FileType AppLoader_THREEDSX::IdentifyType(FileUtil::IOFile* file) {
     u32 magic{};
 
     if (file->Seek(0, SEEK_SET) && 1 == file->ReadArray<u32>(&magic, 1)) {
-        if (MakeMagic('3', 'D', 'S', 'X') == magic ||
-            (MakeMagic('Z', '3', 'D', 'S') == magic &&
-             FileUtil::Z3DSReadIOFile::GetUnderlyingFileMagic(file) ==
-                 MakeMagic('3', 'D', 'S', 'X')))
+        if (MakeMagic('3', 'D', 'S', 'X') == magic)
             return FileType::THREEDSX;
     }
 
@@ -292,8 +284,6 @@ ResultStatus AppLoader_THREEDSX::Load(std::shared_ptr<Kernel::Process>& process)
     // Attach the default resource limit (APPLICATION) to the process
     process->resource_limit =
         system.Kernel().ResourceLimit().GetForCategory(Kernel::ResourceLimitCategory::Application);
-
-    process->resource_limit->ApplyAppMaxCPUSetting(process, 1, 89);
 
     // On real HW this is done with FS:Reg, but we can be lazy
     auto fs_user = system.ServiceManager().GetService<Service::FS::FS_USER>("fs:USER");
@@ -346,16 +336,12 @@ ResultStatus AppLoader_THREEDSX::ReadRomFS(std::shared_ptr<FileSys::RomFSReader>
 
 AppLoader::CompressFileInfo AppLoader_THREEDSX::GetCompressFileInfo() {
     CompressFileInfo info;
-    info.is_supported = true;
-    info.recommended_compressed_extension = "z3dsx";
-    info.recommended_uncompressed_extension = "3dsx";
-    info.underlying_magic = std::array<u8, 4>({'3', 'D', 'S', 'X'});
-    info.is_compressed = file->IsCompressed();
+    info.is_supported = false;
     return info;
 }
 
 bool AppLoader_THREEDSX::IsFileCompressed() {
-    return file->IsCompressed();
+    return false;
 }
 
 ResultStatus AppLoader_THREEDSX::ReadIcon(std::vector<u8>& buffer) {

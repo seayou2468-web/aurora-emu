@@ -12,7 +12,6 @@
 #include "common/settings.h"
 #include "common/string_util.h"
 #include "common/swap.h"
-#include "common/zstd_compression.h"
 #include "core/core.h"
 #include "core/file_sys/ncch_container.h"
 #include "core/file_sys/title_metadata.h"
@@ -37,16 +36,6 @@ static constexpr u64 DLP_CHILD_TID_HIGH = 0x0004000100000000;
 
 FileType AppLoader_NCCH::IdentifyType(FileUtil::IOFile* file) {
     u32 magic{};
-
-    // Check compressed NCCH file
-    std::optional<u32> magic_zstd = FileUtil::Z3DSReadIOFile::GetUnderlyingFileMagic(file);
-    if (magic_zstd.has_value()) {
-        if (MakeMagic('N', 'C', 'S', 'D') == magic_zstd)
-            return FileType::CCI;
-
-        if (MakeMagic('N', 'C', 'C', 'H') == magic_zstd)
-            return FileType::CXI;
-    }
 
     // Check normal NCCH file
     if (file->Seek(0x100, SEEK_SET) && 1 == file->ReadArray<u32>(&magic, 1)) {
@@ -149,13 +138,15 @@ ResultStatus AppLoader_NCCH::LoadExec(std::shared_ptr<Kernel::Process>& process)
         codeset->CodeSegment().offset = 0;
         codeset->CodeSegment().addr = overlay_ncch->exheader_header.codeset_info.text.address;
         codeset->CodeSegment().size =
-            overlay_ncch->exheader_header.codeset_info.text.num_max_pages * Memory::CITRA_PAGE_SIZE;
+            overlay_ncch->exheader_header.codeset_info.text.num_max_pages *
+            Memory::CYTRUS_PAGE_SIZE;
 
         codeset->RODataSegment().offset =
             codeset->CodeSegment().offset + codeset->CodeSegment().size;
         codeset->RODataSegment().addr = overlay_ncch->exheader_header.codeset_info.ro.address;
         codeset->RODataSegment().size =
-            overlay_ncch->exheader_header.codeset_info.ro.num_max_pages * Memory::CITRA_PAGE_SIZE;
+            overlay_ncch->exheader_header.codeset_info.ro.num_max_pages *
+            Memory::CYTRUS_PAGE_SIZE;
 
         // TODO(yuriks): Not sure if the bss size is added to the page-aligned .data size or just
         //               to the regular size. Playing it safe for now.
@@ -167,7 +158,7 @@ ResultStatus AppLoader_NCCH::LoadExec(std::shared_ptr<Kernel::Process>& process)
         codeset->DataSegment().addr = overlay_ncch->exheader_header.codeset_info.data.address;
         codeset->DataSegment().size =
             overlay_ncch->exheader_header.codeset_info.data.num_max_pages *
-                Memory::CITRA_PAGE_SIZE +
+                Memory::CYTRUS_PAGE_SIZE +
             bss_page_size;
 
         // Apply patches now that the entire codeset (including .bss) has been allocated
@@ -184,14 +175,6 @@ ResultStatus AppLoader_NCCH::LoadExec(std::shared_ptr<Kernel::Process>& process)
         const auto category = static_cast<Kernel::ResourceLimitCategory>(
             overlay_ncch->exheader_header.arm11_system_local_caps.resource_limit_category);
         process->resource_limit = system.Kernel().ResourceLimit().GetForCategory(category);
-
-        // Update application max cpu setting. PM module uses the launch flags to determine
-        // this, but using the resource limit category is close enough.
-        if (category == Kernel::ResourceLimitCategory::Application) {
-            process->resource_limit->ApplyAppMaxCPUSetting(
-                process, overlay_ncch->exheader_header.arm11_system_local_caps.schedule_mode,
-                overlay_ncch->exheader_header.arm11_system_local_caps.max_cpu);
-        }
 
         // When running N3DS-unaware titles pm will lie about the amount of memory available.
         // This means RESLIMIT_COMMIT = APPMEMALLOC doesn't correspond to the actual size of
@@ -425,39 +408,12 @@ ResultStatus AppLoader_NCCH::ReadTitle(std::string& title) {
 
 AppLoader::CompressFileInfo AppLoader_NCCH::GetCompressFileInfo() {
     CompressFileInfo info{};
-    if (base_ncch.LoadHeader() != ResultStatus::Success) {
-        info.is_supported = false;
-        return info;
-    }
-    info.is_supported = true;
-    info.is_compressed = base_ncch.IsFileCompressed();
-    if (base_ncch.IsNCSD()) {
-        info.underlying_magic = std::array<u8, 4>({'N', 'C', 'S', 'D'});
-        info.recommended_compressed_extension = "zcci";
-        info.recommended_uncompressed_extension = "cci";
-    } else {
-        info.underlying_magic = std::array<u8, 4>({'N', 'C', 'C', 'H'});
-        info.recommended_compressed_extension = "zcxi";
-        info.recommended_uncompressed_extension = "cxi";
-    }
-    std::vector<u8> title_info_vec(sizeof(Service::AM::TitleInfo));
-    Service::AM::TitleInfo* title_info =
-        reinterpret_cast<Service::AM::TitleInfo*>(title_info_vec.data());
-    title_info->tid = base_ncch.ncch_header.program_id;
-    title_info->version = base_ncch.ncch_header.version;
-    title_info->size =
-        base_ncch.ncch_header.content_size * base_ncch.ncch_header.GetContentUnitSize();
-    title_info->unused = title_info->type = 0;
-    info.default_metadata.emplace("titleinfo", title_info_vec);
-
+    info.is_supported = false;
     return info;
 }
 
 bool AppLoader_NCCH::IsFileCompressed() {
-    if (base_ncch.LoadHeader() != ResultStatus::Success) {
-        return false;
-    }
-    return base_ncch.IsFileCompressed();
+    return false;
 }
 
 } // namespace Loader
