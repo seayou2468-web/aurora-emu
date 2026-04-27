@@ -91,7 +91,6 @@ targets:
           - "-ObjC"
           - "-lc++"
           - "-lz"
-          - "-lzstd"
           - "-liconv"
           - "-framework Foundation"
           - "-framework UIKit"
