@@ -45,7 +45,7 @@ jobs:
         run: |
           pod install --project-directory=ios --repo-update
           test -d ios/Pods/boost
-          test -d ios/Pods/zstd
+          test -d ios/Pods/libzstd
 
       - name: Build CocoaPods dependencies for iOS device
         shell: bash
@@ -69,7 +69,7 @@ jobs:
           rg -n "path: ../src/core/aurora3ds/CitraObjC" ios/project.yml
           rg -n "\\$\\(BUILD_DIR\\)/src/core/aurora3ds/bridge\\.o" Makefile
           rg -n "pod 'boost'" ios/Podfile
-          rg -n "pod 'zstd'" ios/Podfile
+          rg -n "pod 'libzstd'" ios/Podfile
 
       - name: Verify iOS device-only build target
         shell: bash
