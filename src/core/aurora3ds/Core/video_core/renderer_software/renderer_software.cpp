@@ -3,6 +3,7 @@
 // Refer to the license.txt file included.
 
 #include "common/color.h"
+#include "common/logging/log.h"
 #include "core/core.h"
 #include "video_core/gpu.h"
 #include "video_core/pica/pica_core.h"
@@ -42,36 +43,74 @@ void RendererSoftware::LoadFBToScreenInfo(int i, const Pica::ColorFill& color_fi
     const PAddr framebuffer_addr =
         framebuffer.active_fb == 0 ? framebuffer.address_left1 : framebuffer.address_left2;
     const s32 bpp = Pica::BytesPerPixel(framebuffer.color_format);
+
+    if (framebuffer.height == 0 || framebuffer.stride == 0 || bpp <= 0) {
+        info.width = 0;
+        info.height = 0;
+        info.pixels.clear();
+        return;
+    }
+
+    if (!memory.IsValidPhysicalAddress(framebuffer_addr)) {
+        LOG_WARNING(Render_Software, "Skipping invalid framebuffer address {:#010X}",
+                    framebuffer_addr);
+        info.width = 0;
+        info.height = 0;
+        info.pixels.clear();
+        return;
+    }
+
     const u8* framebuffer_data = memory.GetPhysicalPointer(framebuffer_addr);
+    if (!framebuffer_data) {
+        info.width = 0;
+        info.height = 0;
+        info.pixels.clear();
+        return;
+    }
 
     const s32 pixel_stride = framebuffer.stride / bpp;
+    if (pixel_stride <= 0) {
+        info.width = 0;
+        info.height = 0;
+        info.pixels.clear();
+        return;
+    }
+
     info.height = framebuffer.height;
-    info.width = pixel_stride;
+    info.width = static_cast<u32>(pixel_stride);
     info.pixels.resize(info.width * info.height * 4);
 
     for (u32 y = 0; y < info.height; y++) {
         for (u32 x = 0; x < info.width; x++) {
             const u8* pixel = framebuffer_data + (y * pixel_stride + pixel_stride - x) * bpp;
-            Common::Vec4 color = [&] {
-                if (color_fill.is_enabled) {
-                    return Common::Vec4<u8>(color_fill.color_r, color_fill.color_g,
-                                            color_fill.color_b, 255);
-                }
+            Common::Vec4<u8> color;
 
+            if (color_fill.is_enabled) {
+                color = Common::Vec4<u8>(color_fill.color_r, color_fill.color_g, color_fill.color_b,
+                                         255);
+            } else {
                 switch (framebuffer.color_format) {
                 case Pica::PixelFormat::RGBA8:
-                    return Common::Color::DecodeRGBA8(pixel);
+                    color = Common::Color::DecodeRGBA8(pixel);
+                    break;
                 case Pica::PixelFormat::RGB8:
-                    return Common::Color::DecodeRGB8(pixel);
+                    color = Common::Color::DecodeRGB8(pixel);
+                    break;
                 case Pica::PixelFormat::RGB565:
-                    return Common::Color::DecodeRGB565(pixel);
+                    color = Common::Color::DecodeRGB565(pixel);
+                    break;
                 case Pica::PixelFormat::RGB5A1:
-                    return Common::Color::DecodeRGB5A1(pixel);
+                    color = Common::Color::DecodeRGB5A1(pixel);
+                    break;
                 case Pica::PixelFormat::RGBA4:
-                    return Common::Color::DecodeRGBA4(pixel);
+                    color = Common::Color::DecodeRGBA4(pixel);
+                    break;
+                default:
+                    color = Common::Vec4<u8>(0, 0, 0, 255);
+                    break;
                 }
-                UNREACHABLE();
-            }();
+            }
+
             const u32 output_offset = (x * info.height + y) * 4;
             u8* dest = info.pixels.data() + output_offset;
             std::memcpy(dest, color.AsArray(), sizeof(color));
