@@ -17,6 +17,48 @@
 
 @implementation AURLibraryViewController
 
+
+- (NSString *)documentsDirectory {
+    return NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;
+}
+
+- (NSString *)romsDirectory {
+    NSString *dir = [[self documentsDirectory] stringByAppendingPathComponent:@"ROMs"];
+    [[NSFileManager defaultManager] createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:nil];
+    return dir;
+}
+
+- (NSString *)persistROMAtURL:(NSURL *)url {
+    if (!url || !url.isFileURL) return nil;
+
+    BOOL didAccess = [url startAccessingSecurityScopedResource];
+
+    NSString *romsDir = [self romsDirectory];
+    NSString *baseName = url.lastPathComponent ?: @"imported.rom";
+    NSString *destPath = [romsDir stringByAppendingPathComponent:baseName];
+
+    NSFileManager *fm = [NSFileManager defaultManager];
+    if ([fm fileExistsAtPath:destPath]) {
+        NSString *name = [baseName stringByDeletingPathExtension];
+        NSString *ext = [baseName pathExtension];
+        NSString *suffix = [NSString stringWithFormat:@"_%@", [[NSUUID UUID].UUIDString substringToIndex:8]];
+        NSString *uniqueName = ext.length > 0 ? [NSString stringWithFormat:@"%@%@.%@", name, suffix, ext]
+                                             : [NSString stringWithFormat:@"%@%@", name, suffix];
+        destPath = [romsDir stringByAppendingPathComponent:uniqueName];
+    }
+
+    NSError *error = nil;
+    [fm copyItemAtURL:url toURL:[NSURL fileURLWithPath:destPath] error:&error];
+
+    if (didAccess) [url stopAccessingSecurityScopedResource];
+
+    if (error) {
+        NSLog(@"[AUR][Library] ROM copy failed: %@", error.localizedDescription);
+        return nil;
+    }
+    return destPath;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor blackColor];
@@ -137,9 +179,14 @@
 - (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls {
     NSURL *url = urls.firstObject;
     if (url) {
+        NSString *storedROMPath = [self persistROMAtURL:url];
+        if (storedROMPath.length == 0) {
+            return;
+        }
+
         AURGame *game = [[AURGame alloc] init];
         game.title = [[url lastPathComponent] stringByDeletingPathExtension];
-        game.romPath = [url path];
+        game.romPath = storedROMPath;
 
         NSString *ext = [[url pathExtension] lowercaseString];
         if ([ext isEqualToString:@"gba"]) game.coreType = EMULATOR_CORE_TYPE_GBA;
