@@ -53,6 +53,14 @@ jobs:
           rg -n "path: ../src/core/aurora3ds/CitraObjC" ios/project.yml
           rg -n "\\$\\(BUILD_DIR\\)/src/core/aurora3ds/bridge\\.o" Makefile
 
+      - name: Verify iOS device-only build target
+        shell: bash
+        run: |
+          rg -n "SDKROOT: iphoneos" ios/project.yml
+          rg -n "SUPPORTED_PLATFORMS: iphoneos" ios/project.yml
+          rg -n "\\-sdk iphoneos" .github/workflows/ios-device-app-build.yml
+          rg -n "generic/platform=iOS" .github/workflows/ios-device-app-build.yml
+
       - name: Build iOS app archive (.app inside .xcarchive)
         shell: bash
         run: |
