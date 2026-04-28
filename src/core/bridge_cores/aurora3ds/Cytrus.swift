@@ -19,7 +19,7 @@ private func checkedInt32(_ value: Int, context: StaticString) -> Int32 {
 public actor SystemSaveGame {
     var emulator: CytrusEmulator = .shared()
     
-    public var systemLanguage: Int { .init(emulator.systemLanguage()) }
+    public var systemLanguage: Int { Int(emulator.systemLanguage()) }
     public func set(_ systemLanguage: Int) { emulator.set(systemLanguage: checkedInt32(systemLanguage, context: "systemLanguage"))}
     
     public var username: String { emulator.username() }
