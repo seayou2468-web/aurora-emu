@@ -15,13 +15,17 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential pkg-config libsdl2-dev
+          sudo apt-get install -y build-essential pkg-config libsdl2-dev xvfb
 
       - name: Build Linux binary
         run: |
           make clean
-          make -j"$(nproc)" AURORA_LINUX_3DS_ONLY=1
+          make -j"$(nproc)"
           test -x build/nanoboyadvance-linux
+
+      - name: Render smoke test (NES on Xvfb)
+        run: |
+          timeout 10s xvfb-run -a ./build/nanoboyadvance-linux src/core/quick_nes/dq.nes || test $? -eq 124
 
       - name: Upload Linux binary artifact
         uses: actions/upload-artifact@v4
