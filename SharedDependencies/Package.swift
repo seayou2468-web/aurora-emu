@@ -54,7 +54,6 @@ let package = Package(
             "httplib",
             "inih",
             "jwt",
-            "libchdr",
             "libslirp",
             "lodepng",
             "magic_enum",
@@ -83,10 +82,6 @@ let package = Package(
         .target(name: "inih", publicHeadersPath: "include"),
         .target(name: "jwt", dependencies: [
             "OpenSSL"
-        ], publicHeadersPath: "include"),
-        .target(name: "libchdr", dependencies: [
-            "FLAC",
-            "ogg"
         ], publicHeadersPath: "include"),
         .target(name: "libslirp", dependencies: [
             "glib"
@@ -192,12 +187,6 @@ let package = Package(
                       url: url("lib_teakra", "0.0.7"),
                       checksum: "1acbc735d0ada8aa9111f4c9b928d83bb440039d45d35ae2f3f67429ff8f6bb3"),
         
-        .binaryTarget(name: "FLAC",
-                      url: "https://github.com/sbooth/flac-binary-xcframework/releases/download/0.2.0/FLAC.xcframework.zip",
-                      checksum: "87f1b13fb490867790b96d52fcbeb1a23847b8f45f50cece530d533266c2001e"),
-        .binaryTarget(name: "ogg",
-                      url: "https://github.com/sbooth/ogg-binary-xcframework/releases/download/0.1.2/ogg.xcframework.zip",
-                      checksum: "b6ab2dcf89076ca9488ef32d810d0343a2072fadd9eb94247f498b7b87070e2e")
         
     ],
     cLanguageStandard: .gnu2x,

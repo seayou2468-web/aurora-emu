@@ -65,7 +65,6 @@ settings:
       - "$(SRCROOT)/../SharedDependencies/Sources/httplib/include"
       - "$(SRCROOT)/../SharedDependencies/Sources/inih/include"
       - "$(SRCROOT)/../SharedDependencies/Sources/jwt/include"
-      - "$(SRCROOT)/../SharedDependencies/Sources/libchdr/include"
       - "$(SRCROOT)/../SharedDependencies/Sources/libslirp/include"
       - "$(SRCROOT)/../SharedDependencies/Sources/lodepng/include"
       - "$(SRCROOT)/../SharedDependencies/Sources/magic_enum/include"
