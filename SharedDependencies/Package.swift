@@ -46,6 +46,13 @@ let package = Package(
             "lib_sirit",
             "lib_soundtouch",
             "lib_teakra",
+            "MoltenVK",
+            "libavcodec",
+            "libavfilter",
+            "libavformat",
+            "libavutil",
+            "libswresample",
+            "libswscale",
             "cereal",
             "cryptopp",
             "dds_ktx",
@@ -88,7 +95,14 @@ let package = Package(
             .linkedFramework("sirit"),
             .linkedFramework("soundtouch"),
             .linkedFramework("spirv"),
-            .linkedFramework("teakra")
+            .linkedFramework("teakra"),
+            .linkedFramework("MoltenVK"),
+            .linkedFramework("libavcodec"),
+            .linkedFramework("libavfilter"),
+            .linkedFramework("libavformat"),
+            .linkedFramework("libavutil"),
+            .linkedFramework("libswresample"),
+            .linkedFramework("libswscale")
         ]),
         .target(name: "cereal", publicHeadersPath: "include"),
         .target(name: "cryptopp", publicHeadersPath: "include", cxxSettings: [
@@ -131,6 +145,14 @@ let package = Package(
         .target(name: "tsl", publicHeadersPath: "include"),
         .target(name: "xxhash", publicHeadersPath: "include"),
         
+
+        .binaryTarget(name: "MoltenVK", path: "MoltenVK.xcframework"),
+        .binaryTarget(name: "libavcodec", path: "libavcodec.xcframework"),
+        .binaryTarget(name: "libavfilter", path: "libavfilter.xcframework"),
+        .binaryTarget(name: "libavformat", path: "libavformat.xcframework"),
+        .binaryTarget(name: "libavutil", path: "libavutil.xcframework"),
+        .binaryTarget(name: "libswresample", path: "libswresample.xcframework"),
+        .binaryTarget(name: "libswscale", path: "libswscale.xcframework"),
 
         .binaryTarget(name: "lib_boostcontext",
                       url: url("lib_boostcontext", "0.0.6"),
