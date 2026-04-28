@@ -6,7 +6,7 @@ configs:
   Debug: debug
   Release: release
 schemes:
-  AuroraSwift:
+  Cytrus:
     build:
       targets:
         AuroraSwift: all

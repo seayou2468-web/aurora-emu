@@ -51,7 +51,7 @@ jobs:
           cd ios
           xcodebuild \
             -workspace AuroraSwift.xcworkspace \
-            -scheme AuroraSwift \
+            -scheme Cytrus \
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
