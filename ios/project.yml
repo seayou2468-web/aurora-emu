@@ -64,6 +64,7 @@ settings:
       - "$(SRCROOT)/../Dependicies/Sources/nlohmann/include"
       - "$(SRCROOT)/../Dependicies/Sources/oaknut/include"
       - "$(SRCROOT)/../Dependicies/Sources/boost/include"
+      - "$(SRCROOT)/../Dependicies/Sources/vma/include"
       - "$(SRCROOT)/../Dependicies/Sources/stb/include"
       - "$(SRCROOT)/../Dependicies/Sources/toml/include"
       - "$(SRCROOT)/../Dependicies/Sources/tsl/include"
