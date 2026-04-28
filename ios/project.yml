@@ -36,10 +36,12 @@ settings:
       - "$(SRCROOT)/../Dependicies/Sources/nihstro/include"
       - "$(SRCROOT)/../Dependicies/Sources/nlohmann/include"
       - "$(SRCROOT)/../Dependicies/Sources/oaknut/include"
+      - "$(SRCROOT)/../Dependicies/Sources/boost/include"
       - "$(SRCROOT)/../Dependicies/Sources/stb/include"
       - "$(SRCROOT)/../Dependicies/Sources/toml/include"
       - "$(SRCROOT)/../Dependicies/Sources/tsl/include"
       - "$(SRCROOT)/../Dependicies/Sources/xxhash/include"
+      - "$(SRCROOT)/../Dependicies/Sources/zstd/include"
       - "$(SRCROOT)/../Platforms/API"
       - "$(SRCROOT)/../Platforms/AuroraIOS/objc"
     FRAMEWORK_SEARCH_PATHS:
