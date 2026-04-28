@@ -5,6 +5,19 @@ options:
 configs:
   Debug: debug
   Release: release
+schemes:
+  AuroraSwift:
+    build:
+      targets:
+        AuroraSwift: all
+    run:
+      config: Release
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
 packages:
   zlib-spm:
     url: https://github.com/Azoy/zlib-spm
