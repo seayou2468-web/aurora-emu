@@ -290,7 +290,7 @@ extension Cytrus {
     }
     
     public func input(_ slot: Int, _ button: CytrusButtonType, _ pressed: Bool) {
-        emulator.input(slot, button: button.rawValue, pressed: pressed)
+        emulator.input(Int32(slot), button: button.rawValue, pressed: pressed)
     }
     
     public func thumbstickMoved(_ thumbstick: CytrusAnalogType, _ x: Float, _ y: Float) {
