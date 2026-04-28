@@ -69,6 +69,7 @@ settings:
       - "$(SRCROOT)/../Dependicies/Sources/tsl/include"
       - "$(SRCROOT)/../Dependicies/Sources/xxhash/include"
       - "$(SRCROOT)/../Dependicies/Sources/vulkan/include"
+      - "$(VULKAN_SDK)/include"
       - "$(SRCROOT)/../Platforms/API"
       - "$(SRCROOT)/../Platforms/AuroraIOS/objc"
     FRAMEWORK_SEARCH_PATHS:
@@ -76,6 +77,7 @@ settings:
       - "$(inherited)"
     LIBRARY_SEARCH_PATHS:
       - "$(SRCROOT)/../Dependicies"
+      - "$(VULKAN_SDK)/lib"
       - "$(inherited)"
 
 targets:
