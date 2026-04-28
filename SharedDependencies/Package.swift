@@ -68,17 +68,7 @@ let package = Package(
             "tsl",
             "xxhash"
         ], path: "Sources/SharedDependencies", publicHeadersPath: "include", cxxSettings: [
-            .define("SDL_MAIN_HANDLED"),
-            // URL binaryTarget xcframework headers are expanded under DerivedData/SourcePackages/artifacts.
-            // Keep explicit include paths so includes like <glslang/...> resolve in C/C++ translation units.
-            .unsafeFlags([
-                "-I$(BUILD_DIR)/SourcePackages/artifacts/SharedDependencies/lib_glslang/lib_glslang.xcframework/ios-arm64/Headers",
-                "-I$(BUILD_DIR)/SourcePackages/artifacts/SharedDependencies/lib_glslang/lib_glslang.xcframework/ios-arm64_x86_64-simulator/Headers",
-                "-I$(BUILD_DIR)/SourcePackages/artifacts/SharedDependencies/lib_machineindependent/lib_machineindependent.xcframework/ios-arm64/Headers",
-                "-I$(BUILD_DIR)/SourcePackages/artifacts/SharedDependencies/lib_machineindependent/lib_machineindependent.xcframework/ios-arm64_x86_64-simulator/Headers",
-                "-I$(BUILD_DIR)/SourcePackages/artifacts/SharedDependencies/lib_spirv/lib_spirv.xcframework/ios-arm64/Headers",
-                "-I$(BUILD_DIR)/SourcePackages/artifacts/SharedDependencies/lib_spirv/lib_spirv.xcframework/ios-arm64_x86_64-simulator/Headers"
-            ])
+            .define("SDL_MAIN_HANDLED")
         ], linkerSettings: [
             .linkedFramework("boostcontext"),
             .linkedFramework("boostiostreams"),
