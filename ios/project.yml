@@ -52,6 +52,7 @@ settings:
       - "$(SRCROOT)/../Dependicies/Sources/cryptopp/include"
       - "$(SRCROOT)/../Dependicies/Sources/dds_ktx/include"
       - "$(SRCROOT)/../Dependicies/Sources/eventbus/include"
+      - "$(SRCROOT)/../Dependicies/Sources/glslang/include"
       - "$(SRCROOT)/../Dependicies/Sources/glib/include"
       - "$(SRCROOT)/../Dependicies/Sources/httplib/include"
       - "$(SRCROOT)/../Dependicies/Sources/inih/include"

@@ -39,7 +39,7 @@ jobs:
           echo "CPATH=${VULKAN_PREFIX}/include:${CPATH:-}" >> "${GITHUB_ENV}"
           echo "CPLUS_INCLUDE_PATH=${VULKAN_PREFIX}/include:${CPLUS_INCLUDE_PATH:-}" >> "${GITHUB_ENV}"
 
-      - name: Fetch third-party headers (Boost/VMA)
+      - name: Fetch third-party headers (Boost/VMA/glslang)
         run: |
           ./scripts/fetch_third_party_headers.sh
 
