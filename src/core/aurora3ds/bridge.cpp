@@ -5,11 +5,13 @@
 #include <memory>
 #include <sstream>
 #include <vector>
+#include <cstring>
 
 #if defined(__APPLE__)
 #include <dlfcn.h>
 #include "./Core/include/common/dynamic_library/dynamic_library.h"
 #include "./Core/include/common/file_util.h"
+#include "./Core/include/common/common_paths.h"
 #include "./Core/include/core/core.h"
 #include "./Core/include/core/dumping/backend.h"
 #include "./Core/include/core/frontend/emu_window.h"
@@ -198,6 +200,48 @@ AURBridgeRuntime* AsRuntime(void* runtime) {
   return static_cast<AURBridgeRuntime*>(runtime);
 }
 
+const char* GetBasename(const char* path) {
+  if (!path) return nullptr;
+  const char* slash = std::strrchr(path, '/');
+  if (!slash) slash = std::strrchr(path, '\\');
+  return slash ? (slash + 1) : path;
+}
+
+bool InstallSystemDataFile(const char* source_path, const char* target_name, std::string& last_error) {
+  if (!source_path || !target_name) {
+    last_error = "invalid system data path";
+    return false;
+  }
+
+  const std::string target_path =
+      FileUtil::GetUserPath(FileUtil::UserPath::SysDataDir) + std::string(target_name);
+  if (!FileUtil::CreateFullPath(target_path)) {
+    last_error = std::string("failed to create destination path: ") + target_path;
+    return false;
+  }
+  if (!FileUtil::Copy(std::string(source_path), target_path)) {
+    last_error = std::string("failed to copy system data file: ") + source_path;
+    return false;
+  }
+  return true;
+}
+
+int ToInputManagerButton(int key) {
+  switch (key) {
+    case 0: return InputManager::N3DS_BUTTON_A;
+    case 1: return InputManager::N3DS_BUTTON_B;
+    case 2: return InputManager::N3DS_BUTTON_SELECT;
+    case 3: return InputManager::N3DS_BUTTON_START;
+    case 4: return InputManager::N3DS_DPAD_RIGHT;
+    case 5: return InputManager::N3DS_DPAD_LEFT;
+    case 6: return InputManager::N3DS_DPAD_UP;
+    case 7: return InputManager::N3DS_DPAD_DOWN;
+    case 8: return InputManager::N3DS_TRIGGER_R;
+    case 9: return InputManager::N3DS_TRIGGER_L;
+    default: return -1;
+  }
+}
+
 }  // namespace
 
 extern "C" {
@@ -249,8 +293,29 @@ void Aurora3DSBridge_Destroy(void* runtime_ptr) {
   delete runtime;
 }
 
-bool Aurora3DSBridge_LoadBIOSFromPath(void*, const char*) {
-  return true;
+bool Aurora3DSBridge_LoadBIOSFromPath(void* runtime_ptr, const char* bios_path) {
+  auto* runtime = AsRuntime(runtime_ptr);
+  if (!runtime || !runtime->system || !bios_path) return false;
+
+  const char* basename = GetBasename(bios_path);
+  if (!basename || basename[0] == '\0') {
+    runtime->last_error = "invalid BIOS file name";
+    return false;
+  }
+
+  if (std::strcmp(basename, "aes_keys.txt") == 0) {
+    const bool ok = InstallSystemDataFile(bios_path, AES_KEYS, runtime->last_error);
+    if (ok) runtime->last_error.clear();
+    return ok;
+  }
+  if (std::strcmp(basename, "seeddb.bin") == 0) {
+    const bool ok = InstallSystemDataFile(bios_path, "seeddb.bin", runtime->last_error);
+    if (ok) runtime->last_error.clear();
+    return ok;
+  }
+
+  runtime->last_error = std::string("unsupported 3DS system data file: ") + basename;
+  return false;
 }
 
 bool Aurora3DSBridge_LoadROMFromPath(void* runtime_ptr, const char* rom_path) {
@@ -354,7 +419,27 @@ bool Aurora3DSBridge_StepFrame(void* runtime_ptr) {
          status == Core::System::ResultStatus::ShutdownRequested;
 }
 
-void Aurora3DSBridge_SetKeyStatus(void*, int, bool) {}
+void Aurora3DSBridge_SetKeyStatus(void* runtime_ptr, int key, bool pressed) {
+  auto* runtime = AsRuntime(runtime_ptr);
+  if (!runtime) return;
+  auto* button_handler = InputManager::ButtonHandler();
+  if (!button_handler) {
+    runtime->last_error = "input manager is not initialized";
+    return;
+  }
+
+  const int button_id = ToInputManagerButton(key);
+  if (button_id < 0) {
+    runtime->last_error = "unsupported key code";
+    return;
+  }
+
+  const bool consumed = pressed ? button_handler->PressKey(button_id)
+                                : button_handler->ReleaseKey(button_id);
+  if (!consumed) {
+    runtime->last_error = "button input was not consumed";
+  }
+}
 
 bool Aurora3DSBridge_GetVideoSpec(void*, EmulatorVideoSpec* out_spec) {
   if (!out_spec) return false;

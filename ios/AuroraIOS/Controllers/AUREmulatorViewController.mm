@@ -162,6 +162,15 @@
         NSString *gbc = [[AURDatabaseManager sharedManager] BIOSPathForIdentifier:@"gbc"];
         if (gb) EmulatorCore_LoadBIOSFromPath(_core, gb.UTF8String);
         if (gbc) EmulatorCore_LoadBIOSFromPath(_core, gbc.UTF8String);
+    } else if (_coreType == EMULATOR_CORE_TYPE_3DS) {
+        NSString *aesKeys = [[AURDatabaseManager sharedManager] BIOSPathForIdentifier:@"3ds_aes_keys"];
+        NSString *seedDb = [[AURDatabaseManager sharedManager] BIOSPathForIdentifier:@"3ds_seeddb"];
+        if (aesKeys && !EmulatorCore_LoadBIOSFromPath(_core, aesKeys.UTF8String)) {
+            NSLog(@"[AUR][Emu] Failed to install 3DS aes_keys.txt from %@", aesKeys);
+        }
+        if (seedDb && !EmulatorCore_LoadBIOSFromPath(_core, seedDb.UTF8String)) {
+            NSLog(@"[AUR][Emu] Failed to install 3DS seeddb.bin from %@", seedDb);
+        }
     }
 
     _usesVulkanPresenter = NO;
