@@ -69,6 +69,26 @@ let package = Package(
             "xxhash"
         ], path: "Sources/SharedDependencies", publicHeadersPath: "include", cxxSettings: [
             .define("SDL_MAIN_HANDLED")
+        ], linkerSettings: [
+            .linkedFramework("boostcontext"),
+            .linkedFramework("boostiostreams"),
+            .linkedFramework("boostprogramoptions"),
+            .linkedFramework("boostserialization"),
+            .linkedFramework("dynarmic"),
+            .linkedFramework("enet"),
+            .linkedFramework("faad2"),
+            .linkedFramework("fmt"),
+            .linkedFramework("genericcodegen"),
+            .linkedFramework("glslang"),
+            .linkedFramework("machineindependent"),
+            .linkedFramework("mcl"),
+            .linkedFramework("openal"),
+            .linkedFramework("opus"),
+            .linkedFramework("sdl3"),
+            .linkedFramework("sirit"),
+            .linkedFramework("soundtouch"),
+            .linkedFramework("spirv"),
+            .linkedFramework("teakra")
         ]),
         .target(name: "cereal", publicHeadersPath: "include"),
         .target(name: "cryptopp", publicHeadersPath: "include", cxxSettings: [
@@ -111,6 +131,7 @@ let package = Package(
         .target(name: "tsl", publicHeadersPath: "include"),
         .target(name: "xxhash", publicHeadersPath: "include"),
         
+
         .binaryTarget(name: "lib_boostcontext",
                       url: url("lib_boostcontext", "0.0.6"),
                       checksum: "0fdb5520d200b5c2b0b376c396b8271c8bf1627d576884e1a255a5630abddda1"),
