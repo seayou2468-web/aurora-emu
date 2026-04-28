@@ -44,6 +44,8 @@ settings:
       - "$(inherited)"
       - "ENABLE_VULKAN=1"
       - "ENABLE_SOFTWARE_RENDERER=1"
+      - "ENABLE_SDL3=1"
+      - "HAVE_SDL3=1"
     HEADER_SEARCH_PATHS:
       - "$(inherited)"
       - "$(SRCROOT)/../src"
