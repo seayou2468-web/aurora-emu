@@ -18,7 +18,14 @@ settings:
     SWIFT_VERSION: 5.10
     SWIFT_OBJC_BRIDGING_HEADER: ../Platforms/AuroraIOS/swift/Bridge/AuroraSwift-Bridging-Header.h
     CLANG_CXX_LANGUAGE_STANDARD: gnu++20
+    OTHER_CPLUSPLUSFLAGS:
+      - "$(inherited)"
+      - "-std=gnu++20"
     ENABLE_BITCODE: NO
+    GCC_PREPROCESSOR_DEFINITIONS:
+      - "$(inherited)"
+      - "ENABLE_VULKAN=1"
+      - "ENABLE_SOFTWARE_RENDERER=1"
     HEADER_SEARCH_PATHS:
       - "$(inherited)"
       - "$(SRCROOT)/../src"
