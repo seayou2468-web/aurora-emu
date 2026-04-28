@@ -5,9 +5,14 @@ private struct SwiftROMItem: Hashable {
     let id = UUID()
     let url: URL
     let title: String
-    let coreType: EmulatorCoreType
+    let launchTarget: SwiftLaunchTarget
     let subtitle: String
     let accentColor: UIColor
+}
+
+private enum SwiftLaunchTarget: Hashable {
+    case standard(EmulatorCoreType)
+    case aurora3ds
 }
 
 private enum SwiftSortMode {
@@ -284,10 +289,20 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
         let keyword = (searchText ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         let filteredByCore = allItems.filter { item in
             switch filterControl.selectedSegmentIndex {
-            case 1: return item.coreType == EMULATOR_CORE_TYPE_NDS
-            case 2: return item.coreType == EMULATOR_CORE_TYPE_GBA
-            case 3: return item.coreType == EMULATOR_CORE_TYPE_NES
-            case 4: return item.coreType == EMULATOR_CORE_TYPE_GB
+            case 1:
+                switch item.launchTarget {
+                case .aurora3ds: return true
+                case .standard(let type): return type == EMULATOR_CORE_TYPE_NDS
+                }
+            case 2:
+                if case .standard(let type) = item.launchTarget { return type == EMULATOR_CORE_TYPE_GBA }
+                return false
+            case 3:
+                if case .standard(let type) = item.launchTarget { return type == EMULATOR_CORE_TYPE_NES }
+                return false
+            case 4:
+                if case .standard(let type) = item.launchTarget { return type == EMULATOR_CORE_TYPE_GB }
+                return false
             default: return true
             }
         }
@@ -319,14 +334,14 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
         }
 
         var items = files.compactMap { fileURL in
-            guard let coreType = coreType(for: fileURL) else { return nil }
+            guard let launchTarget = launchTarget(for: fileURL) else { return nil }
             let ext = fileURL.pathExtension.lowercased()
             return SwiftROMItem(
                 url: fileURL,
                 title: fileURL.deletingPathExtension().lastPathComponent,
-                coreType: coreType,
+                launchTarget: launchTarget,
                 subtitle: ext,
-                accentColor: color(for: coreType)
+                accentColor: color(for: launchTarget)
             )
         }
 
@@ -348,28 +363,34 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
         return base.appendingPathComponent(romDirectoryName, isDirectory: true)
     }
 
-    private func coreType(for url: URL) -> EmulatorCoreType? {
+    private func launchTarget(for url: URL) -> SwiftLaunchTarget? {
         switch url.pathExtension.lowercased() {
         case "gba":
-            return EMULATOR_CORE_TYPE_GBA
+            return .standard(EMULATOR_CORE_TYPE_GBA)
         case "nds":
-            return EMULATOR_CORE_TYPE_NDS
+            return .standard(EMULATOR_CORE_TYPE_NDS)
         case "nes":
-            return EMULATOR_CORE_TYPE_NES
+            return .standard(EMULATOR_CORE_TYPE_NES)
         case "gb", "gbc":
-            return EMULATOR_CORE_TYPE_GB
+            return .standard(EMULATOR_CORE_TYPE_GB)
+        case "3ds", "3dsx", "cci", "cxi":
+            return .aurora3ds
         default:
             return nil
         }
     }
 
-    private func color(for coreType: EmulatorCoreType) -> UIColor {
-        switch coreType {
-        case EMULATOR_CORE_TYPE_NDS: return .systemTeal
-        case EMULATOR_CORE_TYPE_GBA: return .systemPurple
-        case EMULATOR_CORE_TYPE_NES: return .systemRed
-        case EMULATOR_CORE_TYPE_GB: return .systemGreen
-        default: return .systemBlue
+    private func color(for launchTarget: SwiftLaunchTarget) -> UIColor {
+        switch launchTarget {
+        case .aurora3ds: return .systemOrange
+        case .standard(let coreType):
+            switch coreType {
+            case EMULATOR_CORE_TYPE_NDS: return .systemTeal
+            case EMULATOR_CORE_TYPE_GBA: return .systemPurple
+            case EMULATOR_CORE_TYPE_NES: return .systemRed
+            case EMULATOR_CORE_TYPE_GB: return .systemGreen
+            default: return .systemBlue
+            }
         }
     }
 
@@ -379,7 +400,7 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
         try? fm.createDirectory(at: targetFolder, withIntermediateDirectories: true)
 
         for sourceURL in urls {
-            guard coreType(for: sourceURL) != nil else { continue }
+            guard launchTarget(for: sourceURL) != nil else { continue }
             let destURL = targetFolder.appendingPathComponent(sourceURL.lastPathComponent)
             try? fm.removeItem(at: destURL)
             do {
@@ -417,10 +438,17 @@ extension SwiftLibraryViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard filteredItems.indices.contains(indexPath.item) else { return }
         let item = filteredItems[indexPath.item]
-        let vc = AUREmulatorViewController(romURL: item.url, coreType: item.coreType)
-        vc.modalPresentationStyle = .fullScreen
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
-        present(vc, animated: true)
+        switch item.launchTarget {
+        case .aurora3ds:
+            let vc = AUR3DSEmulatorViewController(romURL: item.url)
+            vc.modalPresentationStyle = .fullScreen
+            present(vc, animated: true)
+        case .standard(let coreType):
+            let vc = AUREmulatorViewController(romURL: item.url, coreType: coreType)
+            vc.modalPresentationStyle = .fullScreen
+            present(vc, animated: true)
+        }
     }
 
     func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
