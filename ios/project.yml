@@ -108,13 +108,6 @@ targets:
           - "**/*.md"
           - "**/*.txt"
     dependencies:
-      - framework: ../Dependicies/MoltenVK.xcframework
-      - framework: ../Dependicies/libavcodec.xcframework
-      - framework: ../Dependicies/libavfilter.xcframework
-      - framework: ../Dependicies/libavformat.xcframework
-      - framework: ../Dependicies/libavutil.xcframework
-      - framework: ../Dependicies/libswresample.xcframework
-      - framework: ../Dependicies/libswscale.xcframework
       - package: SharedDependencies
         product: SharedDependencies
       - package: zstd
