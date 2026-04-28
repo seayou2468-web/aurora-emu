@@ -4,6 +4,7 @@
 #import "../Managers/AURSkinManager.h"
 #import "../Managers/AURDatabaseManager.h"
 #import "../Managers/AURExternalControllerManager.h"
+#import "../Bridge/AURCoreSessionFactory.h"
 #import "../Metal.h"
 #import <QuartzCore/QuartzCore.h>
 #include <algorithm>
@@ -11,9 +12,7 @@
 #include <cstring>
 
 @interface AUREmulatorViewController () <AURControllerViewDelegate, AURExternalControllerDelegate, AURInGameMenuDelegate> {
-    EmulatorCoreHandle* _core;
     EmulatorCoreType    _coreType;
-    EmulatorVideoSpec   _videoSpec;
     BOOL                _running;
 }
 @property (nonatomic, strong) AURMetalView *imageView;
@@ -22,6 +21,7 @@
 @property (nonatomic, strong) AURControllerView *controllerView;
 @property (nonatomic, strong) CADisplayLink *displayLink;
 @property (nonatomic, strong) NSURL *romURL;
+@property (nonatomic, strong) id<AURCoreSession> coreSession;
 @end
 
 @implementation AUREmulatorViewController
@@ -129,8 +129,8 @@
 
 - (void)startEmulator {
     [self stopEmulator];
-    _core = EmulatorCore_Create(_coreType);
-    if (!_core) {
+    self.coreSession = [AURCoreSessionFactory sessionWithCoreType:_coreType];
+    if (!self.coreSession) {
         NSLog(@"[AUR][Emu] Failed to create core: %d", (int)_coreType);
         return;
     }
@@ -140,25 +140,24 @@
         NSString *arm9 = [[AURDatabaseManager sharedManager] BIOSPathForIdentifier:@"nds_arm9"];
         NSString *arm7 = [[AURDatabaseManager sharedManager] BIOSPathForIdentifier:@"nds_arm7"];
         NSString *firm = [[AURDatabaseManager sharedManager] BIOSPathForIdentifier:@"nds_firmware"];
-        if (arm9) { if (!EmulatorCore_LoadBIOSFromPath(_core, arm9.UTF8String)) NSLog(@"[AUR][Emu] Failed to load ARM9 BIOS at %@", arm9); }
-        if (arm7) EmulatorCore_LoadBIOSFromPath(_core, arm7.UTF8String);
-        if (firm) EmulatorCore_LoadBIOSFromPath(_core, firm.UTF8String);
+        if (arm9) { if (![self.coreSession loadBIOSAtPath:arm9]) NSLog(@"[AUR][Emu] Failed to load ARM9 BIOS at %@", arm9); }
+        if (arm7) [self.coreSession loadBIOSAtPath:arm7];
+        if (firm) [self.coreSession loadBIOSAtPath:firm];
     } else if (_coreType == EMULATOR_CORE_TYPE_GBA) {
         NSString *gba = [[AURDatabaseManager sharedManager] BIOSPathForIdentifier:@"gba"];
-        if (gba) EmulatorCore_LoadBIOSFromPath(_core, gba.UTF8String);
+        if (gba) [self.coreSession loadBIOSAtPath:gba];
     } else if (_coreType == EMULATOR_CORE_TYPE_GB) {
         // SameBoy core handles GB/GBC. Detect mode if needed, but for now just load what's available.
         NSString *gb = [[AURDatabaseManager sharedManager] BIOSPathForIdentifier:@"gb"];
         NSString *gbc = [[AURDatabaseManager sharedManager] BIOSPathForIdentifier:@"gbc"];
-        if (gb) EmulatorCore_LoadBIOSFromPath(_core, gb.UTF8String);
-        if (gbc) EmulatorCore_LoadBIOSFromPath(_core, gbc.UTF8String);
+        if (gb) [self.coreSession loadBIOSAtPath:gb];
+        if (gbc) [self.coreSession loadBIOSAtPath:gbc];
     }
 
-    const char *path = self.romURL.path.fileSystemRepresentation;
-    if (path && EmulatorCore_LoadROMFromPath(_core, path)) {
-        EmulatorCore_GetVideoSpec(_core, &_videoSpec);
+    if ([self.coreSession loadROMAtURL:self.romURL]) {
+        EmulatorVideoSpec videoSpec = self.coreSession.videoSpec;
         if (_coreType != EMULATOR_CORE_TYPE_NDS) {
-            AURFramePixelFormat framePixelFormat = (_videoSpec.pixel_format == EMULATOR_PIXEL_FORMAT_ARGB8888)
+            AURFramePixelFormat framePixelFormat = (videoSpec.pixel_format == EMULATOR_PIXEL_FORMAT_ARGB8888)
                 ? AURFramePixelFormatBGRA8888
                 : AURFramePixelFormatRGBA8888;
             [self.imageView setFramePixelFormat:framePixelFormat];
@@ -167,7 +166,7 @@
         self.displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(gameLoop)];
         [self.displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
     } else {
-        NSLog(@"[AUR][Emu] ROM load failed (%@): %s", self.romURL.lastPathComponent, EmulatorCore_GetLastError(_core) ?: "unknown error");
+        NSLog(@"[AUR][Emu] ROM load failed (%@): %@", self.romURL.lastPathComponent, self.coreSession.lastError ?: @"unknown error");
         [self stopEmulator];
     }
 }
@@ -176,29 +175,27 @@
     _running = NO;
     [self.displayLink invalidate];
     self.displayLink = nil;
-    if (_core) {
-        EmulatorCore_Destroy(_core);
-        _core = nullptr;
-    }
+    self.coreSession = nil;
 }
 
 - (void)gameLoop {
-    if (!_running || !_core) return;
-    EmulatorCore_StepFrame(_core);
-    const char *stepError = EmulatorCore_GetLastError(_core);
-    if (stepError && stepError[0] != '\0') {
-        NSLog(@"[AUR][Emu] frame step warning: %s", stepError);
+    if (!_running || !self.coreSession) return;
+    [self.coreSession stepFrame];
+    NSString *stepError = self.coreSession.lastError;
+    if (stepError.length > 0) {
+        NSLog(@"[AUR][Emu] frame step warning: %@", stepError);
     }
 
     size_t pixelCount = 0;
-    const uint32_t* frameRGBA = EmulatorCore_GetFrameBufferRGBA(_core, &pixelCount);
+    const uint32_t* frameRGBA = [self.coreSession frameBufferWithPixelCount:&pixelCount];
     if (!frameRGBA) return;
+    EmulatorVideoSpec videoSpec = self.coreSession.videoSpec;
 
     if (_coreType == EMULATOR_CORE_TYPE_NDS) {
         constexpr size_t kScreenWidth = 256U;
         constexpr size_t kScreenHeight = 192U;
 
-        const size_t sourceWidth = (size_t)_videoSpec.width;
+        const size_t sourceWidth = (size_t)videoSpec.width;
         const size_t sourceHeight = (sourceWidth > 0) ? (pixelCount / sourceWidth) : 0;
 
         if (sourceWidth >= (kScreenWidth * 2U)) {
@@ -217,7 +214,7 @@
         return;
     }
 
-    [self.imageView displayFrameRGBA:frameRGBA width:_videoSpec.width height:_videoSpec.height];
+    [self.imageView displayFrameRGBA:frameRGBA width:videoSpec.width height:videoSpec.height];
 }
 
 - (void)dealloc {
@@ -232,21 +229,21 @@
 #pragma mark - AURControllerViewDelegate
 
 - (void)controllerViewDidPressKey:(EmulatorKey)key {
-    if (_core) EmulatorCore_SetKeyStatus(_core, key, true);
+    [self.coreSession setKey:key pressed:YES];
 }
 
 - (void)controllerViewDidReleaseKey:(EmulatorKey)key {
-    if (_core) EmulatorCore_SetKeyStatus(_core, key, false);
+    [self.coreSession setKey:key pressed:NO];
 }
 
 #pragma mark - AURExternalControllerDelegate
 
 - (void)externalControllerDidPressKey:(EmulatorKey)key {
-    if (_core) EmulatorCore_SetKeyStatus(_core, key, true);
+    [self.coreSession setKey:key pressed:YES];
 }
 
 - (void)externalControllerDidReleaseKey:(EmulatorKey)key {
-    if (_core) EmulatorCore_SetKeyStatus(_core, key, false);
+    [self.coreSession setKey:key pressed:NO];
 }
 
 - (void)menuTapped {

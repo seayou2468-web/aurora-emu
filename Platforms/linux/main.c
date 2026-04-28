@@ -6,7 +6,7 @@
 
 #include <SDL.h>
 
-#include "src/core/emulator_core_c_api.h"
+#include "../API/AUREmulatorCoreAPI.h"
 
 enum {
   WINDOW_SCALE = 3,
