@@ -53,6 +53,18 @@ jobs:
           cd ios
           pod install --project-directory=.
 
+      - name: Reset SwiftPM artifact cache
+        run: |
+          rm -rf "${HOME}/Library/Caches/org.swift.swiftpm/artifacts"
+          rm -rf "${HOME}/Library/Caches/org.swift.swiftpm/repositories"
+
+      - name: Resolve Swift packages
+        run: |
+          cd ios
+          xcodebuild -resolvePackageDependencies \
+            -workspace AuroraSwift.xcworkspace \
+            -scheme Cytrus
+
       - name: Build for iOS device (arm64)
         run: |
           cd ios
