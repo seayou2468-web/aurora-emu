@@ -29,10 +29,6 @@ void SetBackendError(const Aurora3DSRuntime* runtime, std::string& last_error) {
 void* CreateRuntime() {
   auto* runtime = new Aurora3DSRuntime();
   runtime->backend = Aurora3DS_Create();
-  if (!runtime->backend) {
-    delete runtime;
-    return nullptr;
-  }
   return runtime;
 }
 
