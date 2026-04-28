@@ -115,6 +115,10 @@ jobs:
             src/core/aurora3ds/Core/include/boost/range/iterator_range_core.hpp
           perl -0pi -e 's{//<-- but this\\.}{// <-- but this.}g' \
             src/core/aurora3ds/Core/include/boost/icl/functors.hpp
+          perl -0pi -e 's{//! @par Throws\\n}{//! @par Throws:\\n}g' \
+            src/core/aurora3ds/Core/include/boost/container/static_vector.hpp
+          perl -0pi -e 's{//! @pre\\n}{//! @pre Preconditions:\\n}g' \
+            src/core/aurora3ds/Core/include/boost/container/static_vector.hpp
 
       - name: Verify Aurora3DS is permanently in build graph
         shell: bash

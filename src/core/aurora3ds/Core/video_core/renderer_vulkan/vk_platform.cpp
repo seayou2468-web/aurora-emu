@@ -78,10 +78,9 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL DebugReportCallback(vk::DebugReportFlagsEX
     if ((flags & vk::DebugReportFlagBitsEXT::eDebug) || (flags & vk::DebugReportFlagBitsEXT::eWarning) || (flags & vk::DebugReportFlagBitsEXT::ePerformanceWarning))
         level = Common::Log::Level::Debug;
 
-    const vk::DebugReportObjectTypeEXT type = static_cast<vk::DebugReportObjectTypeEXT>(objectType);
-//    LOG_GENERIC(Common::Log::Class::Render_Vulkan, level,
-//                "type = {}, object = {} | MessageCode = {:#x}, LayerPrefix = {} | {}",
-//                vk::to_string(type), object, messageCode, pLayerPrefix, pMessage); //Manic修改
+    LOG_GENERIC(Common::Log::Class::Render_Vulkan, level,
+                "type = {}, object = {} | MessageCode = {:#x}, LayerPrefix = {} | {}",
+                vk::to_string(objectType), object, messageCode, pLayerPrefix, pMessage);
 
     return VK_FALSE;
 }
@@ -366,7 +365,7 @@ vk::UniqueDebugUtilsMessengerEXT CreateDebugMessenger(vk::Instance instance) {
                        vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
                        vk::DebugUtilsMessageTypeFlagBitsEXT::eDeviceAddressBinding |
                        vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
-        .pfnUserCallback = reinterpret_cast<PFN_vkDebugUtilsMessengerCallbackEXT>(+DebugUtilsCallback)//Manic修改
+        .pfnUserCallback = +DebugUtilsCallback,
     };
     return instance.createDebugUtilsMessengerEXTUnique(msg_ci);
 }
@@ -377,7 +376,7 @@ vk::UniqueDebugReportCallbackEXT CreateDebugReportCallback(vk::Instance instance
                  vk::DebugReportFlagBitsEXT::eError |
                  vk::DebugReportFlagBitsEXT::ePerformanceWarning |
                  vk::DebugReportFlagBitsEXT::eWarning,
-        .pfnCallback = reinterpret_cast<PFN_vkDebugReportCallbackEXT>(+DebugReportCallback)//Manic修改
+        .pfnCallback = +DebugReportCallback,
     };
     return instance.createDebugReportCallbackEXTUnique(callback_ci);
 }
