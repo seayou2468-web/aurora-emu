@@ -42,10 +42,14 @@ settings:
     ENABLE_BITCODE: NO
     GCC_PREPROCESSOR_DEFINITIONS:
       - "$(inherited)"
-      - "ENABLE_VULKAN=1"
+      - "CPPHTTPLIB_OPENSSL_SUPPORT"
+      - "HAVE_OPENAL"
+      - "HAVE_SDL3"
+      - "HAVE_COREAUDIO"
+      - "ENABLE_SDL3"
+      - "ENABLE_VULKAN"
+      - "ENABLE_WEB_SERVICE"
       - "ENABLE_SOFTWARE_RENDERER=1"
-      - "ENABLE_SDL3=1"
-      - "HAVE_SDL3=1"
     HEADER_SEARCH_PATHS:
       - "$(inherited)"
       - "$(SRCROOT)/../src"
