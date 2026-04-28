@@ -2,7 +2,7 @@ CC       := cc
 CXX      := c++
 AR       := ar
 CFLAGS   := -O3 -flto -ffast-math -std=c11 -Wall -Wextra -Wpedantic
-CXXFLAGS := -O3 -flto -ffast-math -std=c++20 -Wall -Wextra -Wpedantic -ffunction-sections -fdata-sections -DMELONDS_VERSION=\"nba\" -Isrc/core/melonds/teakra/include
+CXXFLAGS := -O3 -flto -ffast-math -std=c++20 -Wall -Wextra -Wpedantic -ffunction-sections -fdata-sections -DMELONDS_VERSION=\"nba\" -Isrc/core/melonds/teakra/include -Isrc/core/aurora3ds/Core/include
 AURORA_LINUX_3DS_ONLY ?= 0
 ifneq ($(AURORA_LINUX_3DS_ONLY),0)
 CXXFLAGS += -DAURORA_LINUX_3DS_ONLY=1
