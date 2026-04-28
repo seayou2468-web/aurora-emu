@@ -22,18 +22,3 @@ mkdir -p "${ROOT_DIR}/SharedDependencies/Sources/boost/include"
 rm -rf "${ROOT_DIR}/SharedDependencies/Sources/boost/include/boost"
 cp -R "${TMP_DIR}/boost_${BOOST_UNDERSCORE}/boost" "${ROOT_DIR}/SharedDependencies/Sources/boost/include/"
 echo "Installed Boost headers to ${ROOT_DIR}/SharedDependencies/Sources/boost/include/boost"
-
-# -----------------------
-# Vulkan-Hpp ヘッダ
-# -----------------------
-VULKAN_HPP_URL="https://github.com/KhronosGroup/Vulkan-Hpp/archive/refs/heads/master.zip"
-VULKAN_HPP_INCLUDE_DIR="${ROOT_DIR}/SharedDependencies/Sources/vulkan/include/vulkan"
-
-echo "Fetching Vulkan-Hpp headers..."
-curl -L "${VULKAN_HPP_URL}" -o "${TMP_DIR}/Vulkan-Hpp.zip"
-unzip "${TMP_DIR}/Vulkan-Hpp.zip" -d "${TMP_DIR}"
-
-mkdir -p "${VULKAN_HPP_INCLUDE_DIR}"
-rm -rf "${VULKAN_HPP_INCLUDE_DIR:?}/*"
-cp -R "${TMP_DIR}/Vulkan-Hpp-master/vulkan" "${VULKAN_HPP_INCLUDE_DIR}/"
-echo "Installed Vulkan-Hpp headers to ${VULKAN_HPP_INCLUDE_DIR}"
