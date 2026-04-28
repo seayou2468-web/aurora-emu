@@ -23,3 +23,22 @@ else
   cp -R "${TMP_DIR}/boost_${BOOST_UNDERSCORE}/boost" "${ROOT_DIR}/Dependicies/Sources/boost/include/"
   echo "Installed Boost headers to ${ROOT_DIR}/Dependicies/Sources/boost/include/boost"
 fi
+
+VULKAN_HEADERS_VERSION="1.3.296.0"
+VULKAN_HEADERS_TAR="vulkan-headers-${VULKAN_HEADERS_VERSION}.tar.gz"
+VULKAN_HEADERS_URL="https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/v${VULKAN_HEADERS_VERSION}.tar.gz"
+VULKAN_INCLUDE_DIR="${ROOT_DIR}/Dependicies/Sources/vulkan/include/vulkan"
+
+if [[ -f "${VULKAN_INCLUDE_DIR}/vulkan.hpp" ]]; then
+  echo "Vulkan headers already present: ${VULKAN_INCLUDE_DIR}"
+else
+  echo "Fetching Vulkan headers ${VULKAN_HEADERS_VERSION}..."
+  curl -L "${VULKAN_HEADERS_URL}" -o "${TMP_DIR}/${VULKAN_HEADERS_TAR}"
+  tar -xzf "${TMP_DIR}/${VULKAN_HEADERS_TAR}" -C "${TMP_DIR}"
+
+  mkdir -p "${ROOT_DIR}/Dependicies/Sources/vulkan/include"
+  rm -rf "${VULKAN_INCLUDE_DIR}"
+  cp -R "${TMP_DIR}/Vulkan-Headers-${VULKAN_HEADERS_VERSION}/include/vulkan" \
+    "${ROOT_DIR}/Dependicies/Sources/vulkan/include/"
+  echo "Installed Vulkan headers to ${VULKAN_INCLUDE_DIR}"
+fi

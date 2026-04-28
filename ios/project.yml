@@ -68,6 +68,7 @@ settings:
       - "$(SRCROOT)/../Dependicies/Sources/toml/include"
       - "$(SRCROOT)/../Dependicies/Sources/tsl/include"
       - "$(SRCROOT)/../Dependicies/Sources/xxhash/include"
+      - "$(SRCROOT)/../Dependicies/Sources/vulkan/include"
       - "$(SRCROOT)/../Platforms/API"
       - "$(SRCROOT)/../Platforms/AuroraIOS/objc"
     FRAMEWORK_SEARCH_PATHS:
