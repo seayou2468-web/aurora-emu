@@ -29,7 +29,7 @@ VULKAN_HEADERS_TAR="vulkan-headers-${VULKAN_HEADERS_VERSION}.tar.gz"
 VULKAN_HEADERS_URL="https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/vulkan-sdk-${VULKAN_HEADERS_VERSION}.tar.gz"
 VULKAN_INCLUDE_DIR="${ROOT_DIR}/Dependicies/Sources/vulkan/include/vulkan"
 
-if [[ -f "${VULKAN_INCLUDE_DIR}/vulkan.hpp" ]]; then
+if [[ -f "${VULKAN_INCLUDE_DIR}/vulkan.hpp" && -f "${ROOT_DIR}/Dependicies/Sources/vulkan/include/vk_video/vulkan_video_codec_h264std.h" ]]; then
   echo "Vulkan headers already present: ${VULKAN_INCLUDE_DIR}"
 else
   echo "Fetching Vulkan headers ${VULKAN_HEADERS_VERSION}..."
@@ -43,7 +43,10 @@ else
 
   mkdir -p "${ROOT_DIR}/Dependicies/Sources/vulkan/include"
   rm -rf "${VULKAN_INCLUDE_DIR}"
+  rm -rf "${ROOT_DIR}/Dependicies/Sources/vulkan/include/vk_video"
   cp -R "${VULKAN_EXTRACT_DIR}/include/vulkan" \
+    "${ROOT_DIR}/Dependicies/Sources/vulkan/include/"
+  cp -R "${VULKAN_EXTRACT_DIR}/include/vk_video" \
     "${ROOT_DIR}/Dependicies/Sources/vulkan/include/"
   echo "Installed Vulkan headers to ${VULKAN_INCLUDE_DIR}"
 fi
