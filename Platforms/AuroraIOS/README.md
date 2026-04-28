@@ -10,3 +10,6 @@
 `objc/Bridge/AURCoreSessionFactory` がコア種類に応じて接続方式を選択し、
 `objc/Bridge/AURModuleCoreAdapter`（module接続型）または
 `objc/Bridge/AURBridgeCoreAdapter`（bridge接続型）を言語版に依存せず利用します。
+
+Aurora3DS の実機ビルドでは、`ios/pods/AuroraBinaryDeps.podspec` で
+Vulkan/FFmpeg/Boost/Audio 系の xcframework 依存をまとめて解決します。
