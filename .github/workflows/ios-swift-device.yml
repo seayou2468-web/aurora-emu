@@ -3,6 +3,7 @@ name: iOS Swift Device Build
 on:
   push:
     branches: [ "main", "work" ]
+  workflow_dispatch:  
   pull_request:
 
 jobs:
