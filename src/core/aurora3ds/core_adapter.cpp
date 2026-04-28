@@ -11,8 +11,13 @@ struct Aurora3DSRuntime {
   void* backend = nullptr;
 };
 
-void SetBridgeMissingError(std::string& last_error) {
-  last_error = "aurora3ds backend bridge is not linked";
+void SetBackendUnavailableError(std::string& last_error) {
+  const char* err = Aurora3DS_GetLastError(nullptr);
+  if (err && err[0] != '\0') {
+    last_error = err;
+    return;
+  }
+  last_error = "aurora3ds backend is unavailable";
 }
 
 void SetBackendError(const Aurora3DSRuntime* runtime, std::string& last_error) {
@@ -44,7 +49,7 @@ void DestroyRuntime(void* runtime_ptr) {
 bool LoadBIOSFromPath(void* runtime_ptr, const char* bios_path, std::string& last_error) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   if (!runtime || !runtime->backend) {
-    SetBridgeMissingError(last_error);
+    SetBackendUnavailableError(last_error);
     return false;
   }
   if (Aurora3DS_LoadBIOSFromPath(runtime->backend, bios_path)) return true;
@@ -55,7 +60,7 @@ bool LoadBIOSFromPath(void* runtime_ptr, const char* bios_path, std::string& las
 bool LoadROMFromPath(void* runtime_ptr, const char* rom_path, std::string& last_error) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   if (!runtime || !runtime->backend) {
-    SetBridgeMissingError(last_error);
+    SetBackendUnavailableError(last_error);
     return false;
   }
   if (Aurora3DS_LoadROMFromPath(runtime->backend, rom_path)) return true;
@@ -66,7 +71,7 @@ bool LoadROMFromPath(void* runtime_ptr, const char* rom_path, std::string& last_
 bool LoadROMFromMemory(void* runtime_ptr, const void* rom_data, size_t rom_size, std::string& last_error) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   if (!runtime || !runtime->backend) {
-    SetBridgeMissingError(last_error);
+    SetBackendUnavailableError(last_error);
     return false;
   }
   if (Aurora3DS_LoadROMFromMemory(runtime->backend, rom_data, rom_size)) return true;
@@ -77,7 +82,7 @@ bool LoadROMFromMemory(void* runtime_ptr, const void* rom_data, size_t rom_size,
 void StepFrame(void* runtime_ptr, std::string& last_error) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   if (!runtime || !runtime->backend) {
-    SetBridgeMissingError(last_error);
+    SetBackendUnavailableError(last_error);
     return;
   }
   if (!Aurora3DS_StepFrame(runtime->backend)) {
@@ -103,7 +108,7 @@ bool SetRenderSurfaces(
     std::string& last_error) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   if (!runtime || !runtime->backend) {
-    SetBridgeMissingError(last_error);
+    SetBackendUnavailableError(last_error);
     return false;
   }
   if (Aurora3DS_SetRenderSurfaces(
@@ -131,7 +136,7 @@ const uint32_t* GetFrameBufferRGBA(void* runtime_ptr, size_t* pixel_count) {
 bool SaveStateToBuffer(void* runtime_ptr, void* out_buffer, size_t buffer_size, size_t* out_size, std::string& last_error) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   if (!runtime || !runtime->backend) {
-    SetBridgeMissingError(last_error);
+    SetBackendUnavailableError(last_error);
     return false;
   }
   if (Aurora3DS_SaveStateToBuffer(runtime->backend, out_buffer, buffer_size, out_size)) return true;
@@ -142,7 +147,7 @@ bool SaveStateToBuffer(void* runtime_ptr, void* out_buffer, size_t buffer_size, 
 bool LoadStateFromBuffer(void* runtime_ptr, const void* state_buffer, size_t state_size, std::string& last_error) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   if (!runtime || !runtime->backend) {
-    SetBridgeMissingError(last_error);
+    SetBackendUnavailableError(last_error);
     return false;
   }
   if (Aurora3DS_LoadStateFromBuffer(runtime->backend, state_buffer, state_size)) return true;
@@ -153,7 +158,7 @@ bool LoadStateFromBuffer(void* runtime_ptr, const void* state_buffer, size_t sta
 bool ApplyCheatCode(void* runtime_ptr, const char* cheat_code, std::string& last_error) {
   auto* runtime = static_cast<Aurora3DSRuntime*>(runtime_ptr);
   if (!runtime || !runtime->backend) {
-    SetBridgeMissingError(last_error);
+    SetBackendUnavailableError(last_error);
     return false;
   }
   if (Aurora3DS_ApplyCheatCode(runtime->backend, cheat_code)) return true;
