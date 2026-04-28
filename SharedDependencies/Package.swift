@@ -15,6 +15,7 @@ let package = Package(
         .macOS(.v15)
     ],
     products: [
+        .library(name: "SharedDependencies", targets: ["SharedDependencies"]),
         .library(name: "lib_boostcontext", targets: ["lib_boostcontext"]),
         .library(name: "lib_boostiostreams", targets: ["lib_boostiostreams"]),
         .library(name: "lib_boostprogramoptions", targets: ["lib_boostprogramoptions"]),
@@ -45,6 +46,40 @@ let package = Package(
         .library(name: "libswscale", targets: ["libswscale"])
     ],
     targets: [
+        .target(
+            name: "SharedDependencies",
+            dependencies: [
+                "lib_boostcontext",
+                "lib_boostiostreams",
+                "lib_boostprogramoptions",
+                "lib_boostserialization",
+                "lib_dynarmic",
+                "lib_enet",
+                "lib_faad2",
+                "lib_fmt",
+                "lib_genericcodegen",
+                "lib_glslang",
+                "lib_machineindependent",
+                "lib_mcl",
+                "lib_openal",
+                "lib_opus",
+                "lib_sdl3",
+                "lib_sirit",
+                "lib_soundtouch",
+                "lib_spirv",
+                "lib_teakra",
+                "FLAC",
+                "ogg",
+                "MoltenVK",
+                "libavcodec",
+                "libavfilter",
+                "libavformat",
+                "libavutil",
+                "libswresample",
+                "libswscale"
+            ],
+            path: "Sources/SharedDependencies"
+        ),
         .binaryTarget(name: "lib_boostcontext", url: url("lib_boostcontext", "0.0.6"), checksum: "0fdb5520d200b5c2b0b376c396b8271c8bf1627d576884e1a255a5630abddda1"),
         .binaryTarget(name: "lib_boostiostreams", url: url("lib_boostiostreams", "0.0.6"), checksum: "496dacfaa036ab2e6287a034f6659dd68e18c6808f00080a6dd546451fd0ae31"),
         .binaryTarget(name: "lib_boostprogramoptions", url: url("lib_boostprogramoptions", "0.0.6"), checksum: "a405b06fa63794e25334b6e4fa37ab34c8e541696f2ab9e02edae598d1dbda1a"),
