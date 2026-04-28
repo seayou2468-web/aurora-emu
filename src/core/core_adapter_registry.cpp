@@ -9,7 +9,7 @@ extern const CoreAdapter kMelonDSAdapter;
 extern const CoreAdapter kAurora3DSAdapter;
 
 const CoreAdapter* FindCoreAdapter(EmulatorCoreType type) {
-#if defined(AURORA_IOS_MINIMAL_CORE)
+#if defined(AURORA_IOS_MINIMAL_CORE) || defined(AURORA_LINUX_3DS_ONLY)
   switch (type) {
     case EMULATOR_CORE_TYPE_3DS:
       return &kAurora3DSAdapter;

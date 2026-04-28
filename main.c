@@ -16,12 +16,15 @@ enum {
 
 int main(int argc, char** argv) {
   if (argc < 2) {
-    fprintf(stderr, "Usage: %s <rom.(gba|nds|nes|gb|gbc)>\n", argv[0]);
+    fprintf(stderr, "Usage: %s <rom.(3ds|cia|gba|nds|nes|gb|gbc)>\n", argv[0]);
     return 1;
   }
 
   EmulatorCoreType core_type = EMULATOR_CORE_TYPE_GBA;
   const char* ext = strrchr(argv[1], '.');
+  if (ext != NULL && (strcmp(ext, ".3ds") == 0 || strcmp(ext, ".cia") == 0)) {
+    core_type = EMULATOR_CORE_TYPE_3DS;
+  }
   if (ext != NULL && strcmp(ext, ".nes") == 0) {
     core_type = EMULATOR_CORE_TYPE_NES;
   }
@@ -34,7 +37,7 @@ int main(int argc, char** argv) {
 
   EmulatorCoreHandle* core = EmulatorCore_Create(core_type);
   if (!core) {
-    fprintf(stderr, "EmulatorCore_Create failed\n");
+    fprintf(stderr, "EmulatorCore_Create failed (core type: %d)\n", (int)core_type);
     return 1;
   }
 
