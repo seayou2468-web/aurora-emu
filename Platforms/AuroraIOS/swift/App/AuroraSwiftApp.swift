@@ -2,16 +2,11 @@ import UIKit
 
 @main
 final class AuroraSwiftApp: UIResponder, UIApplicationDelegate {
-    var window: UIWindow?
-
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-        let window = UIWindow(frame: UIScreen.main.bounds)
-        window.rootViewController = UINavigationController(rootViewController: SwiftLibraryViewController())
-        window.makeKeyAndVisible()
-        self.window = window
+        // Window creation is handled by AURSceneDelegate (UIWindowScene-based lifecycle).
         return true
     }
 }
