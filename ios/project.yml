@@ -82,6 +82,8 @@ settings:
       - "$(SRCROOT)/../SharedDependencies/Sources/tsl/include"
       - "$(SRCROOT)/../SharedDependencies/Sources/xxhash/include"
       - "$(SRCROOT)/../SharedDependencies/Sources/vulkan/include"
+      - "$(SRCROOT)/../SharedDependencies/Sources/vk_video"
+      - "$(SRCROOT)/../SharedDependencies/Sources/MoltenVK"
       - "$(SRCROOT)/../Platforms/API"
       - "$(SRCROOT)/../Platforms/AuroraIOS/objc"
     FRAMEWORK_SEARCH_PATHS:
@@ -116,6 +118,13 @@ targets:
         product: libseekable_format
       - package: openssl
         product: OpenSSL
+      - framework: ../SharedDependencies/MoltenVK.xcframework
+      - framework: ../SharedDependencies/libavcodec.xcframework
+      - framework: ../SharedDependencies/libavfilter.xcframework
+      - framework: ../SharedDependencies/libavformat.xcframework
+      - framework: ../SharedDependencies/libavutil.xcframework
+      - framework: ../SharedDependencies/libswresample.xcframework
+      - framework: ../SharedDependencies/libswscale.xcframework
     settings:
       base:
         INFOPLIST_FILE: ../Config/Info.plist

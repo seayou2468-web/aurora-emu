@@ -23,7 +23,7 @@ let package = Package(
         ])
     ],
     dependencies: [
-        .package(url: "https://github.com/jarrodnorwell/PLzmaSDK", branch: "master"),
+        .package(url: "https://github.com/OlehKulykov/PLzmaSDK", exact: "1.6.0"),
         .package(url: "https://github.com/krzyzanowskim/OpenSSL", branch: "main")
     ],
     targets: [
@@ -69,7 +69,7 @@ let package = Package(
             "toml",
             "tsl",
             "xxhash"
-        ], cxxSettings: [
+        ], path: "Sources/SharedDependencies", publicHeadersPath: "include", cxxSettings: [
             .define("SDL_MAIN_HANDLED")
         ]),
         .target(name: "cereal", publicHeadersPath: "include"),

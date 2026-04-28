@@ -33,12 +33,11 @@ jobs:
         run: |
           brew install xcodegen cocoapods
 
-      - name: Install Vulkan headers
+      - name: Export SharedDependencies header paths
         run: |
-          brew install vulkan-headers
-          VULKAN_PREFIX="$(brew --prefix vulkan-headers)"
-          echo "CPATH=${VULKAN_PREFIX}/include:${CPATH:-}" >> "${GITHUB_ENV}"
-          echo "CPLUS_INCLUDE_PATH=${VULKAN_PREFIX}/include:${CPLUS_INCLUDE_PATH:-}" >> "${GITHUB_ENV}"
+          SHARED_DEPS_INCLUDE_PATHS="$GITHUB_WORKSPACE/SharedDependencies/Sources/vulkan:$GITHUB_WORKSPACE/SharedDependencies/Sources/vk_video:$GITHUB_WORKSPACE/SharedDependencies/Sources/MoltenVK:$GITHUB_WORKSPACE/SharedDependencies/Sources/boost/include"
+          echo "CPATH=${SHARED_DEPS_INCLUDE_PATHS}:${CPATH:-}" >> "${GITHUB_ENV}"
+          echo "CPLUS_INCLUDE_PATH=${SHARED_DEPS_INCLUDE_PATHS}:${CPLUS_INCLUDE_PATH:-}" >> "${GITHUB_ENV}"
 
       - name: Fetch third-party headers (Boost)
         run: |
