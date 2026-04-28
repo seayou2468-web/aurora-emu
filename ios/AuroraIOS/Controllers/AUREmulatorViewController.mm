@@ -4,6 +4,7 @@
 #import "../Managers/AURSkinManager.h"
 #import "../Managers/AURDatabaseManager.h"
 #import "../Managers/AURExternalControllerManager.h"
+#import "../Managers/AURLogManager.h"
 #import "../Metal.h"
 #import <QuartzCore/QuartzCore.h>
 #include <algorithm>
@@ -134,7 +135,7 @@
     [self stopEmulator];
     _core = EmulatorCore_Create(_coreType);
     if (!_core) {
-        NSLog(@"[AUR][Emu] Failed to create core: %d", (int)_coreType);
+        [AURLogManager logError:[NSString stringWithFormat:@"[AUR][Emu] Failed to create core: %d", (int)_coreType]];
         if (_coreType == EMULATOR_CORE_TYPE_3DS) {
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Aurora3DS接続エラー"
                                                                            message:@"Aurora3DSの実コアブリッジがリンクされていないため起動できません。"
@@ -166,10 +167,10 @@
         NSString *aesKeys = [[AURDatabaseManager sharedManager] BIOSPathForIdentifier:@"3ds_aes_keys"];
         NSString *seedDb = [[AURDatabaseManager sharedManager] BIOSPathForIdentifier:@"3ds_seeddb"];
         if (aesKeys && !EmulatorCore_LoadBIOSFromPath(_core, aesKeys.UTF8String)) {
-            NSLog(@"[AUR][Emu] Failed to install 3DS aes_keys.txt from %@", aesKeys);
+            [AURLogManager logError:[NSString stringWithFormat:@"[AUR][Emu] Failed to install 3DS aes_keys.txt from %@", aesKeys]];
         }
         if (seedDb && !EmulatorCore_LoadBIOSFromPath(_core, seedDb.UTF8String)) {
-            NSLog(@"[AUR][Emu] Failed to install 3DS seeddb.bin from %@", seedDb);
+            [AURLogManager logError:[NSString stringWithFormat:@"[AUR][Emu] Failed to install 3DS seeddb.bin from %@", seedDb]];
         }
     }
 
@@ -192,7 +193,7 @@
             (uint32_t)llround(bottomSize.height * scale),
             (float)scale);
         if (!_usesVulkanPresenter) {
-            NSLog(@"[AUR][Emu] 3DS Vulkan renderer surface connect failed: %s", EmulatorCore_GetLastError(_core) ?: "unknown");
+            [AURLogManager logError:[NSString stringWithFormat:@"[AUR][Emu] 3DS Vulkan renderer surface connect failed: %s", EmulatorCore_GetLastError(_core) ?: "unknown"]];
         }
     }
 
@@ -209,7 +210,7 @@
         self.displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(gameLoop)];
         [self.displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
     } else {
-        NSLog(@"[AUR][Emu] ROM load failed (%@): %s", self.romURL.lastPathComponent, EmulatorCore_GetLastError(_core) ?: "unknown error");
+        [AURLogManager logError:[NSString stringWithFormat:@"[AUR][Emu] ROM load failed (%@): %s", self.romURL.lastPathComponent, EmulatorCore_GetLastError(_core) ?: "unknown error"]];
         if (_coreType == EMULATOR_CORE_TYPE_3DS) {
             const char *errorText = EmulatorCore_GetLastError(_core) ?: "unknown error";
             NSString *message = [NSString stringWithFormat:@"Aurora3DSブリッジまたはROM初期化に失敗しました。\n%s", errorText];
@@ -238,7 +239,7 @@
     EmulatorCore_StepFrame(_core);
     const char *stepError = EmulatorCore_GetLastError(_core);
     if (stepError && stepError[0] != '\0') {
-        NSLog(@"[AUR][Emu] frame step warning: %s", stepError);
+        [AURLogManager logError:[NSString stringWithFormat:@"[AUR][Emu] frame step warning: %s", stepError]];
     }
     if (_coreType == EMULATOR_CORE_TYPE_3DS && _usesVulkanPresenter) {
         return;

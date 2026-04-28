@@ -1,5 +1,6 @@
 #import "AURAppDelegate.h"
 #import "AURSceneDelegate.h"
+#import "Managers/AURLogManager.h"
 
 @implementation AURAppDelegate
 
@@ -7,6 +8,8 @@
     didFinishLaunchingWithOptions:(NSDictionary* _Nullable)launchOptions {
     (void)application;
     (void)launchOptions;
+    [AURLogManager startLogging];
+    [AURLogManager logInfo:@"Application didFinishLaunchingWithOptions"];
     // ウィンドウ生成は AURSceneDelegate に委譲。
     // iOS 13+ SceneDelegate が有効な場合、ここでは何もしない。
     return YES;
