@@ -1,0 +1,4 @@
+#pragma once
+
+// Compatibility shim for Sirit headers that include the typo'd name.
+#include <spirv/unified1/spirv.hpp>
