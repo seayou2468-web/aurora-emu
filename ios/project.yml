@@ -19,6 +19,8 @@ settings:
       - "$(SRCROOT)/../src/core/bridge_cores/aurora3ds/Core/include"
       - "$(SRCROOT)/../Dependicies/Sources/**/include"
       - "$(SRCROOT)/../Dependicies/Sources/boost/include"
+      - "$(SRCROOT)/../Dependicies/Sources/microprofile/include"
+      - "$(SRCROOT)/../Dependicies/Sources/zstd/include"
       - "$(SRCROOT)/../Platforms/API"
       - "$(SRCROOT)/../Platforms/AuroraIOS/objc"
     FRAMEWORK_SEARCH_PATHS:

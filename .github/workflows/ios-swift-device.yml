@@ -32,7 +32,7 @@ jobs:
         run: |
           brew install xcodegen cocoapods
 
-      - name: Fetch Boost headers
+      - name: Fetch third-party headers (Boost/Zstd)
         run: |
           ./scripts/fetch_boost_headers.sh
 
