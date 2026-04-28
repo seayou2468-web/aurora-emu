@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "openssl",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/krzyzanowskim/OpenSSL",
+      "state" : {
+        "branch" : "main",
+        "revision" : "2a2c00b315bd82d24e7cab8580fe4a37c7ee7cc7"
+      }
+    },
+    {
       "identity" : "zlib-spm",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Azoy/zlib-spm",

@@ -25,6 +25,9 @@ packages:
   zstd:
     url: https://github.com/jarrodnorwell/zstd
     branch: dev
+  openssl:
+    url: https://github.com/krzyzanowskim/OpenSSL
+    branch: main
 settings:
   base:
     PRODUCT_BUNDLE_IDENTIFIER: com.auroraemu.auroraswift
@@ -127,6 +130,8 @@ targets:
         product: libzstd
       - package: zstd
         product: libseekable_format
+      - package: openssl
+        product: OpenSSL
     settings:
       base:
         INFOPLIST_FILE: ../Config/Info.plist
