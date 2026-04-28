@@ -47,6 +47,13 @@ let package = Package(
             "lib_sirit",
             "lib_soundtouch",
             "lib_teakra",
+            "MoltenVK",
+            "libavcodec",
+            "libavfilter",
+            "libavformat",
+            "libavutil",
+            "libswresample",
+            "libswscale",
             "cereal",
             "cryptopp",
             "dds_ktx",
@@ -199,7 +206,15 @@ let package = Package(
                       checksum: "87f1b13fb490867790b96d52fcbeb1a23847b8f45f50cece530d533266c2001e"),
         .binaryTarget(name: "ogg",
                       url: "https://github.com/sbooth/ogg-binary-xcframework/releases/download/0.1.2/ogg.xcframework.zip",
-                      checksum: "b6ab2dcf89076ca9488ef32d810d0343a2072fadd9eb94247f498b7b87070e2e")
+                      checksum: "b6ab2dcf89076ca9488ef32d810d0343a2072fadd9eb94247f498b7b87070e2e"),
+        
+        .binaryTarget(name: "MoltenVK", path: "XCFrameworks/MoltenVK.xcframework"),
+        .binaryTarget(name: "libavcodec", path: "XCFrameworks/libavcodec.xcframework"),
+        .binaryTarget(name: "libavfilter", path: "XCFrameworks/libavfilter.xcframework"),
+        .binaryTarget(name: "libavformat", path: "XCFrameworks/libavformat.xcframework"),
+        .binaryTarget(name: "libavutil", path: "XCFrameworks/libavutil.xcframework"),
+        .binaryTarget(name: "libswresample", path: "XCFrameworks/libswresample.xcframework"),
+        .binaryTarget(name: "libswscale", path: "XCFrameworks/libswscale.xcframework")
         
     ],
     cLanguageStandard: .gnu2x,
