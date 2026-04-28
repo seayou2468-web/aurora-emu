@@ -18,6 +18,7 @@ settings:
       - "$(SRCROOT)/../src/core/bridge_cores/aurora3ds"
       - "$(SRCROOT)/../src/core/bridge_cores/aurora3ds/Core/include"
       - "$(SRCROOT)/../Dependicies/Sources/**/include"
+      - "$(SRCROOT)/../Dependicies/libfmt.xcframework/**/Headers"
       - "$(SRCROOT)/../Platforms/API"
       - "$(SRCROOT)/../Platforms/AuroraIOS/objc"
     FRAMEWORK_SEARCH_PATHS:
