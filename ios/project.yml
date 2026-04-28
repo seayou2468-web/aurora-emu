@@ -83,6 +83,7 @@ settings:
       - "$(SRCROOT)/../SharedDependencies/Sources/vulkan/include"
       - "$(SRCROOT)/../SharedDependencies/Sources/vk_video"
       - "$(SRCROOT)/../SharedDependencies/Sources/MoltenVK"
+      - "$(SRCROOT)/../SharedDependencies/Sources"
       - "$(SRCROOT)/../Platforms/API"
       - "$(SRCROOT)/../Platforms/AuroraIOS/objc"
     FRAMEWORK_SEARCH_PATHS:
