@@ -25,8 +25,8 @@ final class AuroraCoreBridge: NSObject {
     private let session: AURCoreSession
 
     init(coreType: AuroraCoreType) {
-        let nativeType = EmulatorCoreType(rawValue: coreType.rawValue)!
-        self.session = AURCoreSessionFactory.session(withCoreType: nativeType)
+        let nativeType = EmulatorCoreType(rawValue: UInt32(coreType.rawValue))
+        self.session = AURCoreSessionFactory.session(with: nativeType)
         super.init()
     }
 
@@ -39,7 +39,7 @@ final class AuroraCoreBridge: NSObject {
     }
 
     func setKey(_ key: AuroraCoreKey, pressed: Bool) {
-        guard let mapped = EmulatorKey(rawValue: key.rawValue) else { return }
+        let mapped = EmulatorKey(rawValue: UInt32(key.rawValue))
         session.setKey(mapped, pressed: pressed)
     }
 

@@ -319,7 +319,7 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
             return []
         }
 
-        var items = files.compactMap { fileURL in
+        var items: [SwiftROMItem] = files.compactMap { fileURL in
             guard let launchTarget = launchTarget(for: fileURL) else { return nil }
             let ext = fileURL.pathExtension.lowercased()
             return SwiftROMItem(
@@ -336,8 +336,8 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
             items.sort { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
         case .recentlyAdded:
             items.sort {
-                let lhs = (try? $0.url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
-                let rhs = (try? $1.url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+                let lhs = (try? $0.url.resourceValues(forKeys: [URLResourceKey.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+                let rhs = (try? $1.url.resourceValues(forKeys: [URLResourceKey.contentModificationDateKey]).contentModificationDate) ?? .distantPast
                 return lhs > rhs
             }
         }
@@ -412,7 +412,7 @@ extension SwiftLibraryViewController: UICollectionViewDelegate {
         switch item.launchTarget {
         case .aurora3ds:
             let vc = AUR3DSEmulatorViewController(romURL: item.url)
-            vc.modalPresentationStyle = .fullScreen
+            vc.modalPresentationStyle = UIModalPresentationStyle.fullScreen
             present(vc, animated: true)
         }
     }

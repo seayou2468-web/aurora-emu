@@ -13,7 +13,7 @@ public actor SystemSaveGame {
     var emulator: CytrusEmulator = .shared()
     
     public var systemLanguage: Int { .init(emulator.systemLanguage()) }
-    public func set(_ systemLanguage: Int) { emulator.set(systemLanguage: .init(systemLanguage))}
+    public func set(_ systemLanguage: Int) { emulator.set(systemLanguage: Int32(systemLanguage))}
     
     public var username: String { emulator.username() }
     public func set(_ username: String) { emulator.set(username: username) }
@@ -290,7 +290,7 @@ extension Cytrus {
     }
     
     public func input(_ slot: Int, _ button: CytrusButtonType, _ pressed: Bool) {
-        emulator.input(.init(slot), button: button.rawValue, pressed: pressed)
+        emulator.input(slot, button: button.rawValue, pressed: pressed)
     }
     
     public func thumbstickMoved(_ thumbstick: CytrusAnalogType, _ x: Float, _ y: Float) {
