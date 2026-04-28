@@ -23,7 +23,6 @@ let package = Package(
         ])
     ],
     dependencies: [
-        .package(url: "https://github.com/OlehKulykov/PLzmaSDK", exact: "1.6.0"),
         .package(url: "https://github.com/krzyzanowskim/OpenSSL", branch: "main")
     ],
     targets: [
@@ -87,8 +86,7 @@ let package = Package(
         ], publicHeadersPath: "include"),
         .target(name: "libchdr", dependencies: [
             "FLAC",
-            "ogg",
-            .product(name: "PLzmaSDK-Static", package: "PLzmaSDK")
+            "ogg"
         ], publicHeadersPath: "include"),
         .target(name: "libslirp", dependencies: [
             "glib"
