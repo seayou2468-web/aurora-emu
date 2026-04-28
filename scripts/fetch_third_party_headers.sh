@@ -26,7 +26,7 @@ fi
 
 VULKAN_HEADERS_VERSION="1.3.296.0"
 VULKAN_HEADERS_TAR="vulkan-headers-${VULKAN_HEADERS_VERSION}.tar.gz"
-VULKAN_HEADERS_URL="https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/v${VULKAN_HEADERS_VERSION}.tar.gz"
+VULKAN_HEADERS_URL="https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/vulkan-sdk-${VULKAN_HEADERS_VERSION}.tar.gz"
 VULKAN_INCLUDE_DIR="${ROOT_DIR}/Dependicies/Sources/vulkan/include/vulkan"
 
 if [[ -f "${VULKAN_INCLUDE_DIR}/vulkan.hpp" ]]; then
@@ -35,10 +35,15 @@ else
   echo "Fetching Vulkan headers ${VULKAN_HEADERS_VERSION}..."
   curl -L "${VULKAN_HEADERS_URL}" -o "${TMP_DIR}/${VULKAN_HEADERS_TAR}"
   tar -xzf "${TMP_DIR}/${VULKAN_HEADERS_TAR}" -C "${TMP_DIR}"
+  VULKAN_EXTRACT_DIR="$(find "${TMP_DIR}" -maxdepth 1 -type d -name 'Vulkan-Headers-*' | head -n 1)"
+  if [[ -z "${VULKAN_EXTRACT_DIR}" ]]; then
+    echo "Failed to locate extracted Vulkan-Headers directory." >&2
+    exit 1
+  fi
 
   mkdir -p "${ROOT_DIR}/Dependicies/Sources/vulkan/include"
   rm -rf "${VULKAN_INCLUDE_DIR}"
-  cp -R "${TMP_DIR}/Vulkan-Headers-${VULKAN_HEADERS_VERSION}/include/vulkan" \
+  cp -R "${VULKAN_EXTRACT_DIR}/include/vulkan" \
     "${ROOT_DIR}/Dependicies/Sources/vulkan/include/"
   echo "Installed Vulkan headers to ${VULKAN_INCLUDE_DIR}"
 fi
