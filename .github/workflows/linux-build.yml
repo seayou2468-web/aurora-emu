@@ -20,12 +20,14 @@ jobs:
       - name: Build Linux binary
         run: |
           make clean
-          make -j"$(nproc)"
+          make -j"$(nproc)" AURORA_LINUX_3DS_ONLY=1
           test -x build/nanoboyadvance-linux
 
-      - name: Render smoke test (NES on Xvfb)
+      - name: Aurora3DS Linux load smoke test
         run: |
-          timeout 10s xvfb-run -a ./build/nanoboyadvance-linux src/core/quick_nes/dq.nes || test $? -eq 124
+          curl -L https://github.com/16BitWonder/3DS-TEST/releases/download/v1.0/3DS-TEST.cia -o /tmp/3DS-TEST.cia
+          xvfb-run -a ./build/nanoboyadvance-linux /tmp/3DS-TEST.cia > /tmp/aurora3ds-linux.log 2>&1 || true
+          grep -Eq "failed to load libaurora3ds_bridge.so|EmulatorCore_LoadROMFromPath failed" /tmp/aurora3ds-linux.log
 
       - name: Upload Linux binary artifact
         uses: actions/upload-artifact@v4

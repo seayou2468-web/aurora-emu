@@ -6,6 +6,7 @@
 #include <sstream>
 #include <vector>
 #include <cstring>
+#include <type_traits>
 
 #if defined(__APPLE__)
 #include <dlfcn.h>
@@ -555,6 +556,176 @@ const char* Aurora3DS_GetLastError(void* runtime) {
 
 }  // extern "C"
 
+#elif defined(__linux__)
+
+#include <dlfcn.h>
+#include <mutex>
+
+namespace {
+
+struct LinuxBridgeSymbols {
+  void* handle = nullptr;
+  const char* last_error = "aurora3ds linux bridge library is not loaded";
+
+  void* (*create_fn)(void) = nullptr;
+  void (*destroy_fn)(void*) = nullptr;
+  bool (*load_bios_fn)(void*, const char*) = nullptr;
+  bool (*load_rom_path_fn)(void*, const char*) = nullptr;
+  bool (*probe_rom_path_fn)(const char*, Aurora3DSROMProbeInfo*) = nullptr;
+  bool (*load_rom_mem_fn)(void*, const void*, size_t) = nullptr;
+  bool (*step_frame_fn)(void*) = nullptr;
+  bool (*set_surfaces_fn)(void*, void*, void*, uint32_t, uint32_t, uint32_t, uint32_t, float) = nullptr;
+  void (*set_key_fn)(void*, int, bool) = nullptr;
+  bool (*get_video_spec_fn)(void*, EmulatorVideoSpec*) = nullptr;
+  const uint32_t* (*get_frame_fn)(void*, size_t*) = nullptr;
+  bool (*save_state_fn)(void*, void*, size_t, size_t*) = nullptr;
+  bool (*load_state_fn)(void*, const void*, size_t) = nullptr;
+  bool (*apply_cheat_fn)(void*, const char*) = nullptr;
+  const char* (*get_last_error_fn)(void*) = nullptr;
+};
+
+LinuxBridgeSymbols& GetLinuxBridge() {
+  static LinuxBridgeSymbols symbols{};
+  static std::once_flag once;
+  std::call_once(once, [] {
+    constexpr const char* candidates[] = {
+        "libaurora3ds_bridge.so",
+        "libaurora3ds_core.so",
+        "./libaurora3ds_bridge.so",
+    };
+    for (const char* candidate : candidates) {
+      void* handle = dlopen(candidate, RTLD_NOW | RTLD_LOCAL);
+      if (!handle) {
+        continue;
+      }
+      symbols.handle = handle;
+      symbols.last_error = "";
+      break;
+    }
+    if (!symbols.handle) {
+      symbols.last_error = "failed to load libaurora3ds_bridge.so (or libaurora3ds_core.so)";
+      return;
+    }
+
+    auto load_sym = [&](auto& fn_ptr, const char* name) {
+      fn_ptr = reinterpret_cast<std::remove_reference_t<decltype(fn_ptr)>>(dlsym(symbols.handle, name));
+      return fn_ptr != nullptr;
+    };
+    if (!load_sym(symbols.create_fn, "Aurora3DSBridge_Create") ||
+        !load_sym(symbols.destroy_fn, "Aurora3DSBridge_Destroy") ||
+        !load_sym(symbols.load_bios_fn, "Aurora3DSBridge_LoadBIOSFromPath") ||
+        !load_sym(symbols.load_rom_path_fn, "Aurora3DSBridge_LoadROMFromPath") ||
+        !load_sym(symbols.probe_rom_path_fn, "Aurora3DSBridge_ProbeROMFromPath") ||
+        !load_sym(symbols.load_rom_mem_fn, "Aurora3DSBridge_LoadROMFromMemory") ||
+        !load_sym(symbols.step_frame_fn, "Aurora3DSBridge_StepFrame") ||
+        !load_sym(symbols.set_surfaces_fn, "Aurora3DSBridge_SetRenderSurfaces") ||
+        !load_sym(symbols.set_key_fn, "Aurora3DSBridge_SetKeyStatus") ||
+        !load_sym(symbols.get_video_spec_fn, "Aurora3DSBridge_GetVideoSpec") ||
+        !load_sym(symbols.get_frame_fn, "Aurora3DSBridge_GetFrameBufferRGBA") ||
+        !load_sym(symbols.save_state_fn, "Aurora3DSBridge_SaveStateToBuffer") ||
+        !load_sym(symbols.load_state_fn, "Aurora3DSBridge_LoadStateFromBuffer") ||
+        !load_sym(symbols.apply_cheat_fn, "Aurora3DSBridge_ApplyCheatCode") ||
+        !load_sym(symbols.get_last_error_fn, "Aurora3DSBridge_GetLastError")) {
+      symbols.last_error = "aurora3ds linux bridge symbols are incomplete";
+      dlclose(symbols.handle);
+      symbols.handle = nullptr;
+    }
+  });
+  return symbols;
+}
+
+bool LinuxBridgeReady() {
+  return GetLinuxBridge().handle != nullptr;
+}
+
+const char* LinuxBridgeLastError(void* runtime) {
+  auto& bridge = GetLinuxBridge();
+  if (bridge.handle && bridge.get_last_error_fn) {
+    if (const char* err = bridge.get_last_error_fn(runtime); err && err[0] != '\0') {
+      return err;
+    }
+  }
+  return bridge.last_error;
+}
+
+} // namespace
+
+extern "C" {
+
+bool Aurora3DSBridge_ProbeROMFromPath(const char* rom_path, Aurora3DSROMProbeInfo* out_info) {
+  auto& bridge = GetLinuxBridge();
+  return bridge.probe_rom_path_fn && bridge.probe_rom_path_fn(rom_path, out_info);
+}
+
+void* Aurora3DS_Create(void) {
+  auto& bridge = GetLinuxBridge();
+  return bridge.create_fn ? bridge.create_fn() : nullptr;
+}
+void Aurora3DS_Destroy(void* runtime) {
+  auto& bridge = GetLinuxBridge();
+  if (bridge.destroy_fn) bridge.destroy_fn(runtime);
+}
+bool Aurora3DS_LoadBIOSFromPath(void* runtime, const char* path) {
+  auto& bridge = GetLinuxBridge();
+  return bridge.load_bios_fn && bridge.load_bios_fn(runtime, path);
+}
+bool Aurora3DS_LoadROMFromPath(void* runtime, const char* path) {
+  auto& bridge = GetLinuxBridge();
+  return bridge.load_rom_path_fn && bridge.load_rom_path_fn(runtime, path);
+}
+bool Aurora3DS_ProbeROMFromPath(const char* path, Aurora3DSROMProbeInfo* out_info) {
+  return Aurora3DSBridge_ProbeROMFromPath(path, out_info);
+}
+bool Aurora3DS_LoadROMFromMemory(void* runtime, const void* data, size_t size) {
+  auto& bridge = GetLinuxBridge();
+  return bridge.load_rom_mem_fn && bridge.load_rom_mem_fn(runtime, data, size);
+}
+bool Aurora3DS_StepFrame(void* runtime) {
+  auto& bridge = GetLinuxBridge();
+  return bridge.step_frame_fn && bridge.step_frame_fn(runtime);
+}
+bool Aurora3DS_SetRenderSurfaces(void* runtime, void* top, void* bottom, uint32_t tw, uint32_t th,
+                                 uint32_t bw, uint32_t bh, float scale) {
+  auto& bridge = GetLinuxBridge();
+  return bridge.set_surfaces_fn && bridge.set_surfaces_fn(runtime, top, bottom, tw, th, bw, bh, scale);
+}
+void Aurora3DS_SetKeyStatus(void* runtime, int key, bool pressed) {
+  auto& bridge = GetLinuxBridge();
+  if (bridge.set_key_fn) bridge.set_key_fn(runtime, key, pressed);
+}
+bool Aurora3DS_GetVideoSpec(void* runtime, EmulatorVideoSpec* out_spec) {
+  auto& bridge = GetLinuxBridge();
+  return bridge.get_video_spec_fn && bridge.get_video_spec_fn(runtime, out_spec);
+}
+const uint32_t* Aurora3DS_GetFrameBufferRGBA(void* runtime, size_t* pixel_count) {
+  auto& bridge = GetLinuxBridge();
+  if (!bridge.get_frame_fn) {
+    if (pixel_count) *pixel_count = 0;
+    return nullptr;
+  }
+  return bridge.get_frame_fn(runtime, pixel_count);
+}
+bool Aurora3DS_SaveStateToBuffer(void* runtime, void* out_buffer, size_t buffer_size, size_t* out_size) {
+  auto& bridge = GetLinuxBridge();
+  return bridge.save_state_fn && bridge.save_state_fn(runtime, out_buffer, buffer_size, out_size);
+}
+bool Aurora3DS_LoadStateFromBuffer(void* runtime, const void* state_buffer, size_t state_size) {
+  auto& bridge = GetLinuxBridge();
+  return bridge.load_state_fn && bridge.load_state_fn(runtime, state_buffer, state_size);
+}
+bool Aurora3DS_ApplyCheatCode(void* runtime, const char* cheat_code) {
+  auto& bridge = GetLinuxBridge();
+  return bridge.apply_cheat_fn && bridge.apply_cheat_fn(runtime, cheat_code);
+}
+const char* Aurora3DS_GetLastError(void* runtime) {
+  if (!LinuxBridgeReady()) {
+    return LinuxBridgeLastError(runtime);
+  }
+  return LinuxBridgeLastError(runtime);
+}
+
+}  // extern "C"
+
 #else
 
 extern "C" {
@@ -578,13 +749,7 @@ const uint32_t* Aurora3DS_GetFrameBufferRGBA(void*, size_t* pixel_count) {
 bool Aurora3DS_SaveStateToBuffer(void*, void*, size_t, size_t*) { return false; }
 bool Aurora3DS_LoadStateFromBuffer(void*, const void*, size_t) { return false; }
 bool Aurora3DS_ApplyCheatCode(void*, const char*) { return false; }
-const char* Aurora3DS_GetLastError(void*) {
-#if defined(__APPLE__)
-  return "aurora3ds backend bridge is not linked";
-#else
-  return "aurora3ds is only available on Apple targets";
-#endif
-}
+const char* Aurora3DS_GetLastError(void*) { return "aurora3ds backend bridge is not linked"; }
 
 }  // extern "C"
 
