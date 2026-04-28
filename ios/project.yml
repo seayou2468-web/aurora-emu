@@ -18,8 +18,8 @@ settings:
       - "$(SRCROOT)/../src/core/bridge_cores/aurora3ds"
       - "$(SRCROOT)/../src/core/bridge_cores/aurora3ds/Core/include"
       - "$(SRCROOT)/../Dependicies/Sources/**/include"
-      - "$(SRCROOT)/../Dependicies/**/Headers"
-      - "$(SRCROOT)/../Dependicies/libfmt.xcframework/**/Headers"
+      - "$(SRCROOT)/../Dependicies/libfmt.xcframework/ios-arm64/Headers"
+      - "$(SRCROOT)/../Dependicies/libfmt.xcframework/ios-arm64_x86_64-simulator/Headers"
       - "$(SRCROOT)/../Platforms/API"
       - "$(SRCROOT)/../Platforms/AuroraIOS/objc"
     FRAMEWORK_SEARCH_PATHS:
