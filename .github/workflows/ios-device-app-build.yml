@@ -105,6 +105,17 @@ jobs:
           test -f src/core/aurora3ds/Core/include/zdict.h
           test -f src/core/aurora3ds/Core/include/zstd_errors.h
 
+          VMA_VERSION="v3.2.1"
+          curl -fsSL "https://raw.githubusercontent.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/${VMA_VERSION}/include/vk_mem_alloc.h" \
+            -o src/core/aurora3ds/Core/include/vk_mem_alloc.h
+          test -f src/core/aurora3ds/Core/include/vk_mem_alloc.h
+
+          # Patch known Boost documentation warnings emitted by clang -Wdocumentation.
+          perl -0pi -e 's/\\param Range An input range/\\param r An input range/g' \
+            src/core/aurora3ds/Core/include/boost/range/iterator_range_core.hpp
+          perl -0pi -e 's{//<-- but this\\.}{// <-- but this.}g' \
+            src/core/aurora3ds/Core/include/boost/icl/functors.hpp
+
       - name: Verify Aurora3DS is permanently in build graph
         shell: bash
         run: |
@@ -115,6 +126,7 @@ jobs:
           grep -nF "\$(BUILD_DIR)/src/core/aurora3ds/bridge.o" Makefile
           grep -nF "pod 'boost'" ios/Podfile
           grep -nF "pod 'libzstd'" ios/Podfile
+          test -f src/core/aurora3ds/Core/include/vk_mem_alloc.h
 
       - name: Verify iOS device-only build target
         shell: bash
