@@ -77,8 +77,8 @@ u32 MipLevels(u32 width, u32 height, u32 max_level);
  * @param surface_info Structure used to query the surface information.
  * @param start_addr The start address of the dest data. Used if tiled.
  * @param end_addr The end address of the dest data. Used if tiled.
- * @param source_tiled The source linear texture data.
- * @param dest_linear The output buffer where the encoded linear or tiled data will be written to.
+ * @param source The source linear texture data.
+ * @param dest The output buffer where the encoded linear or tiled data will be written to.
  * @param convert Whether the pixel format needs to be converted.
  */
 void EncodeTexture(const SurfaceParams& surface_info, PAddr start_addr, PAddr end_addr,
@@ -90,8 +90,8 @@ void EncodeTexture(const SurfaceParams& surface_info, PAddr start_addr, PAddr en
  * @param surface_info Structure used to query the surface information.
  * @param start_addr The start address of the source data. Used if tiled.
  * @param end_addr The end address of the source data. Used if tiled.
- * @param source_tiled The source linear or tiled texture data.
- * @param dest_linear The output buffer where the decoded linear data will be written to.
+ * @param source The source linear or tiled texture data.
+ * @param dest The output buffer where the decoded linear data will be written to.
  * @param convert Whether the pixel format needs to be converted.
  */
 void DecodeTexture(const SurfaceParams& surface_info, PAddr start_addr, PAddr end_addr,

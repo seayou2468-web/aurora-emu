@@ -35,6 +35,16 @@ jobs:
           brew install cocoapods
           pod --version
 
+      - name: Install Vulkan SDK headers and configure include path
+        shell: bash
+        run: |
+          brew install vulkan-headers
+          VULKAN_HEADERS_PREFIX="$(brew --prefix vulkan-headers)"
+          test -d "${VULKAN_HEADERS_PREFIX}/include/vulkan"
+          test -f "${VULKAN_HEADERS_PREFIX}/include/vulkan/vulkan.hpp"
+          echo "CPATH=${VULKAN_HEADERS_PREFIX}/include:${CPATH}" >> "$GITHUB_ENV"
+          echo "CPLUS_INCLUDE_PATH=${VULKAN_HEADERS_PREFIX}/include:${CPLUS_INCLUDE_PATH}" >> "$GITHUB_ENV"
+
       - name: Generate Xcode project
         shell: bash
         run: |
@@ -113,6 +123,7 @@ jobs:
           grep -nF "SUPPORTED_PLATFORMS: iphoneos" ios/project.yml
           grep -nF -- "-sdk iphoneos" .github/workflows/ios-device-app-build.yml
           grep -nF "generic/platform=iOS" .github/workflows/ios-device-app-build.yml
+          grep -nF "vulkan-headers" .github/workflows/ios-device-app-build.yml
 
       - name: Build iOS app archive (.app inside .xcarchive)
         shell: bash

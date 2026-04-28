@@ -230,8 +230,9 @@ constexpr void MortonCopyTile(u32 stride, std::span<u8> tile_buffer, std::span<u
 
 /**
  * @brief Performs morton to/from linear convertions on the provided pixel data
- * @param converted If true performs RGBA8 to/from convertion to all color formats
- * @param width, height The dimentions of the rectangular region of pixels in linear_buffer
+ * @tparam converted If true performs RGBA8 to/from convertion to all color formats
+ * @param width The width of the rectangular region of pixels in linear_buffer
+ * @param height The height of the rectangular region of pixels in linear_buffer
  * @param start_offset The number of bytes from the start of the first tile to the start of
  * tiled_buffer
  * @param end_offset The number of bytes from the start of the first tile to the end of tiled_buffer
@@ -337,7 +338,6 @@ static constexpr void MortonCopy(u32 width, u32 height, u32 start_offset, u32 en
  * @tparam converted If true, converts the texture to/from the appropriate format.
  * @param src_buffer The source pixel data
  * @param dst_buffer The destination pixel data
- * @return
  */
 template <bool decode, PixelFormat format, bool converted = false>
 static constexpr void LinearCopy(std::span<u8> src_buffer, std::span<u8> dst_buffer) {
