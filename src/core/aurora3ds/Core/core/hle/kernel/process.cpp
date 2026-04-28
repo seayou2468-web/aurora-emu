@@ -1,4 +1,4 @@
-// Copyright 2015 Citra Emulator Project
+// Copyright Citra Emulator Project / Azahar Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
@@ -124,6 +124,8 @@ void KernelSystem::TerminateProcess(std::shared_ptr<Process> process) {
         GetThreadManager(core).TerminateProcessThreads(process);
     }
 
+    RestoreMemoryState(process->codeset->program_id);
+
     process->Exit();
     std::erase(process_list, process);
 }
@@ -182,7 +184,7 @@ void Process::ParseKernelCaps(const u32* kernel_caps, std::size_t len) {
             // Mapped memory page
             AddressMapping mapping;
             mapping.address = descriptor << 12;
-            mapping.size = Memory::CYTRUS_PAGE_SIZE;
+            mapping.size = Memory::CITRA_PAGE_SIZE;
             mapping.read_only = false;
             mapping.unk_flag = false;
 
@@ -459,7 +461,7 @@ ResultVal<VAddr> Process::AllocateThreadLocalStorage() {
         auto base_memory_region = kernel.GetMemoryRegion(MemoryRegion::BASE);
 
         // Allocate some memory from the end of the linear heap for this region.
-        auto offset = base_memory_region->LinearAllocate(Memory::CYTRUS_PAGE_SIZE);
+        auto offset = base_memory_region->LinearAllocate(Memory::CITRA_PAGE_SIZE);
         if (!offset) {
             LOG_ERROR(Kernel_SVC,
                       "Not enough space in BASE linear region to allocate a new TLS page");
@@ -467,17 +469,17 @@ ResultVal<VAddr> Process::AllocateThreadLocalStorage() {
         }
 
         holding_tls_memory +=
-            MemoryRegionInfo::Interval(*offset, *offset + Memory::CYTRUS_PAGE_SIZE);
-        memory_used += Memory::CYTRUS_PAGE_SIZE;
+            MemoryRegionInfo::Interval(*offset, *offset + Memory::CITRA_PAGE_SIZE);
+        memory_used += Memory::CITRA_PAGE_SIZE;
 
         // The page is completely available at the start.
         tls_slots.emplace_back(0);
 
         // Map the page to the current process' address space.
         auto tls_page_addr =
-            Memory::TLS_AREA_VADDR + static_cast<VAddr>(tls_page) * Memory::CYTRUS_PAGE_SIZE;
+            Memory::TLS_AREA_VADDR + static_cast<VAddr>(tls_page) * Memory::CITRA_PAGE_SIZE;
         vm_manager.MapBackingMemory(tls_page_addr, kernel.memory.GetFCRAMRef(*offset),
-                                    Memory::CYTRUS_PAGE_SIZE, MemoryState::Locked);
+                                    Memory::CITRA_PAGE_SIZE, MemoryState::Locked);
 
         LOG_DEBUG(Kernel, "Allocated TLS page at addr={:08X}", tls_page_addr);
     } else {
@@ -488,7 +490,7 @@ ResultVal<VAddr> Process::AllocateThreadLocalStorage() {
     tls_slots[tls_page].set(tls_slot);
 
     auto tls_address = Memory::TLS_AREA_VADDR +
-                       static_cast<VAddr>(tls_page) * Memory::CYTRUS_PAGE_SIZE +
+                       static_cast<VAddr>(tls_page) * Memory::CITRA_PAGE_SIZE +
                        static_cast<VAddr>(tls_slot) * Memory::TLS_ENTRY_SIZE;
     kernel.memory.ZeroBlock(*this, tls_address, Memory::TLS_ENTRY_SIZE);
 

@@ -1,4 +1,4 @@
-// Copyright 2014 Citra Emulator Project
+// Copyright Citra Emulator Project / Azahar Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
@@ -10,6 +10,7 @@
 #include "common/archives.h"
 #include "common/bit_field.h"
 #include "common/hacks/hack_manager.h"
+#include "common/settings.h"
 #include "core/core.h"
 #include "core/hle/ipc_helpers.h"
 #include "core/hle/kernel/shared_memory.h"
@@ -19,7 +20,9 @@
 #include "core/memory.h"
 #include "video_core/gpu.h"
 #include "video_core/gpu_debugger.h"
+#include "video_core/pica/pica_core.h"
 #include "video_core/pica/regs_lcd.h"
+#include "video_core/renderer_base.h"
 #include "video_core/right_eye_disabler.h"
 
 SERIALIZE_EXPORT_IMPL(Service::GSP::SessionData)
@@ -410,25 +413,62 @@ void GSP_GPU::SetLcdForceBlack(Kernel::HLERequestContext& ctx) {
 void GSP_GPU::TriggerCmdReqQueue(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
 
-    // Iterate through each command.
     auto* command_buffer = GetCommandBuffer(active_thread_id);
     auto& gpu = system.GPU();
-    for (u32 i = 0; i < command_buffer->number_commands; i++) {
-        gpu.Debugger().GXCommandProcessed(command_buffer->commands[i]);
+
+    bool requires_delay = false;
+
+    while (command_buffer->number_commands) {
+        if (command_buffer->should_stop) {
+            command_buffer->status.Assign(CommandBuffer::STATUS_STOPPED);
+            break;
+        }
+        if (command_buffer->status == CommandBuffer::STATUS_STOPPED) {
+            break;
+        }
+
+        Command command = command_buffer->commands[command_buffer->index];
+        if (command.id == CommandId::SubmitCmdList && !requires_delay &&
+            Settings::values.delay_game_render_thread_us.GetValue() != 0) {
+            requires_delay = true;
+        }
+
+        // Decrease the number of commands remaining and increase the current index
+        command_buffer->number_commands.Assign(command_buffer->number_commands - 1);
+        command_buffer->index.Assign((command_buffer->index + 1) % 0xF);
+
+        gpu.Debugger().GXCommandProcessed(command);
 
         // Decode and execute command
-        gpu.Execute(command_buffer->commands[i]);
+        system.perf_stats->BeginGPUProcessing();
+        gpu.Execute(command);
+        system.perf_stats->EndGPUProcessing();
 
-        // Indicates that command has completed
-        command_buffer->number_commands.Assign(command_buffer->number_commands - 1);
+        if (command.stop) {
+            command_buffer->status.Assign(CommandBuffer::STATUS_STOPPED);
+        }
     }
 
-    IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
-    rb.Push(ResultSuccess);
+    if (requires_delay) {
+        ctx.RunAsync(
+            [](Kernel::HLERequestContext& ctx) {
+                return Settings::values.delay_game_render_thread_us.GetValue() * 1000;
+            },
+            [](Kernel::HLERequestContext& ctx) {
+                IPC::RequestBuilder rb(ctx, 1, 0);
+                rb.Push(ResultSuccess);
+            },
+            false);
+    } else {
+        IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
+        rb.Push(ResultSuccess);
+    }
 }
 
 void GSP_GPU::ImportDisplayCaptureInfo(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
+
+    LOG_DEBUG(Service_GSP, "called");
 
     if (active_thread_id == std::numeric_limits<u32>::max()) {
         LOG_WARNING(Service_GSP, "Called without an active thread.");
@@ -466,27 +506,63 @@ void GSP_GPU::ImportDisplayCaptureInfo(Kernel::HLERequestContext& ctx) {
     rb.Push(ResultSuccess);
     rb.PushRaw(top_entry);
     rb.PushRaw(bottom_entry);
-
-    LOG_WARNING(Service_GSP, "called");
 }
 
-static void CopyFrameBuffer(Core::System& system, VAddr dst, VAddr src, u32 stride, u32 lines) {
-    auto dst_ptr = system.Memory().GetPointer(dst);
-    const auto src_ptr = system.Memory().GetPointer(src);
+static void CopyFrameBuffer(Core::System& system, VAddr dst, VAddr src, u32 dst_stride,
+                            u32 src_stride, u32 lines) {
+    auto* dst_ptr = system.Memory().GetPointer(dst);
+    const auto* src_ptr = system.Memory().GetPointer(src);
+
     if (!dst_ptr || !src_ptr) {
         LOG_WARNING(Service_GSP,
                     "Could not resolve pointers for framebuffer capture, skipping screen.");
         return;
     }
 
-    system.Memory().RasterizerFlushVirtualRegion(src, stride * lines, Memory::FlushMode::Flush);
-    std::memcpy(dst_ptr, src_ptr, stride * lines);
-    system.Memory().RasterizerFlushVirtualRegion(dst, stride * lines,
+    system.Memory().RasterizerFlushVirtualRegion(src, src_stride * lines, Memory::FlushMode::Flush);
+
+    const u32 copy_bytes_per_line = std::min(src_stride, dst_stride);
+    for (u32 y = 0; y < lines; ++y) {
+        std::memcpy(dst_ptr, src_ptr, copy_bytes_per_line);
+        src_ptr += src_stride;
+        dst_ptr += dst_stride;
+    }
+
+    system.Memory().RasterizerFlushVirtualRegion(dst, dst_stride * lines,
+                                                 Memory::FlushMode::Invalidate);
+}
+
+static void ClearFramebuffer(Core::System& system, VAddr dst, u32 dst_stride, u32 lines) {
+    auto* dst_ptr = system.Memory().GetPointer(dst);
+
+    if (!dst_ptr) {
+        LOG_WARNING(Service_GSP,
+                    "Could not resolve pointers for framebuffer clear, skipping screen.");
+        return;
+    }
+
+    const u32 set_bytes_per_line = dst_stride;
+    for (u32 y = 0; y < lines; ++y) {
+        std::memset(dst_ptr, 0, set_bytes_per_line);
+        dst_ptr += dst_stride;
+    }
+
+    system.Memory().RasterizerFlushVirtualRegion(dst, dst_stride * lines,
                                                  Memory::FlushMode::Invalidate);
 }
 
 void GSP_GPU::SaveVramSysArea(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
+
+    LOG_DEBUG(Service_GSP, "called");
+
+    // Taken from GSP decomp. TODO: GSP seems to so something special
+    // when the fb format results in bpp of 0 or 4, most likely clearing
+    // it, more research needed.
+    static const u8 bpp_per_format[] = {// Valid values
+                                        4, 3, 2, 2, 2,
+                                        // Invalid values
+                                        0, 0, 0};
 
     if (active_thread_id == std::numeric_limits<u32>::max()) {
         LOG_WARNING(Service_GSP, "Called without an active thread.");
@@ -497,46 +573,70 @@ void GSP_GPU::SaveVramSysArea(Kernel::HLERequestContext& ctx) {
         return;
     }
 
-    LOG_INFO(Service_GSP, "called");
-
-    // TODO: This should also save LCD register state.
     system.Memory().RasterizerFlushVirtualRegion(Memory::VRAM_VADDR, Memory::VRAM_SIZE,
                                                  Memory::FlushMode::Flush);
     const auto vram = system.Memory().GetPointer(Memory::VRAM_VADDR);
     saved_vram.emplace(std::vector<u8>(Memory::VRAM_SIZE));
     std::memcpy(saved_vram.get().data(), vram, Memory::VRAM_SIZE);
 
-    const auto top_screen = GetFrameBufferInfo(active_thread_id, 0);
+    auto top_screen = GetFrameBufferInfo(active_thread_id, 0);
     if (top_screen) {
+        u8 bytes_per_pixel =
+            bpp_per_format[top_screen->framebuffer_info[top_screen->index].GetPixelFormat()];
         const auto top_fb = top_screen->framebuffer_info[top_screen->index];
-        if (top_fb.address_left) {
+        if (top_fb.address_left && bytes_per_pixel != 0 && bytes_per_pixel != 4) {
             CopyFrameBuffer(system, FRAMEBUFFER_SAVE_AREA_TOP_LEFT, top_fb.address_left,
-                            top_fb.stride, TOP_FRAMEBUFFER_HEIGHT);
+                            FRAMEBUFFER_WIDTH * bytes_per_pixel, top_fb.stride,
+                            TOP_FRAMEBUFFER_HEIGHT);
         } else {
-            LOG_WARNING(Service_GSP, "No framebuffer bound to top left screen, skipping capture.");
+            LOG_DEBUG(Service_GSP, "Invalid framebuffer bound to top left screen, clearing...");
+            ClearFramebuffer(system, FRAMEBUFFER_SAVE_AREA_TOP_LEFT,
+                             FRAMEBUFFER_WIDTH * bytes_per_pixel, TOP_FRAMEBUFFER_HEIGHT);
         }
-        if (top_fb.address_right) {
+        if (top_fb.address_right && bytes_per_pixel != 0 && bytes_per_pixel != 4) {
             CopyFrameBuffer(system, FRAMEBUFFER_SAVE_AREA_TOP_RIGHT, top_fb.address_right,
-                            top_fb.stride, TOP_FRAMEBUFFER_HEIGHT);
+                            FRAMEBUFFER_WIDTH * bytes_per_pixel, top_fb.stride,
+                            TOP_FRAMEBUFFER_HEIGHT);
         } else {
-            LOG_WARNING(Service_GSP, "No framebuffer bound to top right screen, skipping capture.");
+            LOG_DEBUG(Service_GSP, "Invalid framebuffer bound to top right screen, clearing...");
+            ClearFramebuffer(system, FRAMEBUFFER_SAVE_AREA_TOP_RIGHT,
+                             FRAMEBUFFER_WIDTH * bytes_per_pixel, TOP_FRAMEBUFFER_HEIGHT);
         }
+
+        FrameBufferInfo fb_info = top_screen->framebuffer_info[top_screen->index];
+
+        fb_info.address_left = FRAMEBUFFER_SAVE_AREA_TOP_LEFT;
+        fb_info.address_right = FRAMEBUFFER_SAVE_AREA_TOP_RIGHT;
+        fb_info.stride = FRAMEBUFFER_WIDTH * bytes_per_pixel;
+        system.GPU().SetBufferSwap(0, fb_info);
     } else {
         LOG_WARNING(Service_GSP, "No top screen bound, skipping capture.");
     }
 
-    const auto bottom_screen = GetFrameBufferInfo(active_thread_id, 1);
+    auto bottom_screen = GetFrameBufferInfo(active_thread_id, 1);
     if (bottom_screen) {
+        u8 bytes_per_pixel =
+            bpp_per_format[bottom_screen->framebuffer_info[bottom_screen->index].GetPixelFormat()];
         const auto bottom_fb = bottom_screen->framebuffer_info[bottom_screen->index];
-        if (bottom_fb.address_left) {
+        if (bottom_fb.address_left && bytes_per_pixel != 0 && bytes_per_pixel != 4) {
             CopyFrameBuffer(system, FRAMEBUFFER_SAVE_AREA_BOTTOM, bottom_fb.address_left,
-                            bottom_fb.stride, BOTTOM_FRAMEBUFFER_HEIGHT);
+                            FRAMEBUFFER_WIDTH * bytes_per_pixel, bottom_fb.stride,
+                            BOTTOM_FRAMEBUFFER_HEIGHT);
         } else {
-            LOG_WARNING(Service_GSP, "No framebuffer bound to bottom screen, skipping capture.");
+            LOG_DEBUG(Service_GSP, "Invalid framebuffer bound to bottom screen, clearing...");
+            ClearFramebuffer(system, FRAMEBUFFER_SAVE_AREA_BOTTOM,
+                             FRAMEBUFFER_WIDTH * bytes_per_pixel, BOTTOM_FRAMEBUFFER_HEIGHT);
         }
+        FrameBufferInfo fb_info = bottom_screen->framebuffer_info[bottom_screen->index];
+
+        fb_info.address_left = FRAMEBUFFER_SAVE_AREA_BOTTOM;
+        fb_info.stride = FRAMEBUFFER_WIDTH * bytes_per_pixel;
+        system.GPU().SetBufferSwap(1, fb_info);
     } else {
         LOG_WARNING(Service_GSP, "No bottom screen bound, skipping capture.");
     }
+
+    // Real GSP waits for VBlank here, but we don't need it (?).
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
     rb.Push(ResultSuccess);
@@ -545,15 +645,30 @@ void GSP_GPU::SaveVramSysArea(Kernel::HLERequestContext& ctx) {
 void GSP_GPU::RestoreVramSysArea(Kernel::HLERequestContext& ctx) {
     IPC::RequestParser rp(ctx);
 
-    LOG_INFO(Service_GSP, "called");
+    LOG_DEBUG(Service_GSP, "called");
 
     if (saved_vram) {
-        // TODO: This should also restore LCD register state.
         auto vram = system.Memory().GetPointer(Memory::VRAM_VADDR);
         std::memcpy(vram, saved_vram.get().data(), Memory::VRAM_SIZE);
         system.Memory().RasterizerFlushVirtualRegion(Memory::VRAM_VADDR, Memory::VRAM_SIZE,
                                                      Memory::FlushMode::Invalidate);
     }
+
+    auto top_screen = GetFrameBufferInfo(active_thread_id, 0);
+    if (top_screen) {
+        system.GPU().SetBufferSwap(0, top_screen->framebuffer_info[top_screen->index]);
+    } else {
+        LOG_WARNING(Service_GSP, "No top screen bound, skipping restore.");
+    }
+
+    auto bottom_screen = GetFrameBufferInfo(active_thread_id, 1);
+    if (bottom_screen) {
+        system.GPU().SetBufferSwap(1, bottom_screen->framebuffer_info[top_screen->index]);
+    } else {
+        LOG_WARNING(Service_GSP, "No bottom screen bound, skipping restore.");
+    }
+
+    // Real GSP waits for VBlank here, but we don't need it (?).
 
     IPC::RequestBuilder rb = rp.MakeBuilder(1, 0);
     rb.Push(ResultSuccess);
@@ -566,18 +681,29 @@ Result GSP_GPU::AcquireGpuRight(const Kernel::HLERequestContext& ctx,
 
     LOG_DEBUG(Service_GSP, "called flag={:08X} process={} thread_id={}", flag, process->process_id,
               session_data->thread_id);
-    
+
     bool right_eye_disable_allow =
         Common::Hacks::hack_manager.GetHackAllowMode(Common::Hacks::HackType::RIGHT_EYE_DISABLE,
                                                      process->codeset->program_id) !=
         Common::Hacks::HackAllowMode::DISALLOW;
+
+    bool requires_shader_fixup =
+        Common::Hacks::hack_manager.GetHackAllowMode(
+            Common::Hacks::HackType::REQUIRES_SHADER_FIXUP, process->codeset->program_id,
+            Common::Hacks::HackAllowMode::DISALLOW) != Common::Hacks::HackAllowMode::DISALLOW;
+
     auto& gpu = system.GPU();
+    gpu.ApplyPerProgramSettings(process->codeset->program_id);
     gpu.GetRightEyeDisabler().SetEnabled(right_eye_disable_allow);
+    gpu.PicaCore().vs_setup.requires_fixup = requires_shader_fixup;
+    gpu.PicaCore().gs_setup.requires_fixup = requires_shader_fixup;
 
     if (active_thread_id == session_data->thread_id) {
         return {ErrorDescription::AlreadyDone, ErrorModule::GX, ErrorSummary::Success,
                 ErrorLevel::Success};
     }
+
+    gpu.Renderer().Rasterizer()->SwitchDiskResources(process->codeset->program_id);
 
     if (blocking) {
         // TODO: The thread should be put to sleep until acquired.
@@ -589,6 +715,7 @@ Result GSP_GPU::AcquireGpuRight(const Kernel::HLERequestContext& ctx,
     }
 
     active_thread_id = session_data->thread_id;
+    active_client_thread_id = ctx.ClientThread()->thread_id;
     return ResultSuccess;
 }
 
@@ -617,6 +744,7 @@ void GSP_GPU::ReleaseRight(const SessionData* session_data) {
     ASSERT_MSG(active_thread_id == session_data->thread_id,
                "Wrong thread tried to release GPU right");
     active_thread_id = std::numeric_limits<u32>::max();
+    active_client_thread_id = std::numeric_limits<u32>::max();
 }
 
 void GSP_GPU::ReleaseRight(Kernel::HLERequestContext& ctx) {
@@ -682,9 +810,11 @@ SessionData* GSP_GPU::FindRegisteredThreadData(u32 thread_id) {
 
 template <class Archive>
 void GSP_GPU::serialize(Archive& ar, const unsigned int) {
+    DEBUG_SERIALIZATION_POINT;
     ar& boost::serialization::base_object<Kernel::SessionRequestHandler>(*this);
     ar & shared_memory;
     ar & active_thread_id;
+    ar & active_client_thread_id;
     ar & first_initialization;
     ar & used_thread_ids;
     ar & saved_vram;

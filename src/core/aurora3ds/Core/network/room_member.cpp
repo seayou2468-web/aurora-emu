@@ -583,8 +583,7 @@ void RoomMember::Join(const std::string& nick, const std::string& console_id_has
 }
 
 bool RoomMember::IsConnected() const {
-//    return room_member_impl->IsConnected();
-    return false;//Manic修改
+    return room_member_impl->IsConnected();
 }
 
 void RoomMember::SendWifiPacket(const WifiPacket& wifi_packet) {

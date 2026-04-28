@@ -1,3 +1,7 @@
+// Copyright Citra Emulator Project / Azahar Emulator Project
+// Licensed under GPLv2 or any later version
+// Refer to the license.txt file included.
+
 // Copyright 2013 Dolphin Emulator Project / 2014 Citra Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
@@ -24,15 +28,15 @@
 #endif
 
 #ifdef _MSC_VER
-#define CYTRUS_NO_INLINE __declspec(noinline)
+#define CITRA_NO_INLINE __declspec(noinline)
 #else
-#define CYTRUS_NO_INLINE __attribute__((noinline))
+#define CITRA_NO_INLINE __attribute__((noinline))
 #endif
 
 #ifdef _MSC_VER
-#define CYTRUS_NO_RETURN __declspec(noreturn)
+#define CITRA_NO_RETURN __declspec(noreturn)
 #else
-#define CYTRUS_NO_RETURN __attribute__((noreturn))
+#define CITRA_NO_RETURN __attribute__((noreturn))
 #endif
 
 #ifdef _MSC_VER
@@ -101,4 +105,46 @@ __declspec(dllimport) void __stdcall DebugBreak(void);
     [[nodiscard]] constexpr bool False(type key) noexcept {                                        \
         using T = std::underlying_type_t<type>;                                                    \
         return static_cast<T>(key) == 0;                                                           \
+    }
+
+#define DECLARE_ENUM_ARITHMETIC_OPERATORS(type)                                                    \
+    [[nodiscard]] constexpr type operator+(type a, type b) noexcept {                              \
+        using T = std::underlying_type_t<type>;                                                    \
+        return static_cast<type>(static_cast<T>(a) + static_cast<T>(b));                           \
+    }                                                                                              \
+    [[nodiscard]] constexpr type operator-(type a, type b) noexcept {                              \
+        using T = std::underlying_type_t<type>;                                                    \
+        return static_cast<type>(static_cast<T>(a) - static_cast<T>(b));                           \
+    }                                                                                              \
+    [[nodiscard]] constexpr type operator*(type a, type b) noexcept {                              \
+        using T = std::underlying_type_t<type>;                                                    \
+        return static_cast<type>(static_cast<T>(a) * static_cast<T>(b));                           \
+    }                                                                                              \
+    [[nodiscard]] constexpr type operator/(type a, type b) noexcept {                              \
+        using T = std::underlying_type_t<type>;                                                    \
+        return static_cast<type>(static_cast<T>(a) / static_cast<T>(b));                           \
+    }                                                                                              \
+    [[nodiscard]] constexpr type operator%(type a, type b) noexcept {                              \
+        using T = std::underlying_type_t<type>;                                                    \
+        return static_cast<type>(static_cast<T>(a) % static_cast<T>(b));                           \
+    }                                                                                              \
+    constexpr type& operator+=(type& a, type b) noexcept {                                         \
+        a = a + b;                                                                                 \
+        return a;                                                                                  \
+    }                                                                                              \
+    constexpr type& operator-=(type& a, type b) noexcept {                                         \
+        a = a - b;                                                                                 \
+        return a;                                                                                  \
+    }                                                                                              \
+    constexpr type& operator*=(type& a, type b) noexcept {                                         \
+        a = a * b;                                                                                 \
+        return a;                                                                                  \
+    }                                                                                              \
+    constexpr type& operator/=(type& a, type b) noexcept {                                         \
+        a = a / b;                                                                                 \
+        return a;                                                                                  \
+    }                                                                                              \
+    constexpr type& operator%=(type& a, type b) noexcept {                                         \
+        a = a % b;                                                                                 \
+        return a;                                                                                  \
     }

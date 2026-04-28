@@ -2,13 +2,15 @@
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <fmt/core.h>
 #include <fmt/format.h>
+#include <fmt/format-inl.h>
 #if defined(_WIN32)
 #include <windows.h>
 #else
 #include <dlfcn.h>
 #endif
-#include "common/dynamic_library/dynamic_library.h"
+#include "dynamic_library.h"
 
 namespace Common {
 

@@ -1,4 +1,4 @@
-// Copyright 2014 Citra Emulator Project
+// Copyright Citra Emulator Project / Azahar Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
@@ -27,6 +27,7 @@ enum class WindowSystemType : u8 {
     MacOS,
     X11,
     Wayland,
+    LibRetro,
 };
 
 struct Frame;
@@ -254,6 +255,38 @@ public:
                                         bool is_portrait_mode = {});
 
     std::unique_ptr<TextureMailbox> mailbox = nullptr;
+    bool isSecondary() const {
+        return is_secondary;
+    }
+
+    /**
+     * Requests for a frontend to setup a framebuffer.
+     */
+    virtual void SetupFramebuffer() {}
+
+    /// Flags that the framebuffer should be cleared.
+    virtual bool NeedsClearing() const {
+        return true;
+    }
+
+    /// Cursor state for rendering a touch crosshair on the bottom screen.
+    struct CursorInfo {
+        bool visible = false;
+
+        /// Cursor position in bottom-screen-local pixel coordinates.
+        /// Origin is the top-left corner of the bottom screen, with x ranging
+        /// from 0 to bottom_screen.GetWidth() and y from 0 to
+        /// bottom_screen.GetHeight().
+        float projected_x = 0;
+        float projected_y = 0;
+    };
+
+    /// Returns the current cursor state. Override to provide cursor position.
+    virtual CursorInfo GetCursorInfo() const {
+        return {};
+    }
+
+    Settings::StereoRenderOption get3DMode() const;
 
 protected:
     EmuWindow();

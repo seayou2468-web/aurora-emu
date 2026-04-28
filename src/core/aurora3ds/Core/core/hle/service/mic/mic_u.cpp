@@ -1,4 +1,4 @@
-// Copyright 2014 Citra Emulator Project
+// Copyright Citra Emulator Project / Azahar Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
@@ -25,6 +25,7 @@ namespace Service::MIC {
 
 template <class Archive>
 void MIC_U::serialize(Archive& ar, const unsigned int) {
+    DEBUG_SERIALIZATION_POINT;
     ar& boost::serialization::base_object<Kernel::SessionRequestHandler>(*this);
     ar&* impl.get();
 }
@@ -180,20 +181,10 @@ struct MIC_U::Impl {
             CreateMic();
         }
 
-        if (Settings::values.simBlowing) {
-            // 可以模拟"吹气"
-            size_t size = state.sample_size == 8 ? 16 : 32;
-            AudioCore::Samples result(size);
-            std::generate(result.begin(), result.end(), []() {
-                return static_cast<u8>(rand() % 256);
-            });
-            state.WriteSamples(result);
-        } else {
-            AudioCore::Samples samples = mic->Read();
-            if (!samples.empty()) {
-                // write the samples to sharedmem page
-                state.WriteSamples(samples);
-            }
+        AudioCore::Samples samples = mic->Read();
+        if (!samples.empty()) {
+            // write the samples to sharedmem page
+            state.WriteSamples(samples);
         }
 
         // schedule next run
@@ -223,7 +214,6 @@ struct MIC_U::Impl {
             LOG_CRITICAL(Service_MIC,
                          "Application started sampling again before stopping sampling");
             mic->StopSampling();
-            mic.reset();
         }
 
         u8 sample_size = encoding == Encoding::PCM8Signed || encoding == Encoding::PCM8 ? 8 : 16;
@@ -234,7 +224,9 @@ struct MIC_U::Impl {
         state.looped_buffer = audio_buffer_loop;
         state.size = audio_buffer_size;
 
-        CreateMic();
+        if (!mic) {
+            CreateMic();
+        }
         StartSampling();
 
         timing.ScheduleEvent(GetBufferUpdatePeriod(state.sample_rate), buffer_write_event);
@@ -268,7 +260,6 @@ struct MIC_U::Impl {
         timing.RemoveEvent(buffer_write_event);
         if (mic) {
             mic->StopSampling();
-            mic.reset();
         }
         LOG_TRACE(Service_MIC, "called");
     }

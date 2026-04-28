@@ -1,10 +1,11 @@
-// Copyright 2014 Citra Emulator Project
+// Copyright Citra Emulator Project / Azahar Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
 #pragma once
 
 #include <atomic>
+#include <chrono>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -72,7 +73,6 @@ class AppLoader;
 namespace Core {
 
 class ARM_Interface;
-class TelemetrySession;
 class ExclusiveMonitor;
 class Timing;
 
@@ -100,6 +100,8 @@ public:
                                    ///< Console
         ErrorSystemFiles,          ///< Error in finding system files
         ErrorSavestate,            ///< Error saving or loading
+        ErrorArticDisconnected,    ///< Error when artic base disconnects
+        ErrorN3DSApplication,      ///< Error launching New 3DS application in Old 3DS mode
         ShutdownRequested,         ///< Emulated program requested a system shutdown
         ErrorUnknown               ///< Any other error
     };
@@ -136,8 +138,9 @@ public:
     bool SendSignal(Signal signal, u32 param = 0);
 
     /// Request reset of the system
-    void RequestReset(const std::string& chainload = "") {
+    void RequestReset(const std::string& chainload = "", std::optional<u8> mem_mode = {}) {
         m_chainloadpath = chainload;
+        m_mem_mode = mem_mode;
         SendSignal(Signal::Reset);
     }
 
@@ -165,21 +168,25 @@ public:
         return is_powered_on;
     }
 
-    /**
-     * Returns a reference to the telemetry session for this emulation session.
-     * @returns Reference to the telemetry session.
-     */
-    [[nodiscard]] Core::TelemetrySession& TelemetrySession() const {
-        return *telemetry_session;
-    }
-
     /// Prepare the core emulation for a reschedule
     void PrepareReschedule();
 
     [[nodiscard]] PerfStats::Results GetAndResetPerfStats();
 
+    void ReportArticTraffic(u32 bytes) {
+        if (perf_stats) {
+            perf_stats->AddArticBaseTraffic(bytes);
+        }
+    }
+
+    void ReportPerfArticEvent(PerfStats::PerfArticEventBits event, bool set) {
+        if (perf_stats) {
+            perf_stats->ReportPerfArticEvent(event, set);
+        }
+    }
+
     [[nodiscard]] PerfStats::Results GetLastPerfStats();
-    
+
     double GetStableFrameTimeScale();
 
     /**
@@ -341,21 +348,38 @@ public:
                (mic_permission_granted = mic_permission_func());
     }
 
+    enum class SaveStateStatus {
+        NONE,
+        LOADING,
+        SAVING,
+    };
+
+    SaveStateStatus GetSaveStateStatus() {
+        return save_state_status;
+    }
+
     void SaveState(u32 slot) const;
 
     void LoadState(u32 slot);
 
-    /// Self delete ncch
-    bool SetSelfDelete(const std::string& file) {
-        if (m_filepath == file) {
-            self_delete_pending = true;
-            return true;
-        }
-        return false;
-    }
+    std::vector<u8> SaveStateBuffer() const;
+
+    bool LoadStateBuffer(std::vector<u8> buffer);
 
     /// Applies any changes to settings to this core instance.
     void ApplySettings();
+
+    void RegisterAppLoaderEarly(std::unique_ptr<Loader::AppLoader>& loader);
+
+    void InsertCartridge(const std::string& path);
+
+    void EjectCartridge();
+
+    const std::string& GetCartridge() const {
+        return inserted_cartridge;
+    }
+
+    bool IsInitialSetup();
 
 private:
     /**
@@ -367,15 +391,19 @@ private:
      */
     [[nodiscard]] ResultStatus Init(Frontend::EmuWindow& emu_window,
                                     Frontend::EmuWindow* secondary_window,
-                                    Kernel::MemoryMode memory_mode,
-                                    const Kernel::New3dsHwCapabilities& n3ds_hw_caps,
-                                    u32 num_cores);
+                                    Kernel::MemoryMode memory_mode, u32 num_cores);
 
     /// Reschedule the core emulation
     void Reschedule();
 
     /// AppLoader used to load the current executing application
     std::unique_ptr<Loader::AppLoader> app_loader;
+
+    // Temporary app loader passed from frontend
+    std::unique_ptr<Loader::AppLoader> early_app_loader;
+
+    /// Path for current inserted cartridge
+    std::string inserted_cartridge;
 
     /// ARM11 CPU core
     std::vector<std::shared_ptr<ARM_Interface>> cpu_cores;
@@ -386,9 +414,6 @@ private:
 
     /// When true, signals that a reschedule should happen
     bool reschedule_pending{};
-
-    /// Telemetry session for this emulation session
-    std::unique_ptr<Core::TelemetrySession> telemetry_session;
 
     std::unique_ptr<VideoCore::GPU> gpu;
 
@@ -432,6 +457,11 @@ private:
 
     std::atomic_bool is_powered_on{};
 
+    SaveStateStatus save_state_status = SaveStateStatus::NONE;
+    SaveStateStatus save_state_request_status = SaveStateStatus::NONE;
+    u32 save_state_slot = 0;
+    std::chrono::steady_clock::time_point save_state_request_time{};
+
     ResultStatus status = ResultStatus::Success;
     std::string status_details = "";
     /// Saved variables for reset
@@ -439,8 +469,8 @@ private:
     Frontend::EmuWindow* m_secondary_window;
     std::string m_filepath;
     std::string m_chainloadpath;
+    std::optional<u8> m_mem_mode;
     u64 title_id;
-    bool self_delete_pending;
 
     std::mutex signal_mutex;
     Signal current_signal;
@@ -450,7 +480,12 @@ private:
     bool mic_permission_granted = false;
 
     boost::optional<Service::APT::DeliverArg> restore_deliver_arg;
+    boost::optional<Service::APT::SysMenuArg> restore_sys_menu_arg;
     boost::optional<Service::PLGLDR::PLG_LDR::PluginLoaderContext> restore_plugin_context;
+    std::unique_ptr<IPCDebugger::Recorder> restore_ipc_recorder;
+    std::vector<u8> restore_wireless_reboot_info;
+
+    std::vector<u64> lle_modules;
 
     friend class boost::serialization::access;
     template <typename Archive>

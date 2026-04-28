@@ -31,8 +31,6 @@ class Module final {
 public:
     explicit Module(Core::System& system);
     ~Module();
-    
-    std::shared_ptr<NfcDevice> device = nullptr;
 
     class Interface : public ServiceFramework<Interface> {
     public:
@@ -374,7 +372,7 @@ public:
 private:
     CommunicationMode nfc_mode = CommunicationMode::NotInitialized;
 
-//    std::shared_ptr<NfcDevice> device = nullptr;
+    std::shared_ptr<NfcDevice> device = nullptr;
 
     template <class Archive>
     void serialize(Archive& ar, const unsigned int);

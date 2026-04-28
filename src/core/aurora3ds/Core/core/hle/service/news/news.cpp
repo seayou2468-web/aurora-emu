@@ -1,9 +1,11 @@
-// Copyright 2015 Citra Emulator Project
+// Copyright Citra Emulator Project / Azahar Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
 #include <algorithm>
+#include <fmt/core.h>
 #include <fmt/format.h>
+#include <fmt/format-inl.h>
 #include "common/archives.h"
 #include "common/assert.h"
 #include "common/file_util.h"
@@ -45,6 +47,7 @@ constexpr std::array<u8, 8> news_system_savedata_id{
 
 template <class Archive>
 void Module::serialize(Archive& ar, const unsigned int) {
+    DEBUG_SERIALIZATION_POINT;
     ar & db;
     ar & notification_ids;
     ar & automatic_sync_flag;
@@ -151,7 +154,7 @@ void Module::Interface::ResetNotifications(Kernel::HLERequestContext& ctx) {
     FileSys::Path archive_path(news_system_savedata_id);
 
     // Format the SystemSaveData archive 0x00010035
-    systemsavedata_factory.Format(archive_path, FileSys::ArchiveFormatInfo(), 0);
+    systemsavedata_factory.Format(archive_path, FileSys::ArchiveFormatInfo(), 0, 0, 0);
 
     news->news_system_save_data_archive = systemsavedata_factory.Open(archive_path, 0).Unwrap();
 
@@ -655,7 +658,7 @@ Result Module::LoadNewsDBSavedata() {
     // If the archive didn't exist, create the files inside
     if (archive_result.Code() == FileSys::ResultNotFound) {
         // Format the archive to create the directories
-        systemsavedata_factory.Format(archive_path, FileSys::ArchiveFormatInfo(), 0);
+        systemsavedata_factory.Format(archive_path, FileSys::ArchiveFormatInfo(), 0, 0, 0);
 
         // Open it again to get a valid archive now that the folder exists
         news_system_save_data_archive = systemsavedata_factory.Open(archive_path, 0).Unwrap();
@@ -722,7 +725,7 @@ Result Module::SaveFileToSavedata(std::string filename, std::span<const u8> buff
     ASSERT_MSG(result.Succeeded(), "could not open file");
 
     auto file = std::move(result).Unwrap();
-    file->Write(0, buffer.size(), 1, buffer.data());
+    file->Write(0, buffer.size(), true, false, buffer.data());
     file->Close();
 
     return ResultSuccess;

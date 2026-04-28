@@ -1,8 +1,8 @@
-// Copyright 2023 Citra Emulator Project
+// Copyright Citra Emulator Project / Azahar Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
-#include "json.hpp"
+#include <json.hpp>
 #include "common/file_util.h"
 #include "common/literals.h"
 #include "common/memory_detect.h"
@@ -190,7 +190,7 @@ void CustomTexManager::PrepareDumping(u64 title_id) {
     }
 
     nlohmann::ordered_json json;
-    json["author"] = "manic";//Manic修改
+    json["author"] = "citra";
     json["version"] = "1.0.0";
     json["description"] = "A graphics pack";
 
@@ -228,7 +228,8 @@ void CustomTexManager::PreloadTextures(const std::atomic_bool& stop_run,
             material->LoadFromDisk(flip_png_files);
             size_sum += material->size;
             if (callback) {
-                callback(VideoCore::LoadCallbackStage::Preload, preloaded, custom_textures.size());
+                callback(VideoCore::LoadCallbackStage::Preload, preloaded, custom_textures.size(),
+                         "");
             }
             preloaded++;
         }
@@ -385,7 +386,7 @@ std::vector<FileUtil::FSTEntry> CustomTexManager::GetTextures(u64 title_id) {
 }
 
 void CustomTexManager::CreateWorkers() {
-    const std::size_t num_workers = std::max(std::thread::hardware_concurrency(), 2U) - 1;
+    const std::size_t num_workers = std::max(std::thread::hardware_concurrency(), 2U) >> 1;
     workers = std::make_unique<Common::ThreadWorker>(num_workers, "Custom textures");
 }
 

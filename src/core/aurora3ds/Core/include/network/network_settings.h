@@ -10,10 +10,9 @@ namespace NetSettings {
 
 struct Values {
     // WebService
-    bool enable_telemetry;
     std::string web_api_url;
-    std::string manicemu_username;//Manic修改
-    std::string manicemu_token;//Manic修改
+    std::string citra_username;
+    std::string citra_token;
 } extern values;
 
 } // namespace NetSettings

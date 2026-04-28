@@ -1,9 +1,11 @@
-// Copyright 2023 Citra Emulator Project
+// Copyright Citra Emulator Project / Azahar Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
 #include <string_view>
+#include <fmt/core.h>
 #include <fmt/format.h>
+#include <fmt/format-inl.h>
 
 #include "video_core/pica/regs_rasterizer.h"
 #include "video_core/shader/generator/glsl_shader_decompiler.h"
@@ -15,19 +17,15 @@ using VSOutputAttributes = Pica::RasterizerRegs::VSOutputAttributes;
 namespace Pica::Shader::Generator::GLSL {
 
 constexpr std::string_view VSPicaUniformBlockDef = R"(
-struct pica_uniforms {
-    bool b[16];
-    uvec4 i[4];
-    vec4 f[96];
-};
-
 #ifdef VULKAN
 layout (set = 0, binding = 0, std140) uniform vs_pica_data {
 #else
 layout (binding = 0, std140) uniform vs_pica_data {
 #endif
-    pica_uniforms uniforms;
-};
+    uint b;
+    uvec4 i[4];
+    vec4 f[96];
+} uniforms;
 )";
 
 constexpr std::string_view VSUniformBlockDef = R"(
@@ -37,6 +35,7 @@ layout (set = 0, binding = 1, std140) uniform vs_data {
 layout (binding = 1, std140) uniform vs_data {
 #endif
     bool enable_clip1;
+    bool flip_viewport;
     vec4 clip_coef;
 };
 
@@ -123,6 +122,9 @@ void main() {
     normquat = vert_normquat;
     view = vert_view;
     vec4 vtx_pos = SanitizeVertex(vert_position);
+    if (flip_viewport) {
+        vtx_pos.y = -vtx_pos.y;
+    }
     gl_Position = vec4(vtx_pos.x, vtx_pos.y, -vtx_pos.z, vtx_pos.w);
 )";
     if (use_clip_planes) {
@@ -153,7 +155,9 @@ std::string_view MakeLoadPrefix(AttribLoadFlags flag) {
 }
 
 std::string GenerateVertexShader(const ShaderSetup& setup, const PicaVSConfig& config,
-                                 bool separable_shader) {
+                                 const ExtraVSConfig& extra) {
+    const bool separable_shader = extra.separable_shader;
+
     std::string out;
     if (separable_shader) {
         out += "#extension GL_ARB_separate_shader_objects : enable\n";
@@ -178,8 +182,8 @@ std::string GenerateVertexShader(const ShaderSetup& setup, const PicaVSConfig& c
     };
 
     auto program_source =
-        DecompileProgram(setup.program_code, setup.swizzle_data, config.state.main_offset,
-                         get_input_reg, get_output_reg, config.state.sanitize_mul);
+        DecompileProgram(setup.GetProgramCode(), setup.GetSwizzleData(), config.state.main_offset,
+                         get_input_reg, get_output_reg, extra.sanitize_mul);
 
     if (program_source.empty()) {
         return "";
@@ -188,7 +192,7 @@ std::string GenerateVertexShader(const ShaderSetup& setup, const PicaVSConfig& c
     // input attributes declaration
     for (std::size_t i = 0; i < used_regs.size(); ++i) {
         if (used_regs[i]) {
-            const auto flags = config.state.load_flags[i];
+            const auto flags = extra.load_flags[i];
             const std::string_view prefix = MakeLoadPrefix(flags);
             out +=
                 fmt::format("layout(location = {0}) in {1}vec4 vs_in_typed_reg{0};\n", i, prefix);
@@ -197,7 +201,7 @@ std::string GenerateVertexShader(const ShaderSetup& setup, const PicaVSConfig& c
     }
     out += '\n';
 
-    if (config.state.use_geometry_shader) {
+    if (extra.use_geometry_shader) {
         // output attributes declaration
         for (u32 i = 0; i < config.state.num_outputs; ++i) {
             if (separable_shader) {
@@ -207,19 +211,21 @@ std::string GenerateVertexShader(const ShaderSetup& setup, const PicaVSConfig& c
         }
         out += "void EmitVtx() {}\n";
     } else {
-        out += GetVertexInterfaceDeclaration(true, config.state.use_clip_planes, separable_shader);
+        out += GetVertexInterfaceDeclaration(true, extra.use_clip_planes, separable_shader);
 
         // output attributes declaration
         for (u32 i = 0; i < config.state.num_outputs; ++i) {
             out += fmt::format("vec4 vs_out_attr{};\n", i);
         }
 
-        const auto semantic =
-            [&state = config.state](VSOutputAttributes::Semantic slot_semantic) -> std::string {
+        const auto semantic_maps = config.state.gs_state.GetSemanticMaps();
+
+        const auto semantic = [&state = config.state, &semantic_maps](
+                                  VSOutputAttributes::Semantic slot_semantic) -> std::string {
             const u32 slot = static_cast<u32>(slot_semantic);
-            const u32 attrib = state.gs_state.semantic_maps[slot].attribute_index;
-            const u32 comp = state.gs_state.semantic_maps[slot].component_index;
-            if (attrib < state.gs_state.gs_output_attributes) {
+            const u32 attrib = semantic_maps[slot].attribute_index;
+            const u32 comp = semantic_maps[slot].component_index;
+            if (attrib < state.gs_state.gs_output_attributes_count) {
                 return fmt::format("vs_out_attr{}.{}", attrib, "xyzw"[comp]);
             }
             return "1.0";
@@ -238,8 +244,11 @@ std::string GenerateVertexShader(const ShaderSetup& setup, const PicaVSConfig& c
                semantic(VSOutputAttributes::POSITION_Z) + ", " +
                semantic(VSOutputAttributes::POSITION_W) + ");\n";
         out += "    vtx_pos = SanitizeVertex(vtx_pos);\n";
+        out += "    if (flip_viewport) {\n";
+        out += "        vtx_pos.y = -vtx_pos.y;\n";
+        out += "    }\n";
         out += "    gl_Position = vec4(vtx_pos.x, vtx_pos.y, -vtx_pos.z, vtx_pos.w);\n";
-        if (config.state.use_clip_planes) {
+        if (extra.use_clip_planes) {
             out += "    gl_ClipDistance[0] = -vtx_pos.z;\n"; // fixed PICA clipping plane z <= 0
             out += "    if (enable_clip1) {\n";
             out += "        gl_ClipDistance[1] = dot(clip_coef, vtx_pos);\n";
@@ -276,7 +285,7 @@ std::string GenerateVertexShader(const ShaderSetup& setup, const PicaVSConfig& c
     for (std::size_t i = 0; i < used_regs.size(); ++i) {
         if (used_regs[i]) {
             out += fmt::format("vs_in_reg{0} = vec4(vs_in_typed_reg{0});\n", i);
-            if (True(config.state.load_flags[i] & AttribLoadFlags::ZeroW)) {
+            if (True(extra.load_flags[i] & AttribLoadFlags::ZeroW)) {
                 out += fmt::format("vs_in_reg{0}.w = 0;\n", i);
             }
         }
@@ -291,13 +300,15 @@ std::string GenerateVertexShader(const ShaderSetup& setup, const PicaVSConfig& c
     return out;
 }
 
-static std::string GetGSCommonSource(const PicaGSConfigState& state, bool separable_shader) {
-    std::string out = GetVertexInterfaceDeclaration(true, state.use_clip_planes, separable_shader);
+static std::string GetGSCommonSource(const PicaGSConfigState& state,
+                                     const ExtraFixedGSConfig& extra) {
+    std::string out =
+        GetVertexInterfaceDeclaration(true, extra.use_clip_planes, extra.separable_shader);
     out += VSUniformBlockDef;
 
     out += '\n';
-    for (u32 i = 0; i < state.vs_output_attributes; ++i) {
-        if (separable_shader) {
+    for (u32 i = 0; i < state.vs_output_attributes_count; ++i) {
+        if (extra.separable_shader) {
             out += fmt::format("layout(location = {}) ", i);
         }
         out += fmt::format("in vec4 vs_out_attr{}[];\n", i);
@@ -306,14 +317,17 @@ static std::string GetGSCommonSource(const PicaGSConfigState& state, bool separa
     out += R"(
 struct Vertex {
 )";
-    out += fmt::format("    vec4 attributes[{}];\n", state.gs_output_attributes);
+    out += fmt::format("    vec4 attributes[{}];\n", state.gs_output_attributes_count);
     out += "};\n\n";
 
-    const auto semantic = [&state](VSOutputAttributes::Semantic slot_semantic) -> std::string {
+    const auto semantic_maps = state.GetSemanticMaps();
+
+    const auto semantic =
+        [&state, &semantic_maps](VSOutputAttributes::Semantic slot_semantic) -> std::string {
         const u32 slot = static_cast<u32>(slot_semantic);
-        const u32 attrib = state.semantic_maps[slot].attribute_index;
-        const u32 comp = state.semantic_maps[slot].component_index;
-        if (attrib < state.gs_output_attributes) {
+        const u32 attrib = semantic_maps[slot].attribute_index;
+        const u32 comp = semantic_maps[slot].component_index;
+        if (attrib < state.gs_output_attributes_count) {
             return fmt::format("vtx.attributes[{}].{}", attrib, "xyzw"[comp]);
         }
         return "1.0";
@@ -332,8 +346,11 @@ struct Vertex {
            semantic(VSOutputAttributes::POSITION_Z) + ", " +
            semantic(VSOutputAttributes::POSITION_W) + ");\n";
     out += "    vtx_pos = SanitizeVertex(vtx_pos);\n";
+    out += "    if (flip_viewport) {\n";
+    out += "        vtx_pos.y = -vtx_pos.y;\n";
+    out += "    }\n";
     out += "    gl_Position = vec4(vtx_pos.x, vtx_pos.y, -vtx_pos.z, vtx_pos.w);\n";
-    if (state.use_clip_planes) {
+    if (extra.use_clip_planes) {
         out += "    gl_ClipDistance[0] = -vtx_pos.z;\n"; // fixed PICA clipping plane z <= 0
         out += "    if (enable_clip1) {\n";
         out += "        gl_ClipDistance[1] = dot(clip_coef, vtx_pos);\n";
@@ -382,7 +399,10 @@ void EmitPrim(Vertex vtx0, Vertex vtx1, Vertex vtx2) {
     return out;
 };
 
-std::string GenerateFixedGeometryShader(const PicaFixedGSConfig& config, bool separable_shader) {
+std::string GenerateFixedGeometryShader(const PicaFixedGSConfig& config,
+                                        const ExtraFixedGSConfig& extra) {
+    const bool separable_shader = extra.separable_shader;
+
     std::string out;
     if (separable_shader) {
         out += "#extension GL_ARB_separate_shader_objects : enable\n";
@@ -394,7 +414,7 @@ layout(triangle_strip, max_vertices = 3) out;
 
 )";
 
-    out += GetGSCommonSource(config.state, separable_shader);
+    out += GetGSCommonSource(config.state, extra);
 
     out += R"(
 void main() {
@@ -402,8 +422,8 @@ void main() {
 )";
     for (u32 vtx = 0; vtx < 3; ++vtx) {
         out += fmt::format("    prim_buffer[{}].attributes = vec4[{}](", vtx,
-                           config.state.gs_output_attributes);
-        for (u32 i = 0; i < config.state.vs_output_attributes; ++i) {
+                           config.state.gs_output_attributes_count);
+        for (u32 i = 0; i < config.state.vs_output_attributes_count; ++i) {
             out += fmt::format("{}vs_out_attr{}[{}]", i == 0 ? "" : ", ", i, vtx);
         }
         out += ");\n";

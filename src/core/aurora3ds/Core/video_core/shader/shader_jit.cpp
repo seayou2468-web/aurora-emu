@@ -1,19 +1,19 @@
-// Copyright 2016 Citra Emulator Project
+// Copyright Citra Emulator Project / Azahar Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
 #include "common/arch.h"
-#if CYTRUS_ARCH(x86_64) || CYTRUS_ARCH(arm64)
+#if CITRA_ARCH(x86_64) || CITRA_ARCH(arm64)
 
 #include "common/assert.h"
 #include "common/hash.h"
 #include "common/microprofile.h"
 #include "video_core/shader/shader.h"
 #include "video_core/shader/shader_jit.h"
-#if CYTRUS_ARCH(arm64)
+#if CITRA_ARCH(arm64)
 #include "video_core/shader/shader_jit_a64_compiler.h"
 #endif
-#if CYTRUS_ARCH(x86_64)
+#if CITRA_ARCH(x86_64)
 #include "video_core/shader/shader_jit_x64_compiler.h"
 #endif
 
@@ -26,6 +26,7 @@ void JitEngine::SetupBatch(ShaderSetup& setup, u32 entry_point) {
     ASSERT(entry_point < MAX_PROGRAM_CODE_LENGTH);
     setup.entry_point = entry_point;
 
+    setup.DoProgramCodeFixup();
     const u64 code_hash = setup.GetProgramCodeHash();
     const u64 swizzle_hash = setup.GetSwizzleDataHash();
 
@@ -35,7 +36,7 @@ void JitEngine::SetupBatch(ShaderSetup& setup, u32 entry_point) {
         setup.cached_shader = iter->second.get();
     } else {
         auto shader = std::make_unique<JitShader>();
-        shader->Compile(&setup.program_code, &setup.swizzle_data);
+        shader->Compile(&setup.GetProgramCode(), &setup.GetSwizzleData());
         setup.cached_shader = shader.get();
         cache.emplace_hint(iter, cache_key, std::move(shader));
     }
@@ -54,4 +55,4 @@ void JitEngine::Run(const ShaderSetup& setup, ShaderUnit& state) const {
 
 } // namespace Pica::Shader
 
-#endif // CYTRUS_ARCH(x86_64) || CYTRUS_ARCH(arm64)
+#endif // CITRA_ARCH(x86_64) || CITRA_ARCH(arm64)

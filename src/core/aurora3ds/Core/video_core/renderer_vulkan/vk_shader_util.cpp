@@ -1,13 +1,15 @@
-// Copyright 2023 Citra Emulator Project
+// Copyright Citra Emulator Project / Azahar Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
+#include <memory>
 #include <SPIRV/GlslangToSpv.h>
 #include <glslang/Include/ResourceLimits.h>
 #include <glslang/Public/ShaderLang.h>
 #include "common/assert.h"
 #include "common/literals.h"
 #include "common/logging/log.h"
+#include "common/settings.h"
 #include "video_core/renderer_vulkan/vk_shader_util.h"
 
 namespace Vulkan {
@@ -146,19 +148,20 @@ bool InitializeCompiler() {
         return true;
     }
 
-    if (!glslangA::InitializeProcess()) {
+    if (!glslang::InitializeProcess()) {
         LOG_CRITICAL(Render_Vulkan, "Failed to initialize glslang shader compiler");
         return false;
     }
 
-    std::atexit([]() { glslangA::FinalizeProcess(); });
+    std::atexit([]() { glslang::FinalizeProcess(); });
 
     glslang_initialized = true;
     return true;
 }
 } // Anonymous namespace
 
-vk::ShaderModule Compile(std::string_view code, vk::ShaderStageFlagBits stage, vk::Device device) {
+std::vector<u32> CompileGLSL(std::string_view code, vk::ShaderStageFlagBits stage,
+                             std::string_view premable) {
     if (!InitializeCompiler()) {
         return {};
     }
@@ -172,21 +175,23 @@ vk::ShaderModule Compile(std::string_view code, vk::ShaderStageFlagBits stage, v
     const char* pass_source_code = code.data();
     int pass_source_code_length = static_cast<int>(code.size());
 
-    auto shader = std::make_unique<glslangA::TShader>(lang);
-    shader->setEnvTarget(glslangA::EShTargetSpv,
-                         glslangA::EShTargetLanguageVersion::EShTargetSpv_1_3);
+    auto shader = std::make_unique<glslang::TShader>(lang);
+    shader->setEnvTarget(glslang::EShTargetSpv,
+                         glslang::EShTargetLanguageVersion::EShTargetSpv_1_3);
     shader->setStringsWithLengths(&pass_source_code, &pass_source_code_length, 1);
+    shader->setPreamble(premable.data());
 
-    glslangA::TShader::ForbidIncluder includer;
+    glslang::TShader::ForbidIncluder includer;
     if (!shader->parse(&DefaultTBuiltInResource, default_version, profile, false, true, messages,
                        includer)) [[unlikely]] {
         LOG_INFO(Render_Vulkan, "Shader Info Log:\n{}\n{}", shader->getInfoLog(),
                  shader->getInfoDebugLog());
+        LOG_INFO(Render_Vulkan, "Shader Source:\n{}", code);
         return {};
     }
 
     // Even though there's only a single shader, we still need to link it to generate SPV
-    auto program = std::make_unique<glslangA::TProgram>();
+    auto program = std::make_unique<glslang::TProgram>();
     program->addShader(shader.get());
     if (!program->link(messages)) {
         LOG_INFO(Render_Vulkan, "Program Info Log:\n{}\n{}", program->getInfoLog(),
@@ -194,25 +199,25 @@ vk::ShaderModule Compile(std::string_view code, vk::ShaderStageFlagBits stage, v
         return {};
     }
 
-    glslangA::TIntermediate* intermediate = program->getIntermediate(lang);
+    glslang::TIntermediate* intermediate = program->getIntermediate(lang);
     std::vector<u32> out_code;
     spv::SpvBuildLogger logger;
-    glslangA::SpvOptions options;
+    glslang::SpvOptions options;
 
-    // Enable optimizations on the generated SPIR-V code.
-    options.disableOptimizer = false;
+    // Controls optimizations on the generated SPIR-V code.
+    options.disableOptimizer = Settings::values.disable_spirv_optimizer.GetValue();
     options.validate = false;
     options.optimizeSize = true;
 
     out_code.reserve(8_KiB);
-    glslangA::GlslangToSpv(*intermediate, out_code, &logger, &options);
+    glslang::GlslangToSpv(*intermediate, out_code, &logger, &options);
 
     const std::string spv_messages = logger.getAllMessages();
     if (!spv_messages.empty()) {
         LOG_INFO(Render_Vulkan, "SPIR-V conversion messages: {}", spv_messages);
     }
 
-    return CompileSPV(out_code, device);
+    return out_code;
 }
 
 vk::ShaderModule CompileSPV(std::span<const u32> code, vk::Device device) {
@@ -224,10 +229,15 @@ vk::ShaderModule CompileSPV(std::span<const u32> code, vk::Device device) {
     try {
         return device.createShaderModule(shader_info);
     } catch (vk::SystemError& err) {
-        UNREACHABLE_MSG("{}", err.what());
+        LOG_ERROR(Render_Vulkan, "{}", err.what());
     }
 
     return {};
+}
+
+vk::ShaderModule Compile(std::string_view code, vk::ShaderStageFlagBits stage, vk::Device device,
+                         std::string_view premable) {
+    return CompileSPV(CompileGLSL(code, stage, premable), device);
 }
 
 } // namespace Vulkan

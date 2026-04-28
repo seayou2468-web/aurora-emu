@@ -33,15 +33,7 @@ public:
     void AdjustSampleRate(u32 sample_rate) {}
 
     Samples Read() {
-//        return (parameters.sample_size == 8) ? CACHE_8_BIT : CACHE_16_BIT;
-        size_t size = parameters.sample_size == 8 ? 16 : 32;
-        Samples result(size);
-        
-        std::generate(result.begin(), result.end(), []() {
-            return static_cast<u8>(rand() % 256);  // 可以模拟"吹气"
-        });
-        
-        return result;
+        return (parameters.sample_size == 8) ? CACHE_8_BIT : CACHE_16_BIT;
     }
 
 private:

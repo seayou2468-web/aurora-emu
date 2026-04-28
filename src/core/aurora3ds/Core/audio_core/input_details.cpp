@@ -1,4 +1,4 @@
-// Copyright 2023 Citra Emulator Project
+// Copyright Citra Emulator Project / Azahar Emulator Project
 // Licensed under GPLv2 or any later version
 // Refer to the license.txt file included.
 
@@ -9,14 +9,14 @@
 #include "audio_core/input_details.h"
 #include "audio_core/null_input.h"
 #include "audio_core/static_input.h"
-#if defined(__LIBRETRO__) || defined(HAVE_LIBRETRO)
-#include "citra_libretro/audio/libretro_input.h"
-#endif
 #ifdef HAVE_CUBEB
 #include "audio_core/cubeb_input.h"
 #endif
 #ifdef HAVE_OPENAL
 #include "audio_core/openal_input.h"
+#endif
+#ifdef HAVE_LIBRETRO
+#include "audio_core/libretro_input.h"
 #endif
 #include "common/logging/log.h"
 #include "core/core.h"
@@ -25,18 +25,19 @@ namespace AudioCore {
 namespace {
 // input_details is ordered in terms of desirability, with the best choice at the top.
 constexpr std::array input_details = {
-#if defined(__LIBRETRO__) || defined(HAVE_LIBRETRO)
-    InputDetails{InputType::Cubeb, "Real Device (LibRetro)", true,
+#ifdef HAVE_LIBRETRO
+    InputDetails{InputType::LibRetro, "Real Device (LibRetro)", true,
                  [](Core::System& system, std::string_view device_id) -> std::unique_ptr<Input> {
                      if (!system.HasMicPermission()) {
                          LOG_WARNING(Audio,
                                      "Microphone permission denied, falling back to null input.");
                          return std::make_unique<NullInput>();
                      }
-                     return std::make_unique<LibRetro::Audio::LibRetroInput>();
+                     return std::make_unique<LibRetroInput>();
                  },
-                 [] { return std::vector<std::string>{"Default"}; }},
-#elif defined(HAVE_CUBEB)
+                 [] { return std::vector<std::string>{"LibRetro Microphone"}; }},
+#endif
+#ifdef HAVE_CUBEB
     InputDetails{InputType::Cubeb, "Real Device (Cubeb)", true,
                  [](Core::System& system, std::string_view device_id) -> std::unique_ptr<Input> {
                      if (!system.HasMicPermission()) {
