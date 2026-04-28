@@ -395,11 +395,21 @@ bool Aurora3DSBridge_SetRenderSurfaces(
   runtime->top_surface = top_surface;
   runtime->bottom_surface = bottom_surface;
   runtime->render_surface_scale = (render_surface_scale > 0.0f) ? render_surface_scale : 1.0f;
-  if (!runtime->window) return false;
+  if (!runtime->window) {
+    runtime->last_error = "vulkan window is not initialized";
+    return false;
+  }
+  if (!runtime->top_surface) {
+    runtime->last_error = "top render surface is null";
+    return false;
+  }
+  if (!runtime->moltenvk_library || !runtime->moltenvk_library->IsLoaded()) {
+    runtime->last_error = "MoltenVK is not loaded";
+    return false;
+  }
   runtime->window->UpdateRenderSurface(runtime->top_surface, runtime->render_surface_scale);
-  runtime->last_error =
-      "direct surface presenter is unavailable in this core build; using RGBA framebuffer fallback";
-  return false;
+  runtime->last_error.clear();
+  return true;
 }
 
 bool Aurora3DSBridge_StepFrame(void* runtime_ptr) {

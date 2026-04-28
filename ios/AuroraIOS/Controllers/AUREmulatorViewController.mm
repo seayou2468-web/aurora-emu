@@ -194,6 +194,14 @@
             (float)scale);
         if (!_usesVulkanPresenter) {
             [AURLogManager logError:[NSString stringWithFormat:@"[AUR][Emu] 3DS Vulkan renderer surface connect failed: %s", EmulatorCore_GetLastError(_core) ?: "unknown"]];
+            NSString *message = [NSString stringWithFormat:@"MoltenVK描画の初期化に失敗しました。\n%s", EmulatorCore_GetLastError(_core) ?: "unknown error"];
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Aurora3DS Vulkan初期化失敗"
+                                                                           message:message
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+            [self presentViewController:alert animated:YES completion:nil];
+            [self stopEmulator];
+            return;
         }
     }
 
@@ -241,7 +249,7 @@
     if (stepError && stepError[0] != '\0') {
         [AURLogManager logError:[NSString stringWithFormat:@"[AUR][Emu] frame step warning: %s", stepError]];
     }
-    if (_coreType == EMULATOR_CORE_TYPE_3DS && _usesVulkanPresenter) {
+    if (_coreType == EMULATOR_CORE_TYPE_3DS) {
         return;
     }
 
