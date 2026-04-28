@@ -4,7 +4,7 @@
 - `swift/`: 新規のSwift実装。
   - `Bridge/`: Swift <-> Core ブリッジ層。
   - `App/`: Swift版アプリのエントリーポイント。
-  - `UI/`: Swift版UI（ROMインポート/検索/起動を実装）。
+  - `UI/`: Swift版UI（グラスモーフィックUI、ROMインポート/検索/フィルタ/起動/削除を実装）。
 - `../API/`: iOS/Linux共通で使うコアAPI参照ヘッダ。
 
 `objc/Bridge/AURCoreSessionFactory` がコア種類に応じて接続方式を選択し、

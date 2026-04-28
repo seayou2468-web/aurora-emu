@@ -10,6 +10,11 @@ private struct SwiftROMItem: Hashable {
     let accentColor: UIColor
 }
 
+private enum SwiftSortMode {
+    case name
+    case recentlyAdded
+}
+
 private final class SwiftROMCardCell: UICollectionViewCell {
     static let reuseIdentifier = "SwiftROMCardCell"
 
@@ -112,7 +117,12 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
     private var dataSource: UICollectionViewDiffableDataSource<Int, UUID>!
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
     private lazy var searchController = UISearchController(searchResultsController: nil)
+    private let filterControl = UISegmentedControl(items: ["All", "3DS/NDS", "GBA", "NES", "GB"])
+    private let summaryLabel = UILabel()
+    private let emptyStateLabel = UILabel()
+    private let emptyImportButton = UIButton(type: .system)
     private let romDirectoryName = "AuroraROMs"
+    private var sortMode: SwiftSortMode = .name
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -129,7 +139,10 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
             UIBarButtonItem(image: UIImage(systemName: "square.and.arrow.down"), style: .plain, target: self, action: #selector(importROM)),
             UIBarButtonItem(image: UIImage(systemName: "arrow.clockwise"), style: .plain, target: self, action: #selector(reloadLibrary))
         ]
-        navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "gearshape"), style: .plain, target: self, action: #selector(showSettings))
+        navigationItem.leftBarButtonItems = [
+            UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal.decrease.circle"), style: .plain, target: self, action: #selector(showSortMenu)),
+            UIBarButtonItem(image: UIImage(systemName: "gearshape"), style: .plain, target: self, action: #selector(showSettings))
+        ]
 
         searchController.searchBar.placeholder = "ゲーム検索"
         searchController.obscuresBackgroundDuringPresentation = false
@@ -142,11 +155,54 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
         collectionView.register(SwiftROMCardCell.self, forCellWithReuseIdentifier: SwiftROMCardCell.reuseIdentifier)
         view.addSubview(collectionView)
 
+        filterControl.selectedSegmentIndex = 0
+        filterControl.backgroundColor = UIColor.white.withAlphaComponent(0.1)
+        filterControl.selectedSegmentTintColor = UIColor.systemCyan.withAlphaComponent(0.6)
+        filterControl.addTarget(self, action: #selector(filterChanged), for: .valueChanged)
+        filterControl.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(filterControl)
+
+        summaryLabel.font = .systemFont(ofSize: 13, weight: .semibold)
+        summaryLabel.textColor = UIColor.white.withAlphaComponent(0.75)
+        summaryLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(summaryLabel)
+
+        emptyStateLabel.text = "ROMがありません。右上のインポートから追加してください。"
+        emptyStateLabel.textColor = .secondaryLabel
+        emptyStateLabel.textAlignment = .center
+        emptyStateLabel.numberOfLines = 0
+        emptyStateLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(emptyStateLabel)
+
+        emptyImportButton.setTitle("ROMをインポート", for: .normal)
+        emptyImportButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
+        emptyImportButton.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.25)
+        emptyImportButton.tintColor = .white
+        emptyImportButton.layer.cornerRadius = 12
+        emptyImportButton.contentEdgeInsets = UIEdgeInsets(top: 10, left: 16, bottom: 10, right: 16)
+        emptyImportButton.addTarget(self, action: #selector(importROM), for: .touchUpInside)
+        emptyImportButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(emptyImportButton)
+
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            filterControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            filterControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            filterControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+
+            summaryLabel.topAnchor.constraint(equalTo: filterControl.bottomAnchor, constant: 10),
+            summaryLabel.leadingAnchor.constraint(equalTo: filterControl.leadingAnchor, constant: 4),
+            summaryLabel.trailingAnchor.constraint(equalTo: filterControl.trailingAnchor),
+
+            collectionView.topAnchor.constraint(equalTo: summaryLabel.bottomAnchor, constant: 8),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            emptyStateLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            emptyStateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 30),
+            emptyStateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -30),
+            emptyImportButton.topAnchor.constraint(equalTo: emptyStateLabel.bottomAnchor, constant: 16),
+            emptyImportButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
 
         dataSource = UICollectionViewDiffableDataSource<Int, UUID>(collectionView: collectionView) { [weak self] collectionView, indexPath, itemID in
@@ -175,9 +231,40 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
     }
 
     @objc private func showSettings() {
-        let alert = UIAlertController(title: "Aurora Swift", message: "設定画面は次フェーズで追加予定です。", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        let alert = UIAlertController(title: "Aurora Swift", message: "Swift UI Library Settings", preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: "ライブラリ再読み込み", style: .default) { [weak self] _ in
+            self?.reloadLibrary()
+        })
+        alert.addAction(UIAlertAction(title: "検索をクリア", style: .default) { [weak self] _ in
+            self?.searchController.searchBar.text = nil
+            self?.applyFilter(searchText: nil)
+        })
+        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel))
+        if let popover = alert.popoverPresentationController {
+            popover.barButtonItem = navigationItem.leftBarButtonItems?.last
+        }
         present(alert, animated: true)
+    }
+
+    @objc private func showSortMenu() {
+        let alert = UIAlertController(title: "並び順", message: nil, preferredStyle: .actionSheet)
+        alert.addAction(UIAlertAction(title: "名前順", style: .default) { [weak self] _ in
+            self?.sortMode = .name
+            self?.reloadLibrary()
+        })
+        alert.addAction(UIAlertAction(title: "最近追加順", style: .default) { [weak self] _ in
+            self?.sortMode = .recentlyAdded
+            self?.reloadLibrary()
+        })
+        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel))
+        if let popover = alert.popoverPresentationController {
+            popover.barButtonItem = navigationItem.leftBarButtonItems?.first
+        }
+        present(alert, animated: true)
+    }
+
+    @objc private func filterChanged() {
+        applyFilter(searchText: searchController.searchBar.text)
     }
 
     @objc private func importROM() {
@@ -195,16 +282,31 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
 
     private func applyFilter(searchText: String?) {
         let keyword = (searchText ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let filteredByCore = allItems.filter { item in
+            switch filterControl.selectedSegmentIndex {
+            case 1: return item.coreType == EMULATOR_CORE_TYPE_NDS
+            case 2: return item.coreType == EMULATOR_CORE_TYPE_GBA
+            case 3: return item.coreType == EMULATOR_CORE_TYPE_NES
+            case 4: return item.coreType == EMULATOR_CORE_TYPE_GB
+            default: return true
+            }
+        }
+
         if keyword.isEmpty {
-            filteredItems = allItems
+            filteredItems = filteredByCore
         } else {
-            filteredItems = allItems.filter { $0.title.localizedCaseInsensitiveContains(keyword) }
+            filteredItems = filteredByCore.filter { $0.title.localizedCaseInsensitiveContains(keyword) }
         }
 
         var snapshot = NSDiffableDataSourceSnapshot<Int, UUID>()
         snapshot.appendSections([0])
         snapshot.appendItems(filteredItems.map(\.id), toSection: 0)
         dataSource.apply(snapshot, animatingDifferences: true)
+
+        summaryLabel.text = "\(filteredItems.count) games ・ \(displaySortMode())"
+        let isEmpty = filteredItems.isEmpty
+        emptyStateLabel.isHidden = !isEmpty
+        emptyImportButton.isHidden = !isEmpty
     }
 
     private func loadROMItems() -> [SwiftROMItem] {
@@ -216,7 +318,7 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
             return []
         }
 
-        return files.compactMap { fileURL in
+        var items = files.compactMap { fileURL in
             guard let coreType = coreType(for: fileURL) else { return nil }
             let ext = fileURL.pathExtension.lowercased()
             return SwiftROMItem(
@@ -226,7 +328,19 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
                 subtitle: ext,
                 accentColor: color(for: coreType)
             )
-        }.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+        }
+
+        switch sortMode {
+        case .name:
+            items.sort { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+        case .recentlyAdded:
+            items.sort {
+                let lhs = (try? $0.url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+                let rhs = (try? $1.url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+                return lhs > rhs
+            }
+        }
+        return items
     }
 
     private func romFolderURL() -> URL {
@@ -271,11 +385,25 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
             do {
                 try fm.copyItem(at: sourceURL, to: destURL)
             } catch {
-                print("[AUR][Swift] ROM import failed: \(error)")
+                showError(message: "ROM import failed: \(error.localizedDescription)")
             }
         }
 
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         reloadLibrary()
+    }
+
+    private func displaySortMode() -> String {
+        switch sortMode {
+        case .name: return "Sort: Name"
+        case .recentlyAdded: return "Sort: Recent"
+        }
+    }
+
+    private func showError(message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 }
 
@@ -291,6 +419,23 @@ extension SwiftLibraryViewController: UICollectionViewDelegate {
         let item = filteredItems[indexPath.item]
         let vc = AUREmulatorViewController(romURL: item.url, coreType: item.coreType)
         vc.modalPresentationStyle = .fullScreen
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
         present(vc, animated: true)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        guard filteredItems.indices.contains(indexPath.item) else { return nil }
+        let item = filteredItems[indexPath.item]
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
+            let deleteAction = UIAction(title: "Delete ROM", image: UIImage(systemName: "trash"), attributes: .destructive) { _ in
+                do {
+                    try FileManager.default.removeItem(at: item.url)
+                    self?.reloadLibrary()
+                } catch {
+                    self?.showError(message: "Delete failed: \(error.localizedDescription)")
+                }
+            }
+            return UIMenu(title: "", children: [deleteAction])
+        }
     }
 }
