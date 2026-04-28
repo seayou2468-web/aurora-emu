@@ -28,6 +28,8 @@ packages:
   openssl:
     url: https://github.com/krzyzanowskim/OpenSSL
     branch: main
+  SharedDependencies:
+    path: ../SharedDependencies
 settings:
   base:
     PRODUCT_BUNDLE_IDENTIFIER: com.auroraemu.auroraswift
@@ -100,33 +102,55 @@ targets:
           - "**/*.md"
           - "**/*.txt"
     dependencies:
-      - framework: ../Dependicies/FLAC.xcframework
       - framework: ../Dependicies/MoltenVK.xcframework
-      - framework: ../Dependicies/SDL3.xcframework
       - framework: ../Dependicies/libavcodec.xcframework
       - framework: ../Dependicies/libavfilter.xcframework
       - framework: ../Dependicies/libavformat.xcframework
       - framework: ../Dependicies/libavutil.xcframework
-      - framework: ../Dependicies/libboostcontext.xcframework
-      - framework: ../Dependicies/libboostiostreams.xcframework
-      - framework: ../Dependicies/libboostprogramoptions.xcframework
-      - framework: ../Dependicies/libboostserialization.xcframework
-      - framework: ../Dependicies/libdynarmic.xcframework
-      - framework: ../Dependicies/libenet.xcframework
-      - framework: ../Dependicies/libfaad2.xcframework
-      - framework: ../Dependicies/libfmt.xcframework
-      - framework: ../Dependicies/libgenericcodegen.xcframework
-      - framework: ../Dependicies/libglslang.xcframework
-      - framework: ../Dependicies/libmachineindependent.xcframework
-      - framework: ../Dependicies/libmcl.xcframework
-      - framework: ../Dependicies/libopenal.xcframework
-      - framework: ../Dependicies/libopus.xcframework
-      - framework: ../Dependicies/libsirit.xcframework
-      - framework: ../Dependicies/libsoundtouch.xcframework
       - framework: ../Dependicies/libswresample.xcframework
       - framework: ../Dependicies/libswscale.xcframework
-      - framework: ../Dependicies/libteakra.xcframework
-      - framework: ../Dependicies/ogg.xcframework
+      - package: SharedDependencies
+        product: FLAC
+      - package: SharedDependencies
+        product: ogg
+      - package: SharedDependencies
+        product: lib_sdl3
+      - package: SharedDependencies
+        product: lib_boostcontext
+      - package: SharedDependencies
+        product: lib_boostiostreams
+      - package: SharedDependencies
+        product: lib_boostprogramoptions
+      - package: SharedDependencies
+        product: lib_boostserialization
+      - package: SharedDependencies
+        product: lib_dynarmic
+      - package: SharedDependencies
+        product: lib_enet
+      - package: SharedDependencies
+        product: lib_faad2
+      - package: SharedDependencies
+        product: lib_fmt
+      - package: SharedDependencies
+        product: lib_genericcodegen
+      - package: SharedDependencies
+        product: lib_glslang
+      - package: SharedDependencies
+        product: lib_machineindependent
+      - package: SharedDependencies
+        product: lib_mcl
+      - package: SharedDependencies
+        product: lib_openal
+      - package: SharedDependencies
+        product: lib_opus
+      - package: SharedDependencies
+        product: lib_sirit
+      - package: SharedDependencies
+        product: lib_soundtouch
+      - package: SharedDependencies
+        product: lib_spirv
+      - package: SharedDependencies
+        product: lib_teakra
       - package: zstd
         product: libzstd
       - package: zstd
