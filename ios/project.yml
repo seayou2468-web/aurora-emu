@@ -5,6 +5,13 @@ options:
 configs:
   Debug: debug
   Release: release
+packages:
+  zlib-spm:
+    url: https://github.com/Azoy/zlib-spm
+    branch: master
+  zstd:
+    url: https://github.com/jarrodnorwell/zstd
+    branch: dev
 settings:
   base:
     PRODUCT_BUNDLE_IDENTIFIER: com.auroraemu.auroraswift
@@ -41,7 +48,6 @@ settings:
       - "$(SRCROOT)/../Dependicies/Sources/toml/include"
       - "$(SRCROOT)/../Dependicies/Sources/tsl/include"
       - "$(SRCROOT)/../Dependicies/Sources/xxhash/include"
-      - "$(SRCROOT)/../Dependicies/Sources/zstd/include"
       - "$(SRCROOT)/../Platforms/API"
       - "$(SRCROOT)/../Platforms/AuroraIOS/objc"
     FRAMEWORK_SEARCH_PATHS:
@@ -95,6 +101,10 @@ targets:
       - framework: ../Dependicies/libswscale.xcframework
       - framework: ../Dependicies/libteakra.xcframework
       - framework: ../Dependicies/ogg.xcframework
+      - package: zstd
+        product: libzstd
+      - package: zstd
+        product: libseekable_format
     settings:
       base:
         INFOPLIST_FILE: ../Config/Info.plist

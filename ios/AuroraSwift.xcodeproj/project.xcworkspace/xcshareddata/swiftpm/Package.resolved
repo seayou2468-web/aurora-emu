@@ -1,0 +1,23 @@
+{
+  "pins" : [
+    {
+      "identity" : "zlib-spm",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Azoy/zlib-spm",
+      "state" : {
+        "branch" : "master",
+        "revision" : "f92fc0658af4cd9b11f233e9c02786ecbf75f1ee"
+      }
+    },
+    {
+      "identity" : "zstd",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jarrodnorwell/zstd",
+      "state" : {
+        "branch" : "dev",
+        "revision" : "98392d5c327fa2ad9d453166f943df257f8968c4"
+      }
+    }
+  ],
+  "version" : 3
+}
