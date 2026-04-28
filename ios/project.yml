@@ -1,0 +1,49 @@
+name: AuroraSwift
+options:
+  deploymentTarget:
+    iOS: "26.0"
+configs:
+  Debug: debug
+  Release: release
+settings:
+  base:
+    PRODUCT_BUNDLE_IDENTIFIER: com.auroraemu.auroraswift
+    SWIFT_VERSION: 5.10
+    SWIFT_OBJC_BRIDGING_HEADER: ../Platforms/AuroraIOS/swift/Bridge/AuroraSwift-Bridging-Header.h
+    CLANG_CXX_LANGUAGE_STANDARD: gnu++20
+    ENABLE_BITCODE: NO
+    HEADER_SEARCH_PATHS:
+      - "$(SRCROOT)/../src"
+      - "$(SRCROOT)/../src/core"
+      - "$(SRCROOT)/../src/core/bridge_cores/aurora3ds"
+      - "$(SRCROOT)/../src/core/bridge_cores/aurora3ds/Core/include"
+      - "$(SRCROOT)/../Platforms/API"
+      - "$(SRCROOT)/../Platforms/AuroraIOS/objc"
+    FRAMEWORK_SEARCH_PATHS:
+      - "$(SRCROOT)/../Dependicies"
+      - "$(inherited)"
+    LIBRARY_SEARCH_PATHS:
+      - "$(SRCROOT)/../Dependicies"
+      - "$(inherited)"
+
+targets:
+  AuroraSwift:
+    type: application
+    platform: iOS
+    info:
+      path: ../Config/Info.plist
+    entitlements:
+      path: ../Config/Entitlements.plist
+    sources:
+      - path: ../Platforms/AuroraIOS/swift
+      - path: ../Platforms/AuroraIOS/objc/Controllers/AUR3DSEmulatorViewController.h
+      - path: ../Platforms/AuroraIOS/objc/Controllers/AUR3DSEmulatorViewController.mm
+      - path: ../src/core/bridge_cores/aurora3ds
+        excludes:
+          - "**/*.md"
+          - "**/*.txt"
+    settings:
+      base:
+        INFOPLIST_FILE: ../Config/Info.plist
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: ""

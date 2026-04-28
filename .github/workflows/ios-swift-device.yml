@@ -1,0 +1,55 @@
+name: iOS Swift Device Build
+
+on:
+  push:
+    branches: [ "main", "work" ]
+  pull_request:
+
+jobs:
+  build-ios-device:
+    runs-on: macos-15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.1.1.app/Contents/Developer
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select fallback Xcode if 26.1.1 is unavailable
+        run: |
+          if [ ! -d "$DEVELOPER_DIR" ]; then
+            echo "Xcode 26.1.1 not found on runner, falling back to default Xcode"
+            unset DEVELOPER_DIR
+          fi
+          xcodebuild -version
+
+      - name: Setup Ruby and CocoaPods
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: false
+
+      - name: Install XcodeGen and CocoaPods
+        run: |
+          brew install xcodegen cocoapods
+
+      - name: Generate Xcode project
+        run: |
+          cd ios
+          xcodegen generate --spec project.yml
+
+      - name: Install pods
+        run: |
+          cd ios
+          pod install --project-directory=.
+
+      - name: Build for iOS device (arm64)
+        run: |
+          cd ios
+          xcodebuild \
+            -workspace AuroraSwift.xcworkspace \
+            -scheme AuroraSwift \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -arch arm64 \
+            build CODE_SIGNING_ALLOWED=NO

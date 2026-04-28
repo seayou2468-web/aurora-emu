@@ -11,7 +11,6 @@ private struct SwiftROMItem: Hashable {
 }
 
 private enum SwiftLaunchTarget: Hashable {
-    case standard(EmulatorCoreType)
     case aurora3ds
 }
 
@@ -122,7 +121,7 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
     private var dataSource: UICollectionViewDiffableDataSource<Int, UUID>!
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
     private lazy var searchController = UISearchController(searchResultsController: nil)
-    private let filterControl = UISegmentedControl(items: ["All", "3DS/NDS", "GBA", "NES", "GB"])
+    private let filterControl = UISegmentedControl(items: ["All", "Aurora3DS"])
     private let summaryLabel = UILabel()
     private let emptyStateLabel = UILabel()
     private let emptyImportButton = UIButton(type: .system)
@@ -289,20 +288,7 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
         let keyword = (searchText ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         let filteredByCore = allItems.filter { item in
             switch filterControl.selectedSegmentIndex {
-            case 1:
-                switch item.launchTarget {
-                case .aurora3ds: return true
-                case .standard(let type): return type == EMULATOR_CORE_TYPE_NDS
-                }
-            case 2:
-                if case .standard(let type) = item.launchTarget { return type == EMULATOR_CORE_TYPE_GBA }
-                return false
-            case 3:
-                if case .standard(let type) = item.launchTarget { return type == EMULATOR_CORE_TYPE_NES }
-                return false
-            case 4:
-                if case .standard(let type) = item.launchTarget { return type == EMULATOR_CORE_TYPE_GB }
-                return false
+            case 1: return item.launchTarget == .aurora3ds
             default: return true
             }
         }
@@ -365,14 +351,6 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
 
     private func launchTarget(for url: URL) -> SwiftLaunchTarget? {
         switch url.pathExtension.lowercased() {
-        case "gba":
-            return .standard(EMULATOR_CORE_TYPE_GBA)
-        case "nds":
-            return .standard(EMULATOR_CORE_TYPE_NDS)
-        case "nes":
-            return .standard(EMULATOR_CORE_TYPE_NES)
-        case "gb", "gbc":
-            return .standard(EMULATOR_CORE_TYPE_GB)
         case "3ds", "3dsx", "cci", "cxi":
             return .aurora3ds
         default:
@@ -383,14 +361,6 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
     private func color(for launchTarget: SwiftLaunchTarget) -> UIColor {
         switch launchTarget {
         case .aurora3ds: return .systemOrange
-        case .standard(let coreType):
-            switch coreType {
-            case EMULATOR_CORE_TYPE_NDS: return .systemTeal
-            case EMULATOR_CORE_TYPE_GBA: return .systemPurple
-            case EMULATOR_CORE_TYPE_NES: return .systemRed
-            case EMULATOR_CORE_TYPE_GB: return .systemGreen
-            default: return .systemBlue
-            }
         }
     }
 
@@ -442,10 +412,6 @@ extension SwiftLibraryViewController: UICollectionViewDelegate {
         switch item.launchTarget {
         case .aurora3ds:
             let vc = AUR3DSEmulatorViewController(romURL: item.url)
-            vc.modalPresentationStyle = .fullScreen
-            present(vc, animated: true)
-        case .standard(let coreType):
-            let vc = AUREmulatorViewController(romURL: item.url, coreType: coreType)
             vc.modalPresentationStyle = .fullScreen
             present(vc, animated: true)
         }
