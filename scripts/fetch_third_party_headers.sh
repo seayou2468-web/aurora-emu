@@ -23,30 +23,3 @@ else
   cp -R "${TMP_DIR}/boost_${BOOST_UNDERSCORE}/boost" "${ROOT_DIR}/Dependicies/Sources/boost/include/"
   echo "Installed Boost headers to ${ROOT_DIR}/Dependicies/Sources/boost/include/boost"
 fi
-
-VULKAN_HEADERS_VERSION="1.3.296.0"
-VULKAN_HEADERS_TAR="vulkan-headers-${VULKAN_HEADERS_VERSION}.tar.gz"
-VULKAN_HEADERS_URL="https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/vulkan-sdk-${VULKAN_HEADERS_VERSION}.tar.gz"
-VULKAN_INCLUDE_DIR="${ROOT_DIR}/Dependicies/Sources/vulkan/include/vulkan"
-
-if [[ -f "${VULKAN_INCLUDE_DIR}/vulkan.hpp" && -f "${ROOT_DIR}/Dependicies/Sources/vulkan/include/vk_video/vulkan_video_codec_h264std.h" ]]; then
-  echo "Vulkan headers already present: ${VULKAN_INCLUDE_DIR}"
-else
-  echo "Fetching Vulkan headers ${VULKAN_HEADERS_VERSION}..."
-  curl -L "${VULKAN_HEADERS_URL}" -o "${TMP_DIR}/${VULKAN_HEADERS_TAR}"
-  tar -xzf "${TMP_DIR}/${VULKAN_HEADERS_TAR}" -C "${TMP_DIR}"
-  VULKAN_EXTRACT_DIR="$(find "${TMP_DIR}" -maxdepth 1 -type d -name 'Vulkan-Headers-*' | head -n 1)"
-  if [[ -z "${VULKAN_EXTRACT_DIR}" ]]; then
-    echo "Failed to locate extracted Vulkan-Headers directory." >&2
-    exit 1
-  fi
-
-  mkdir -p "${ROOT_DIR}/Dependicies/Sources/vulkan/include"
-  rm -rf "${VULKAN_INCLUDE_DIR}"
-  rm -rf "${ROOT_DIR}/Dependicies/Sources/vulkan/include/vk_video"
-  cp -R "${VULKAN_EXTRACT_DIR}/include/vulkan" \
-    "${ROOT_DIR}/Dependicies/Sources/vulkan/include/"
-  cp -R "${VULKAN_EXTRACT_DIR}/include/vk_video" \
-    "${ROOT_DIR}/Dependicies/Sources/vulkan/include/"
-  echo "Installed Vulkan headers to ${VULKAN_INCLUDE_DIR}"
-fi

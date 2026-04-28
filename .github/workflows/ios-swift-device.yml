@@ -30,17 +30,16 @@ jobs:
 
       - name: Install XcodeGen and CocoaPods
         run: |
-          brew install xcodegen cocoapods vulkan-sdk
+          brew install xcodegen cocoapods
 
-      - name: Export Vulkan SDK paths
+      - name: Install Vulkan headers
         run: |
-          VULKAN_SDK="$(brew --prefix vulkan-sdk)"
-          echo "VULKAN_SDK=${VULKAN_SDK}" >> "${GITHUB_ENV}"
-          echo "VK_SDK_PATH=${VULKAN_SDK}" >> "${GITHUB_ENV}"
-          echo "VULKAN_SDK include: ${VULKAN_SDK}/include"
-          echo "VULKAN_SDK lib: ${VULKAN_SDK}/lib"
+          brew install vulkan-headers
+          VULKAN_PREFIX="$(brew --prefix vulkan-headers)"
+          echo "CPATH=${VULKAN_PREFIX}/include:${CPATH:-}" >> "${GITHUB_ENV}"
+          echo "CPLUS_INCLUDE_PATH=${VULKAN_PREFIX}/include:${CPLUS_INCLUDE_PATH:-}" >> "${GITHUB_ENV}"
 
-      - name: Fetch third-party headers (Boost/Vulkan)
+      - name: Fetch third-party headers (Boost)
         run: |
           ./scripts/fetch_third_party_headers.sh
 
