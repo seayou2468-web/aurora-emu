@@ -51,5 +51,4 @@ jobs:
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
-            -arch arm64 \
             build CODE_SIGNING_ALLOWED=NO
