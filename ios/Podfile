@@ -3,6 +3,6 @@ platform :ios, '26.0'
 target 'AuroraSwift' do
   use_frameworks!
   pod 'AuroraBinaryDeps', :path => './pods/AuroraBinaryDeps.podspec'
-  pod 'Boost', '~> 1.83'
+  pod 'boost', '~> 1.59'
   pod 'libzstd', '~> 1.5'
 end
