@@ -17,8 +17,7 @@ settings:
       - "$(SRCROOT)/../src/core"
       - "$(SRCROOT)/../src/core/bridge_cores/aurora3ds"
       - "$(SRCROOT)/../src/core/bridge_cores/aurora3ds/Core/include"
-      - "$(SRCROOT)/../Dependicies/Sources"
-      - "$(SRCROOT)/../Dependicies/Sources/**"
+      - "$(SRCROOT)/../Dependicies/Sources/**/include"
       - "$(SRCROOT)/../Platforms/API"
       - "$(SRCROOT)/../Platforms/AuroraIOS/objc"
     FRAMEWORK_SEARCH_PATHS:
