@@ -11,7 +11,8 @@ import UIKit
 
 @inline(__always)
 private func checkedInt32(_ value: Int, context: StaticString) -> Int32 {
-    precondition(Int32.min...Int32.max ~= value, "\(context): \(value) is out of Int32 range")
+    precondition(value >= Int(Int32.min) && value <= Int(Int32.max),
+                 "\(context): \(value) is out of Int32 range")
     return Int32(value)
 }
 
