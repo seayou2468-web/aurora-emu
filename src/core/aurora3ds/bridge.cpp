@@ -7,13 +7,11 @@
 #include <vector>
 #include <cstring>
 
-#if defined(__APPLE__) || defined(__linux__)
+#if defined(__APPLE__)
 #include <dlfcn.h>
 #include "./Core/include/common/dynamic_library/dynamic_library.h"
 #include "./Core/include/common/file_util.h"
 #include "./Core/include/common/common_paths.h"
-#include "./Core/include/input_common/main.h"
-#include "./Core/include/input_common/keyboard.h"
 #include "./Core/include/core/core.h"
 #include "./Core/include/core/dumping/backend.h"
 #include "./Core/include/core/frontend/emu_window.h"
@@ -24,15 +22,13 @@
 #include "./Core/include/common/logging/filter.h"
 #include "./Core/include/common/settings.h"
 #include "./Core/include/network/network.h"
-#if defined(__APPLE__)
 #include "./CitraObjC/Camera/CameraFactory.h"
 #include "./CitraObjC/Configuration/Configuration.h"
 #include "./CitraObjC/EmulationWindow/GraphicsContext_Apple.h"
 #include "./CitraObjC/InputManager/InputManager.h"
 #endif
-#endif
 
-#if defined(__APPLE__) || defined(__linux__)
+#if defined(__APPLE__)
 
 namespace {
 
@@ -41,12 +37,7 @@ public:
   AURBridgeVulkanWindow(void* render_surface, float render_surface_scale,
                         std::shared_ptr<Common::DynamicLibrary> driver_library)
       : Frontend::EmuWindow(false), driver_library_(std::move(driver_library)) {
-    window_info.type =
-#if defined(__APPLE__)
-        Frontend::WindowSystemType::MacOS;
-#else
-        Frontend::WindowSystemType::Headless;
-#endif
+    window_info.type = Frontend::WindowSystemType::MacOS;
     window_info.display_connection = nullptr;
     window_info.render_surface = render_surface;
     window_info.render_surface_scale = render_surface_scale;
@@ -56,23 +47,14 @@ public:
   void PollEvents() override {}
 
   std::unique_ptr<Frontend::GraphicsContext> CreateSharedContext() const override {
-#if defined(__APPLE__)
     if (!driver_library_ || !driver_library_->IsLoaded()) {
       return nullptr;
     }
     return std::make_unique<GraphicsContext_Apple>(driver_library_);
-#else
-    return nullptr;
-#endif
   }
 
   void UpdateRenderSurface(void* render_surface, float render_surface_scale) {
-    window_info.type =
-#if defined(__APPLE__)
-        Frontend::WindowSystemType::MacOS;
-#else
-        Frontend::WindowSystemType::Headless;
-#endif
+    window_info.type = Frontend::WindowSystemType::MacOS;
     window_info.render_surface = render_surface;
     window_info.render_surface_scale = render_surface_scale;
   }
@@ -86,6 +68,7 @@ struct AURBridgeRuntime {
   std::unique_ptr<AURBridgeVulkanWindow> window;
   std::shared_ptr<class AURBridgeCaptureBackend> capture;
   std::shared_ptr<Common::DynamicLibrary> moltenvk_library;
+  std::unique_ptr<Configuration> configuration;
   void* top_surface = nullptr;
   void* bottom_surface = nullptr;
   float render_surface_scale = 1.0f;
@@ -259,47 +242,6 @@ int ToInputManagerButton(int key) {
   }
 }
 
-#if defined(__linux__)
-int ToLinuxKeyboardKey(int key) {
-  switch (key) {
-    case 0: return 'z';
-    case 1: return 'x';
-    case 2: return 'c';
-    case 3: return 'v';
-    case 4: return 'l';
-    case 5: return 'j';
-    case 6: return 'i';
-    case 7: return 'k';
-    case 8: return 's';
-    case 9: return 'a';
-    default: return -1;
-  }
-}
-
-void ConfigureLinuxInputProfile() {
-  Settings::values.current_input_profile.buttons[Settings::NativeButton::A] =
-      InputCommon::GenerateKeyboardParam(ToLinuxKeyboardKey(0));
-  Settings::values.current_input_profile.buttons[Settings::NativeButton::B] =
-      InputCommon::GenerateKeyboardParam(ToLinuxKeyboardKey(1));
-  Settings::values.current_input_profile.buttons[Settings::NativeButton::Select] =
-      InputCommon::GenerateKeyboardParam(ToLinuxKeyboardKey(2));
-  Settings::values.current_input_profile.buttons[Settings::NativeButton::Start] =
-      InputCommon::GenerateKeyboardParam(ToLinuxKeyboardKey(3));
-  Settings::values.current_input_profile.buttons[Settings::NativeButton::DRight] =
-      InputCommon::GenerateKeyboardParam(ToLinuxKeyboardKey(4));
-  Settings::values.current_input_profile.buttons[Settings::NativeButton::DLeft] =
-      InputCommon::GenerateKeyboardParam(ToLinuxKeyboardKey(5));
-  Settings::values.current_input_profile.buttons[Settings::NativeButton::DUp] =
-      InputCommon::GenerateKeyboardParam(ToLinuxKeyboardKey(6));
-  Settings::values.current_input_profile.buttons[Settings::NativeButton::DDown] =
-      InputCommon::GenerateKeyboardParam(ToLinuxKeyboardKey(7));
-  Settings::values.current_input_profile.buttons[Settings::NativeButton::R] =
-      InputCommon::GenerateKeyboardParam(ToLinuxKeyboardKey(8));
-  Settings::values.current_input_profile.buttons[Settings::NativeButton::L] =
-      InputCommon::GenerateKeyboardParam(ToLinuxKeyboardKey(9));
-}
-#endif
-
 }  // namespace
 
 extern "C" {
@@ -318,8 +260,8 @@ void* Aurora3DSBridge_Create(void) {
 
   auto* runtime = new AURBridgeRuntime();
   runtime->system = &Core::System::GetInstance();
+  runtime->configuration = std::make_unique<Configuration>();
   runtime->system->ApplySettings();
-#if defined(__APPLE__)
   runtime->moltenvk_library =
       std::make_shared<Common::DynamicLibrary>(dlopen("@rpath/MoltenVK.framework/MoltenVK", RTLD_NOW));
 
@@ -329,11 +271,6 @@ void* Aurora3DSBridge_Create(void) {
   Camera::RegisterFactory("av_rear", std::move(rear_camera));
 
   InputManager::Init();
-#else
-  Settings::values.graphics_api = Settings::GraphicsAPI::Software;
-  InputCommon::Init();
-  ConfigureLinuxInputProfile();
-#endif
   Network::Init();
   Frontend::RegisterDefaultApplets(*runtime->system);
 
@@ -352,11 +289,7 @@ void Aurora3DSBridge_Destroy(void* runtime_ptr) {
     runtime->system->Shutdown();
   }
   Network::Shutdown();
-#if defined(__APPLE__)
   InputManager::Shutdown();
-#else
-  InputCommon::Shutdown();
-#endif
   delete runtime;
 }
 
@@ -470,12 +403,10 @@ bool Aurora3DSBridge_SetRenderSurfaces(
     runtime->last_error = "top render surface is null";
     return false;
   }
-#if defined(__APPLE__)
   if (!runtime->moltenvk_library || !runtime->moltenvk_library->IsLoaded()) {
     runtime->last_error = "MoltenVK is not loaded";
     return false;
   }
-#endif
   runtime->window->UpdateRenderSurface(runtime->top_surface, runtime->render_surface_scale);
   runtime->last_error.clear();
   return true;
@@ -501,7 +432,6 @@ bool Aurora3DSBridge_StepFrame(void* runtime_ptr) {
 void Aurora3DSBridge_SetKeyStatus(void* runtime_ptr, int key, bool pressed) {
   auto* runtime = AsRuntime(runtime_ptr);
   if (!runtime) return;
-#if defined(__APPLE__)
   auto* button_handler = InputManager::ButtonHandler();
   if (!button_handler) {
     runtime->last_error = "input manager is not initialized";
@@ -519,23 +449,6 @@ void Aurora3DSBridge_SetKeyStatus(void* runtime_ptr, int key, bool pressed) {
   if (!consumed) {
     runtime->last_error = "button input was not consumed";
   }
-#else
-  auto* keyboard = InputCommon::GetKeyboard();
-  if (!keyboard) {
-    runtime->last_error = "keyboard input handler is not initialized";
-    return;
-  }
-  const int key_code = ToLinuxKeyboardKey(key);
-  if (key_code < 0) {
-    runtime->last_error = "unsupported key code";
-    return;
-  }
-  if (pressed) {
-    keyboard->PressKey(key_code);
-  } else {
-    keyboard->ReleaseKey(key_code);
-  }
-#endif
 }
 
 bool Aurora3DSBridge_GetVideoSpec(void*, EmulatorVideoSpec* out_spec) {

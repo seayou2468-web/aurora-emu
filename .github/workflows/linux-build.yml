@@ -1,0 +1,30 @@
+name: Linux Build
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config libsdl2-dev
+
+      - name: Build Linux binary
+        run: |
+          make clean
+          make -j"$(nproc)" AURORA_LINUX_3DS_ONLY=1
+          test -x build/nanoboyadvance-linux
+
+      - name: Upload Linux binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nanoboyadvance-linux
+          path: build/nanoboyadvance-linux
