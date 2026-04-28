@@ -45,6 +45,34 @@ targets:
         excludes:
           - "**/*.md"
           - "**/*.txt"
+    dependencies:
+      - framework: ../Dependicies/FLAC.xcframework
+      - framework: ../Dependicies/MoltenVK.xcframework
+      - framework: ../Dependicies/SDL3.xcframework
+      - framework: ../Dependicies/libavcodec.xcframework
+      - framework: ../Dependicies/libavfilter.xcframework
+      - framework: ../Dependicies/libavformat.xcframework
+      - framework: ../Dependicies/libavutil.xcframework
+      - framework: ../Dependicies/libboostcontext.xcframework
+      - framework: ../Dependicies/libboostiostreams.xcframework
+      - framework: ../Dependicies/libboostprogramoptions.xcframework
+      - framework: ../Dependicies/libboostserialization.xcframework
+      - framework: ../Dependicies/libdynarmic.xcframework
+      - framework: ../Dependicies/libenet.xcframework
+      - framework: ../Dependicies/libfaad2.xcframework
+      - framework: ../Dependicies/libfmt.xcframework
+      - framework: ../Dependicies/libgenericcodegen.xcframework
+      - framework: ../Dependicies/libglslang.xcframework
+      - framework: ../Dependicies/libmachineindependent.xcframework
+      - framework: ../Dependicies/libmcl.xcframework
+      - framework: ../Dependicies/libopenal.xcframework
+      - framework: ../Dependicies/libopus.xcframework
+      - framework: ../Dependicies/libsirit.xcframework
+      - framework: ../Dependicies/libsoundtouch.xcframework
+      - framework: ../Dependicies/libswresample.xcframework
+      - framework: ../Dependicies/libswscale.xcframework
+      - framework: ../Dependicies/libteakra.xcframework
+      - framework: ../Dependicies/ogg.xcframework
     settings:
       base:
         INFOPLIST_FILE: ../Config/Info.plist
