@@ -9,11 +9,17 @@ import Foundation
 import MetalKit
 import UIKit
 
+@inline(__always)
+private func checkedInt32(_ value: Int, context: StaticString) -> Int32 {
+    precondition(Int32.min...Int32.max ~= value, "\(context): \(value) is out of Int32 range")
+    return Int32(value)
+}
+
 public actor SystemSaveGame {
     var emulator: CytrusEmulator = .shared()
     
     public var systemLanguage: Int { .init(emulator.systemLanguage()) }
-    public func set(_ systemLanguage: Int) { emulator.set(systemLanguage: Int32(systemLanguage))}
+    public func set(_ systemLanguage: Int) { emulator.set(systemLanguage: checkedInt32(systemLanguage, context: "systemLanguage"))}
     
     public var username: String { emulator.username() }
     public func set(_ username: String) { emulator.set(username: username) }
@@ -286,11 +292,11 @@ extension Cytrus {
     }
     
     public func button(button: CytrusButtonType, player: Int, pressed: Bool) {
-        emulator.input(Int32(player), button: button.rawValue, pressed: pressed)
+        emulator.input(checkedInt32(player, context: "player"), button: button.rawValue, pressed: pressed)
     }
     
     public func input(_ slot: Int, _ button: CytrusButtonType, _ pressed: Bool) {
-        emulator.input(Int32(slot), button: button.rawValue, pressed: pressed)
+        emulator.input(checkedInt32(slot, context: "slot"), button: button.rawValue, pressed: pressed)
     }
     
     public func thumbstickMoved(_ thumbstick: CytrusAnalogType, _ x: Float, _ y: Float) {
