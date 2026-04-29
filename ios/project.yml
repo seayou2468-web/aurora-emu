@@ -50,6 +50,7 @@ settings:
       - "ENABLE_SOFTWARE_RENDERER=1"
     HEADER_SEARCH_PATHS:
       - "$(inherited)"
+      - "$(BUILT_PRODUCTS_DIR)/include"
       - "$(SRCROOT)/../src"
       - "$(SRCROOT)/../src/core"
       - "$(SRCROOT)/../src/core/bridge_cores/aurora3ds"
