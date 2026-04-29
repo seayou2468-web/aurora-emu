@@ -37,4 +37,13 @@ Pod::Spec.new do |s|
     '../../SharedDependencies/libswscale.xcframework',
   ]
   s.preserve_paths = ['../../SharedDependencies/**/*']
+
+  header_search_paths = s.vendored_frameworks.map do |framework|
+    "\"$(PODS_TARGET_SRCROOT)/#{framework}/**/Headers\""
+  end
+
+  s.pod_target_xcconfig = {
+    'HEADER_SEARCH_PATHS' => '$(inherited) ' + header_search_paths.join(' '),
+    'SYSTEM_HEADER_SEARCH_PATHS' => '$(inherited) ' + header_search_paths.join(' ')
+  }
 end
