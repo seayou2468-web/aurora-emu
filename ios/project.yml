@@ -28,8 +28,6 @@ packages:
   openssl:
     url: https://github.com/krzyzanowskim/OpenSSL
     branch: main
-  SharedDependencies:
-    path: ../SharedDependencies
 settings:
   base:
     PRODUCT_BUNDLE_IDENTIFIER: com.auroraemu.auroraswift
@@ -110,14 +108,31 @@ targets:
           - "**/*.md"
           - "**/*.txt"
     dependencies:
-      - package: SharedDependencies
-        product: SharedDependencies
       - package: zstd
         product: libzstd
       - package: zstd
         product: libseekable_format
       - package: openssl
         product: OpenSSL
+      - framework: ../SharedDependencies/lib_boostcontext.xcframework
+      - framework: ../SharedDependencies/lib_boostiostreams.xcframework
+      - framework: ../SharedDependencies/lib_boostprogramoptions.xcframework
+      - framework: ../SharedDependencies/lib_boostserialization.xcframework
+      - framework: ../SharedDependencies/lib_dynarmic.xcframework
+      - framework: ../SharedDependencies/lib_fmt.xcframework
+      - framework: ../SharedDependencies/lib_mcl.xcframework
+      - framework: ../SharedDependencies/lib_enet.xcframework
+      - framework: ../SharedDependencies/lib_faad2.xcframework
+      - framework: ../SharedDependencies/lib_genericcodegen.xcframework
+      - framework: ../SharedDependencies/lib_glslang.xcframework
+      - framework: ../SharedDependencies/lib_machineindependent.xcframework
+      - framework: ../SharedDependencies/lib_spirv.xcframework
+      - framework: ../SharedDependencies/lib_openal.xcframework
+      - framework: ../SharedDependencies/lib_opus.xcframework
+      - framework: ../SharedDependencies/lib_sdl3.xcframework
+      - framework: ../SharedDependencies/lib_sirit.xcframework
+      - framework: ../SharedDependencies/lib_soundtouch.xcframework
+      - framework: ../SharedDependencies/lib_teakra.xcframework
       - framework: ../SharedDependencies/MoltenVK.xcframework
       - framework: ../SharedDependencies/libavcodec.xcframework
       - framework: ../SharedDependencies/libavfilter.xcframework
