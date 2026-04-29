@@ -43,8 +43,10 @@ Pod::Spec.new do |s|
     "\"$(PODS_TARGET_SRCROOT)/#{framework}/**/Headers\""
   end
 
-  s.pod_target_xcconfig = {
+  xcconfig = {
     'HEADER_SEARCH_PATHS' => '$(inherited) ' + header_search_paths.join(' '),
     'SYSTEM_HEADER_SEARCH_PATHS' => '$(inherited) ' + header_search_paths.join(' ')
   }
+  s.pod_target_xcconfig = xcconfig
+  s.user_target_xcconfig = xcconfig
 end
