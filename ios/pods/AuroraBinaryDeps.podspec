@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
   s.author           = { 'Aurora' => 'dev@aurora.local' }
   s.source           = { :path => '.' }
   s.platform         = :ios, '26.0'
-  s.vendored_frameworks = [
+  vendored_frameworks = [
     '../../SharedDependencies/libboostcontext.xcframework',
     '../../SharedDependencies/libboostiostreams.xcframework',
     '../../SharedDependencies/libboostprogramoptions.xcframework',
@@ -36,9 +36,10 @@ Pod::Spec.new do |s|
     '../../SharedDependencies/libswresample.xcframework',
     '../../SharedDependencies/libswscale.xcframework',
   ]
+  s.vendored_frameworks = vendored_frameworks
   s.preserve_paths = ['../../SharedDependencies/**/*']
 
-  header_search_paths = s.vendored_frameworks.map do |framework|
+  header_search_paths = vendored_frameworks.map do |framework|
     "\"$(PODS_TARGET_SRCROOT)/#{framework}/**/Headers\""
   end
 
