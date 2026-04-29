@@ -39,6 +39,10 @@ jobs:
           echo "CPATH=${SHARED_DEPS_INCLUDE_PATHS}:${CPATH:-}" >> "${GITHUB_ENV}"
           echo "CPLUS_INCLUDE_PATH=${SHARED_DEPS_INCLUDE_PATHS}:${CPLUS_INCLUDE_PATH:-}" >> "${GITHUB_ENV}"
 
+      - name: Download SharedDependencies xcframeworks
+        run: |
+          ./SharedDependencies/download_xcframeworks.sh
+
       - name: Fetch third-party headers (Boost)
         run: |
           ./scripts/fetch_third_party_headers.sh
