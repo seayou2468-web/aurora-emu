@@ -9,6 +9,10 @@ Pod::Spec.new do |s|
   s.source           = { :path => '.' }
   s.platform         = :ios, '26.0'
   s.vendored_frameworks = [
+    '../../SharedDependencies/libgenericcodegen.xcframework',
+    '../../SharedDependencies/libglslang.xcframework',
+    '../../SharedDependencies/libmachineindependent.xcframework',
+    '../../SharedDependencies/libspirv.xcframework',
     '../../SharedDependencies/MoltenVK.xcframework',
     '../../SharedDependencies/libavcodec.xcframework',
     '../../SharedDependencies/libavformat.xcframework',
