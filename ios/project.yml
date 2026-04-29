@@ -114,25 +114,25 @@ targets:
         product: libseekable_format
       - package: openssl
         product: OpenSSL
-      - framework: ../SharedDependencies/lib_boostcontext.xcframework
-      - framework: ../SharedDependencies/lib_boostiostreams.xcframework
-      - framework: ../SharedDependencies/lib_boostprogramoptions.xcframework
-      - framework: ../SharedDependencies/lib_boostserialization.xcframework
-      - framework: ../SharedDependencies/lib_dynarmic.xcframework
-      - framework: ../SharedDependencies/lib_fmt.xcframework
-      - framework: ../SharedDependencies/lib_mcl.xcframework
-      - framework: ../SharedDependencies/lib_enet.xcframework
-      - framework: ../SharedDependencies/lib_faad2.xcframework
-      - framework: ../SharedDependencies/lib_genericcodegen.xcframework
-      - framework: ../SharedDependencies/lib_glslang.xcframework
-      - framework: ../SharedDependencies/lib_machineindependent.xcframework
-      - framework: ../SharedDependencies/lib_spirv.xcframework
-      - framework: ../SharedDependencies/lib_openal.xcframework
-      - framework: ../SharedDependencies/lib_opus.xcframework
-      - framework: ../SharedDependencies/lib_sdl3.xcframework
-      - framework: ../SharedDependencies/lib_sirit.xcframework
-      - framework: ../SharedDependencies/lib_soundtouch.xcframework
-      - framework: ../SharedDependencies/lib_teakra.xcframework
+      - framework: ../SharedDependencies/libboostcontext.xcframework
+      - framework: ../SharedDependencies/libboostiostreams.xcframework
+      - framework: ../SharedDependencies/libboostprogramoptions.xcframework
+      - framework: ../SharedDependencies/libboostserialization.xcframework
+      - framework: ../SharedDependencies/libdynarmic.xcframework
+      - framework: ../SharedDependencies/libfmt.xcframework
+      - framework: ../SharedDependencies/libmcl.xcframework
+      - framework: ../SharedDependencies/libenet.xcframework
+      - framework: ../SharedDependencies/libfaad2.xcframework
+      - framework: ../SharedDependencies/libgenericcodegen.xcframework
+      - framework: ../SharedDependencies/libglslang.xcframework
+      - framework: ../SharedDependencies/libmachineindependent.xcframework
+      - framework: ../SharedDependencies/libspirv.xcframework
+      - framework: ../SharedDependencies/libopenal.xcframework
+      - framework: ../SharedDependencies/libopus.xcframework
+      - framework: ../SharedDependencies/SDL3.xcframework
+      - framework: ../SharedDependencies/libsirit.xcframework
+      - framework: ../SharedDependencies/libsoundtouch.xcframework
+      - framework: ../SharedDependencies/libteakra.xcframework
       - framework: ../SharedDependencies/MoltenVK.xcframework
       - framework: ../SharedDependencies/libavcodec.xcframework
       - framework: ../SharedDependencies/libavfilter.xcframework
