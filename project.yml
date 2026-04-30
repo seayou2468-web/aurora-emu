@@ -65,6 +65,7 @@ targets:
           - '**/*.inl'
           - '**/*.yml'
           - '**/.*'
+          - '**/*.plist'
     settings:
       base:
         PRODUCT_NAME: AuroraIOS
