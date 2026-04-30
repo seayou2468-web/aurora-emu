@@ -312,7 +312,8 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
         var items = files.compactMap { url -> SwiftROMItem? in
             guard let launchTarget = launchTarget(for: url) else { return nil }
             let rv = try? url.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey])
-            return SwiftROMItem(url: url, title: url.deletingPathExtension().lastPathComponent, launchTarget: launchTarget, extensionLabel: url.pathExtension.lowercased(), coreType: coreType(for: url), accentColor: color(for: coreType(for: url)), addedDate: rv?.contentModificationDate ?? .distantPast, fileSizeBytes: Int64(rv?.fileSize ?? 0))
+            let mappedCoreType = coreType(for: url)
+            return SwiftROMItem(url: url, title: url.deletingPathExtension().lastPathComponent, launchTarget: launchTarget, extensionLabel: url.pathExtension.lowercased(), coreType: mappedCoreType, accentColor: color(for: mappedCoreType), addedDate: rv?.contentModificationDate ?? .distantPast, fileSizeBytes: Int64(rv?.fileSize ?? 0))
         }
         switch sortMode {
         case .name: items.sort { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
