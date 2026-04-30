@@ -17,6 +17,7 @@ settings:
       - $(SRCROOT)
       - $(SRCROOT)/Platforms/API
       - $(SRCROOT)/src
+      - $(SRCROOT)/src/core
     SWIFT_OBJC_BRIDGING_HEADER: Platforms/AuroraIOS/swift/Bridge/AuroraSwift-Bridging-Header.h
     OTHER_LDFLAGS:
       - -ObjC
