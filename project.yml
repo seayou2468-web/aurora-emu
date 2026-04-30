@@ -53,12 +53,14 @@ targets:
           - Views
           - Managers
           - Models
+          - a.txt
       - path: Platforms/AuroraIOS/swift
       - path: Platforms/API
-      - path: Config
-        excludes:
-          - Project.plist
       - path: src/core
+        excludes:
+          - '**/CMakeLists.txt'
+          - '**/*.md'
+          - '**/*.txt'
     settings:
       base:
         PRODUCT_NAME: AuroraIOS
