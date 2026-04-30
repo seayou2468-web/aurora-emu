@@ -155,11 +155,3 @@ struct ROMCardView: View {
         }
     }
 }
-
-struct EmulatorContainerView: UIViewControllerRepresentable {
-    let item: SwiftROMItem
-    func makeUIViewController(context: Context) -> SwiftEmulatorViewController {
-        SwiftEmulatorViewController(romURL: item.url, coreType: item.coreType)
-    }
-    func updateUIViewController(_ uiViewController: SwiftEmulatorViewController, context: Context) {}
-}

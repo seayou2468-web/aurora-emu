@@ -9,11 +9,11 @@ enum SwiftBIOSKey: String, Codable, CaseIterable {
     case gbc
 }
 
-final class SwiftDatabaseManager {
+@MainActor final class SwiftDatabaseManager {
     static let shared = SwiftDatabaseManager()
 
     private struct Payload: Codable {
-        var games: [SwiftGame]
+        var games: [SwiftROMItem]
         var biosPaths: [SwiftBIOSKey: String]
     }
 
@@ -25,14 +25,14 @@ final class SwiftDatabaseManager {
         self.payload = load()
     }
 
-    func games(systemIdentifier: String? = nil) -> [SwiftGame] {
+    func games(systemIdentifier: String? = nil) -> [SwiftROMItem] {
         queue.sync {
             guard let systemIdentifier else { return payload.games }
             return payload.games.filter { $0.systemIdentifier == systemIdentifier }
         }
     }
 
-    func upsertGame(_ game: SwiftGame) {
+    func upsertGame(_ game: SwiftROMItem) {
         queue.sync {
             if let i = payload.games.firstIndex(where: { $0.romPath == game.romPath }) { payload.games[i] = game }
             else { payload.games.append(game) }

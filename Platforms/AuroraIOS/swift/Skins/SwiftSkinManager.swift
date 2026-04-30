@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-final class SwiftSkinManager: ObservableObject {
+@MainActor final class SwiftSkinManager: ObservableObject {
     static let shared = SwiftSkinManager()
     @Published var availableSkins: [SwiftSkin] = []
 

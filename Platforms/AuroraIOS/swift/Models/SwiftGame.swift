@@ -1,11 +1,11 @@
 import Foundation
-import UIKit
+import SwiftUI
 
-enum SwiftLaunchTarget: String, Codable {
+enum SwiftLaunchTarget: String, Codable, Sendable {
     case coreSession
 }
 
-struct SwiftROMItem: Identifiable, Codable {
+struct SwiftROMItem: Identifiable, Codable, Sendable {
     let id: UUID
     let url: URL
     let title: String
@@ -37,7 +37,7 @@ struct SwiftROMItem: Identifiable, Codable {
     }
 }
 
-import SwiftUI
-extension SwiftROMItem {
-    // Add SwiftUI Color conversion helper if needed, but I'll use native SwiftUI Color in the model for simplicity in this modernized version
-}
+// Ensure EmulatorCoreType is Sendable (it's a C enum, usually it is, but for Swift 6 transparency:)
+extension EmulatorCoreType: @retroactive Sendable {}
+extension EmulatorKey: @retroactive Sendable {}
+extension EmulatorVideoSpec: @retroactive Sendable {}

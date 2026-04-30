@@ -42,7 +42,7 @@ struct SkinOverlayView: View {
                     .position(x: (button.x + button.width / 2) * geometry.size.width,
                               y: (button.y + button.height / 2) * geometry.size.height)
                     .onLongPressGesture(minimumDuration: 0, pressing: { pressing in
-                        bridge.setKey(EmulatorKey(rawValue: Int32(button.key)), pressed: pressing)
+                        bridge.setKey(EmulatorKey(rawValue: UInt32(button.key)), pressed: pressing)
                     }, perform: {})
                 }
             }

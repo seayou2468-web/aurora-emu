@@ -7,7 +7,7 @@ struct SaveStateMetadata: Codable {
     let gameTitle: String
 }
 
-final class SaveStateManager {
+@MainActor final class SaveStateManager {
     static let shared = SaveStateManager()
     private let fileManager = FileManager.default
 
