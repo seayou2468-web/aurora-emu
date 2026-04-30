@@ -1,62 +1,26 @@
 import Foundation
 
-@objc enum AuroraCoreType: Int {
-    case gba = 0
-    case nes = 1
-    case gb = 2
-    case nds = 3
-}
+final class AuroraCoreBridge {
+    private var handle: OpaquePointer?
 
-@objc enum AuroraCoreKey: Int {
-    case a = 0
-    case b = 1
-    case select = 2
-    case start = 3
-    case right = 4
-    case left = 5
-    case up = 6
-    case down = 7
-    case r = 8
-    case l = 9
-}
+    init?(coreType: EmulatorCoreType) {
+        guard let h = EmulatorCore_Create(coreType) else { return nil }
+        self.handle = OpaquePointer(h)
+    }
 
-@objcMembers
-final class AuroraCoreBridge: NSObject {
-    private let session: AURCoreSession
-
-    init(coreType: AuroraCoreType) {
-        let nativeType = Self.makeCoreType(from: coreType)
-        self.session = AURCoreSessionFactory.session(with: nativeType)
-        super.init()
+    deinit {
+        if let handle { EmulatorCore_Destroy(UnsafeMutablePointer<EmulatorCoreHandle>(handle)) }
     }
 
     func loadROM(url: URL) -> Bool {
-        session.loadROM(at: url)
-    }
-
-    func loadBIOS(path: String) -> Bool {
-        session.loadBIOS(atPath: path)
-    }
-
-    func setKey(_ key: AuroraCoreKey, pressed: Bool) {
-        let mapped = Self.makeKey(from: key)
-        session.setKey(mapped, pressed: pressed)
+        guard let handle else { return false }
+        return url.path.withCString { path in
+            EmulatorCore_LoadROMFromPath(UnsafeMutablePointer<EmulatorCoreHandle>(handle), path)
+        }
     }
 
     func stepFrame() {
-        session.stepFrame()
+        guard let handle else { return }
+        EmulatorCore_StepFrame(UnsafeMutablePointer<EmulatorCoreHandle>(handle))
     }
-
-    var lastError: String? {
-        session.lastError()
-    }
-
-    private static func makeCoreType(from coreType: AuroraCoreType) -> EmulatorCoreType {
-        EmulatorCoreType(rawValue: UInt32(coreType.rawValue))
-    }
-
-    private static func makeKey(from key: AuroraCoreKey) -> EmulatorKey {
-        EmulatorKey(rawValue: UInt32(key.rawValue))
-    }
-
 }

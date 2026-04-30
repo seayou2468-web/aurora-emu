@@ -33,22 +33,6 @@ targets:
     platform: iOS
     deploymentTarget: '15.0'
     sources:
-      - path: Platforms/AuroraIOS/objc
-        excludes:
-          - main.m
-          - AURAppDelegate.h
-          - AURAppDelegate.m
-          - AURSceneDelegate.h
-          - AURSceneDelegate.m
-          - Controllers/AURLibraryViewController.h
-          - Controllers/AURLibraryViewController.m
-          - Controllers/AURSettingsViewController.h
-          - Controllers/AURSettingsViewController.m
-          - Controllers/AURControllerSkinsViewController.h
-          - Controllers/AURControllerSkinsViewController.m
-          - Controllers/AURPreferredControllerSkinsViewController.h
-          - Controllers/AURPreferredControllerSkinsViewController.m
-          - a.txt
       - path: Platforms/AuroraIOS/swift
       - path: Platforms/API
       - path: src/core
