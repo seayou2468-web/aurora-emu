@@ -2,12 +2,15 @@
 
 @interface AURBridgeCoreAdapter () {
     EmulatorCoreHandle *_coreHandle;
+    BOOL _running;
     EmulatorVideoSpec _videoSpec;
 }
 @end
 
 @implementation AURBridgeCoreAdapter
 @synthesize coreType = _coreType;
+@synthesize running = _running;
+@synthesize videoSpec = _videoSpec;
 
 - (instancetype)initWithCoreType:(EmulatorCoreType)coreType {
     self = [super init];
