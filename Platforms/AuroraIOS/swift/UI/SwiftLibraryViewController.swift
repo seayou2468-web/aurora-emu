@@ -355,7 +355,10 @@ extension SwiftLibraryViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard filteredItems.indices.contains(indexPath.item) else { return }
         let item = filteredItems[indexPath.item]
-        let vc = AUREmulatorViewController(romurl: item.url, coreType: item.coreType)
+        guard let vc = AUREmulatorViewController(romurl: item.url, coreType: item.coreType) else {
+            showError(message: "エミュレータ画面の初期化に失敗しました。")
+            return
+        }
         vc.modalPresentationStyle = UIModalPresentationStyle.fullScreen
         present(vc, animated: true)
     }
