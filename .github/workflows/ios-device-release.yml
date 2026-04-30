@@ -1,0 +1,36 @@
+name: iOS Device Release Build
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-ios-device:
+    runs-on: macos-latest
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.1.1.app/Contents/Developer
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 26.1.1
+        run: |
+          if [ ! -d "$DEVELOPER_DIR" ]; then
+            echo "Xcode 26.1.1 is not available on this runner." >&2
+            ls /Applications | grep Xcode || true
+            exit 1
+          fi
+          sudo xcode-select -s "$DEVELOPER_DIR"
+          xcodebuild -version
+
+      - name: Build Release for iOS Device (no simulator)
+        run: |
+          xcodebuild \
+            -project AuroraIOS.xcodeproj \
+            -scheme AuroraIOS \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            build

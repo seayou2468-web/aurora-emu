@@ -7,11 +7,12 @@ private struct SwiftROMItem: Hashable {
     let title: String
     let launchTarget: SwiftLaunchTarget
     let subtitle: String
+    let coreType: EmulatorCoreType
     let accentColor: UIColor
 }
 
 private enum SwiftLaunchTarget: Hashable {
-    case aurora3ds
+    case coreSession
 }
 
 private enum SwiftSortMode {
@@ -121,7 +122,7 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
     private var dataSource: UICollectionViewDiffableDataSource<Int, UUID>!
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
     private lazy var searchController = UISearchController(searchResultsController: nil)
-    private let filterControl = UISegmentedControl(items: ["All", "Aurora3DS"])
+    private let filterControl = UISegmentedControl(items: ["All", "3DS", "NDS", "GBA", "GB", "NES"])
     private let summaryLabel = UILabel()
     private let emptyStateLabel = UILabel()
     private let emptyImportButton = UIButton(type: .system)
@@ -288,7 +289,11 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
         let keyword = (searchText ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         let filteredByCore = allItems.filter { item in
             switch filterControl.selectedSegmentIndex {
-            case 1: return item.launchTarget == .aurora3ds
+            case 1: return item.coreType == EMULATOR_CORE_TYPE_3DS
+            case 2: return item.coreType == EMULATOR_CORE_TYPE_NDS
+            case 3: return item.coreType == EMULATOR_CORE_TYPE_GBA
+            case 4: return item.coreType == EMULATOR_CORE_TYPE_GB
+            case 5: return item.coreType == EMULATOR_CORE_TYPE_NES
             default: return true
             }
         }
@@ -327,6 +332,7 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
                 title: fileURL.deletingPathExtension().lastPathComponent,
                 launchTarget: launchTarget,
                 subtitle: ext,
+                coreType: coreType(for: fileURL),
                 accentColor: color(for: launchTarget)
             )
         }
@@ -352,15 +358,40 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
     private func launchTarget(for url: URL) -> SwiftLaunchTarget? {
         switch url.pathExtension.lowercased() {
         case "3ds", "3dsx", "cci", "cxi":
-            return .aurora3ds
+            return .coreSession
+        case "nds", "srl", "dsi":
+            return .coreSession
+        case "gba":
+            return .coreSession
+        case "gb", "gbc":
+            return .coreSession
+        case "nes", "fds":
+            return .coreSession
         default:
             return nil
         }
     }
 
+    private func coreType(for url: URL) -> EmulatorCoreType {
+        switch url.pathExtension.lowercased() {
+        case "3ds", "3dsx", "cci", "cxi":
+            return EMULATOR_CORE_TYPE_3DS
+        case "nds", "srl", "dsi":
+            return EMULATOR_CORE_TYPE_NDS
+        case "gba":
+            return EMULATOR_CORE_TYPE_GBA
+        case "gb", "gbc":
+            return EMULATOR_CORE_TYPE_GB
+        case "nes", "fds":
+            return EMULATOR_CORE_TYPE_NES
+        default:
+            return EMULATOR_CORE_TYPE_3DS
+        }
+    }
+
     private func color(for launchTarget: SwiftLaunchTarget) -> UIColor {
         switch launchTarget {
-        case .aurora3ds: return .systemOrange
+        case .coreSession: return .systemOrange
         }
     }
 
@@ -409,12 +440,9 @@ extension SwiftLibraryViewController: UICollectionViewDelegate {
         guard filteredItems.indices.contains(indexPath.item) else { return }
         let item = filteredItems[indexPath.item]
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
-        switch item.launchTarget {
-        case .aurora3ds:
-            let vc = AUR3DSEmulatorViewController(romURL: item.url)
-            vc.modalPresentationStyle = UIModalPresentationStyle.fullScreen
-            present(vc, animated: true)
-        }
+        let vc = AUREmulatorViewController(romURL: item.url, coreType: item.coreType)
+        vc.modalPresentationStyle = UIModalPresentationStyle.fullScreen
+        present(vc, animated: true)
     }
 
     func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {

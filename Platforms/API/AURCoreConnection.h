@@ -10,9 +10,7 @@ typedef enum AURCoreConnectionKind {
 } AURCoreConnectionKind;
 
 static inline AURCoreConnectionKind AURCoreConnectionKindForCoreName(const char* core_name) {
-  if (core_name != NULL && strcmp(core_name, "aurora3ds") == 0) {
-    return AUR_CORE_CONNECTION_BRIDGE;
-  }
+  (void)core_name;
   return AUR_CORE_CONNECTION_MODULE_ADAPTER;
 }
 
