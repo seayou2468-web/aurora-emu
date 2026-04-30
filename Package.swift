@@ -12,8 +12,7 @@ let package = Package(
             name: "AuroraIOSApp",
             path: "Platforms/AuroraIOS/swift",
             exclude: ["Bridge/AuroraSwift-Bridging-Header.h"],
-            sources: ["App", "UI", "Bridge"],
-            swiftSettings: [.unsafeFlags(["-Xfrontend", "-enable-experimental-cxx-interop"])]
+            sources: ["App", "UI", "Bridge"]
         )
     ]
 )
