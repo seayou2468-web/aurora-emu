@@ -49,7 +49,7 @@ struct SkinOverlayView: View {
             .onAppear {
                 updateOrientation(geometry: geometry)
             }
-            .onChange(of: geometry.size) { _ in
+            .onChange(of: geometry.size) { oldValue, newValue in
                 updateOrientation(geometry: geometry)
             }
         }

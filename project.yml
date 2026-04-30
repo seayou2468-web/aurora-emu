@@ -34,7 +34,8 @@ targets:
     sources:
       - path: Platforms/AuroraIOS/swift
       - path: Platforms/API
-      - path: src/core
+      - path: src/core/api
+      - path: src/core/module_cores
         excludes:
           - '**/CMakeLists.txt'
           - '**/*.md'
@@ -44,7 +45,6 @@ targets:
           - '**/*.yml'
           - '**/.*'
           - '**/*.plist'
-          - bridge_cores
     settings:
       base:
         PRODUCT_NAME: AuroraIOS
