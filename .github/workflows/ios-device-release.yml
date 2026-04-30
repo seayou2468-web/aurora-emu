@@ -11,6 +11,7 @@ jobs:
     runs-on: macos-latest
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.1.1.app/Contents/Developer
+      DERIVED_DATA: ${{ github.workspace }}/DerivedData
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,11 +26,41 @@ jobs:
           sudo xcode-select -s "$DEVELOPER_DIR"
           xcodebuild -version
 
-      - name: Build Release for iOS Device from Swift Package (no xcodeproj)
+      - name: Build unsigned .app for iOS Device from Swift Package
         run: |
           xcodebuild \
             -scheme AuroraIOSApp \
             -configuration Release \
             -destination 'generic/platform=iOS' \
+            -derivedDataPath "$DERIVED_DATA" \
             CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
             build
+
+      - name: Package unsigned IPA manually (Payload zip -> .ipa)
+        run: |
+          set -euo pipefail
+          APP_PATH=$(find "$DERIVED_DATA/Build/Products" -type d -path '*/Release-iphoneos/*.app' | head -n 1)
+          if [ -z "${APP_PATH:-}" ]; then
+            echo "Release-iphoneos 内に .app が見つかりませんでした" >&2
+            find "$DERIVED_DATA/Build/Products" -maxdepth 4 -type d || true
+            exit 1
+          fi
+
+          ARTIFACTS_DIR="$GITHUB_WORKSPACE/artifacts"
+          PAYLOAD_DIR="$ARTIFACTS_DIR/Payload"
+          mkdir -p "$PAYLOAD_DIR"
+          cp -R "$APP_PATH" "$PAYLOAD_DIR/"
+
+          pushd "$ARTIFACTS_DIR" >/dev/null
+          zip -r AuroraIOSApp-unsigned.ipa Payload
+          popd >/dev/null
+
+          echo "IPA_PATH=$ARTIFACTS_DIR/AuroraIOSApp-unsigned.ipa" >> "$GITHUB_ENV"
+
+      - name: Upload unsigned IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AuroraIOSApp-unsigned-ipa
+          path: ${{ env.IPA_PATH }}
+          if-no-files-found: error
