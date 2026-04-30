@@ -73,9 +73,7 @@ struct SwiftLibraryView: View {
             }
         }
         .onAppear {
-            Task {
-                await loadLibrary()
-            }
+            loadLibrary()
         }
     }
 
@@ -99,10 +97,10 @@ struct SwiftLibraryView: View {
             let ext = url.pathExtension.lowercased()
             let coreType: EmulatorCoreType
             switch ext {
-            case "nds", "srl", "dsi": coreType = .NDS
-            case "gba": coreType = .GBA
-            case "gb", "gbc": coreType = .GB
-            case "nes", "fds": coreType = .NES
+            case "nds", "srl", "dsi": coreType = EMULATOR_CORE_TYPE_NDS
+            case "gba": coreType = EMULATOR_CORE_TYPE_GBA
+            case "gb", "gbc": coreType = EMULATOR_CORE_TYPE_GB
+            case "nes", "fds": coreType = EMULATOR_CORE_TYPE_NES
             default: return nil
             }
 

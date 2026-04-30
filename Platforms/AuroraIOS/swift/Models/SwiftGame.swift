@@ -21,7 +21,7 @@ struct SwiftROMItem: Identifiable, Codable, Sendable {
         case EMULATOR_CORE_TYPE_GBA: return .purple
         case EMULATOR_CORE_TYPE_GB: return .green
         case EMULATOR_CORE_TYPE_NES: return .red
-        @unknown default: return .gray
+        default: return .gray
         }
     }
 

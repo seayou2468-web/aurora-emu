@@ -1,20 +1,10 @@
 import Foundation
 
-enum SwiftBIOSKey: String, Codable, CaseIterable, Sendable {
-    case ndsArm9 = "nds_arm9"
-    case ndsArm7 = "nds_arm7"
-    case ndsFirmware = "nds_firmware"
-    case gba
-    case gb
-    case gbc
-}
-
 @MainActor final class SwiftDatabaseManager {
     static let shared = SwiftDatabaseManager()
 
     private struct Payload: Codable {
         var games: [SwiftROMItem]
-        var biosPaths: [SwiftBIOSKey: String]
     }
 
     private var payload: Payload
@@ -48,8 +38,8 @@ enum SwiftBIOSKey: String, Codable, CaseIterable, Sendable {
     }
 
     private static func staticLoad() -> Payload {
-        guard let data = try? Data(contentsOf: dbURL) else { return Payload(games: [], biosPaths: [:]) }
-        return (try? JSONDecoder().decode(Payload.self, from: data)) ?? Payload(games: [], biosPaths: [:])
+        guard let data = try? Data(contentsOf: dbURL) else { return Payload(games: []) }
+        return (try? JSONDecoder().decode(Payload.self, from: data)) ?? Payload(games: [])
     }
 
     private func save() {
