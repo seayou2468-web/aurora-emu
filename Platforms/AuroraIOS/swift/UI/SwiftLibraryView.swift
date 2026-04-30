@@ -72,7 +72,11 @@ struct SwiftLibraryView: View {
                 }
             }
         }
-        .onAppear(perform: loadLibrary)
+        .onAppear {
+            Task {
+                await loadLibrary()
+            }
+        }
     }
 
     var filteredItems: [SwiftROMItem] {
@@ -87,7 +91,7 @@ struct SwiftLibraryView: View {
         return url
     }
 
-    func loadLibrary() {
+    @MainActor func loadLibrary() {
         let folder = romFolderURL()
         guard let files = try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: [.contentModificationDateKey, .fileSizeKey]) else { return }
 
@@ -95,10 +99,10 @@ struct SwiftLibraryView: View {
             let ext = url.pathExtension.lowercased()
             let coreType: EmulatorCoreType
             switch ext {
-            case "nds", "srl", "dsi": coreType = EMULATOR_CORE_TYPE_NDS
-            case "gba": coreType = EMULATOR_CORE_TYPE_GBA
-            case "gb", "gbc": coreType = EMULATOR_CORE_TYPE_GB
-            case "nes", "fds": coreType = EMULATOR_CORE_TYPE_NES
+            case "nds", "srl", "dsi": coreType = .NDS
+            case "gba": coreType = .GBA
+            case "gb", "gbc": coreType = .GB
+            case "nes", "fds": coreType = .NES
             default: return nil
             }
 
@@ -113,7 +117,7 @@ struct SwiftLibraryView: View {
         }
     }
 
-    func importROMs(urls: [URL]) {
+    @MainActor func importROMs(urls: [URL]) {
         let target = romFolderURL()
         for src in urls {
             let dst = target.appendingPathComponent(src.lastPathComponent)

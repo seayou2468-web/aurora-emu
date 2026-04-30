@@ -21,7 +21,7 @@ struct SwiftROMItem: Identifiable, Codable, Sendable {
         case EMULATOR_CORE_TYPE_GBA: return .purple
         case EMULATOR_CORE_TYPE_GB: return .green
         case EMULATOR_CORE_TYPE_NES: return .red
-        default: return .gray
+        @unknown default: return .gray
         }
     }
 
@@ -37,7 +37,19 @@ struct SwiftROMItem: Identifiable, Codable, Sendable {
     }
 }
 
-// Ensure EmulatorCoreType is Sendable (it's a C enum, usually it is, but for Swift 6 transparency:)
-extension EmulatorCoreType: @retroactive Sendable {}
-extension EmulatorKey: @retroactive Sendable {}
-extension EmulatorVideoSpec: @retroactive Sendable {}
+extension EmulatorCoreType: Codable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let raw = try container.decode(UInt32.self)
+        self.init(rawValue: raw)
+    }
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(self.rawValue)
+    }
+}
+
+extension EmulatorCoreType: @unchecked Sendable {}
+extension EmulatorKey: @unchecked Sendable {}
+extension EmulatorVideoSpec: @unchecked Sendable {}
+extension EmulatorPixelFormat: @unchecked Sendable {}
