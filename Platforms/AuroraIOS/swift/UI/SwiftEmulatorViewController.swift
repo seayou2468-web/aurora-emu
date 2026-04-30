@@ -4,6 +4,7 @@ final class SwiftEmulatorViewController: UIViewController, SwiftExternalControll
     private let romURL: URL
     private let coreType: EmulatorCoreType
     private var core: AuroraCoreBridge?
+    private let overlayView = SwiftControllerOverlayView()
 
     init(romURL: URL, coreType: EmulatorCoreType) {
         self.romURL = romURL
@@ -16,6 +17,8 @@ final class SwiftEmulatorViewController: UIViewController, SwiftExternalControll
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
+        overlayView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(overlayView)
         title = romURL.deletingPathExtension().lastPathComponent
 
         let label = UILabel()
@@ -26,6 +29,10 @@ final class SwiftEmulatorViewController: UIViewController, SwiftExternalControll
         label.text = "エミュレータ初期化中..."
         view.addSubview(label)
         NSLayoutConstraint.activate([
+            overlayView.topAnchor.constraint(equalTo: view.topAnchor),
+            overlayView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            overlayView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            overlayView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
@@ -34,6 +41,8 @@ final class SwiftEmulatorViewController: UIViewController, SwiftExternalControll
         self.core = core
         SwiftExternalControllerManager.shared.delegate = self
         SwiftExternalControllerManager.shared.startMonitoring()
+        let systemID = String(coreType.rawValue)
+        overlayView.apply(skin: SwiftSkinManager.shared.skin(for: systemID))
         label.text = core.loadROM(url: romURL) ? "ROMをロードしました" : "ROMロードに失敗しました"
     }
 

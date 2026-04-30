@@ -270,7 +270,17 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
         present(alert, animated: true)
     }
 
-    @objc private func showSettings() { reloadLibrary() }
+    @objc private func showSettings() {
+        let systemID: String
+        switch filterControl.selectedSegmentIndex {
+        case 1: systemID = String(EMULATOR_CORE_TYPE_NDS.rawValue)
+        case 2: systemID = String(EMULATOR_CORE_TYPE_GBA.rawValue)
+        case 3: systemID = String(EMULATOR_CORE_TYPE_GB.rawValue)
+        case 4: systemID = String(EMULATOR_CORE_TYPE_NES.rawValue)
+        default: systemID = String(EMULATOR_CORE_TYPE_GBA.rawValue)
+        }
+        navigationController?.pushViewController(SwiftSkinSettingsViewController(systemID: systemID), animated: true)
+    }
     @objc private func showSortMenu() {
         let alert = UIAlertController(title: "並び順", message: nil, preferredStyle: .actionSheet)
         SwiftSortMode.allCases.forEach { mode in
@@ -356,11 +366,8 @@ extension SwiftLibraryViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard filteredItems.indices.contains(indexPath.item) else { return }
         let item = filteredItems[indexPath.item]
-        guard let vc = AUREmulatorLauncher.makeEmulatorViewController(withROMURL: item.url, coreType: item.coreType) else {
-            showError(message: "エミュレータ画面の初期化に失敗しました。")
-            return
-        }
-        vc.modalPresentationStyle = UIModalPresentationStyle.fullScreen
+        let vc = SwiftEmulatorViewController(romURL: item.url, coreType: item.coreType)
+        vc.modalPresentationStyle = .fullScreen
         present(vc, animated: true)
     }
 }
