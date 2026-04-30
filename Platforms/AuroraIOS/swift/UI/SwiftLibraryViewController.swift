@@ -356,7 +356,7 @@ extension SwiftLibraryViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard filteredItems.indices.contains(indexPath.item) else { return }
         let item = filteredItems[indexPath.item]
-        guard let vc = AUREmulatorViewController(romurl: item.url, coreType: item.coreType) else {
+        guard let vc = AUREmulatorLauncher.makeEmulatorViewController(withROMURL: item.url, coreType: item.coreType) else {
             showError(message: "エミュレータ画面の初期化に失敗しました。")
             return
         }
