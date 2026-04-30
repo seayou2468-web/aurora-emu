@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "core_adapter.hpp"
+#include "../module_cores/core_adapter.hpp"
 
 struct EmulatorCoreHandle {
   const core::CoreAdapter* adapter = nullptr;
