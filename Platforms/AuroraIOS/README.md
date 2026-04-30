@@ -4,12 +4,10 @@
 - `swift/`: 新規のSwift実装。
   - `Bridge/`: Swift <-> Core ブリッジ層。
   - `App/`: Swift版アプリのエントリーポイント。
-  - `UI/`: Swift版UI（グラスモーフィックUI、ROMインポート/検索/フィルタ/起動/削除を実装。現在は Aurora3DS のみ有効化）。
+  - `UI/`: Swift版UI（ROMインポート/検索/フィルタ/起動/削除を実装）。
 - `../API/`: iOS/Linux共通で使うコアAPI参照ヘッダ。
 
 `objc/Bridge/AURCoreSessionFactory` がコア種類に応じて接続方式を選択し、
 `objc/Bridge/AURModuleCoreAdapter`（module接続型）または
 `objc/Bridge/AURBridgeCoreAdapter`（bridge接続型）を言語版に依存せず利用します。
 
-Aurora3DS の実機ビルドでは、`ios/pods/AuroraBinaryDeps.podspec` で
-Vulkan/FFmpeg/Boost/Audio 系の xcframework 依存をまとめて解決します。

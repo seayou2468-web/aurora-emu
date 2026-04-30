@@ -66,6 +66,7 @@ targets:
           - '**/*.yml'
           - '**/.*'
           - '**/*.plist'
+          - bridge_cores
     settings:
       base:
         PRODUCT_NAME: AuroraIOS
