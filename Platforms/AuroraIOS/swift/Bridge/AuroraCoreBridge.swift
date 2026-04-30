@@ -52,19 +52,11 @@ final class AuroraCoreBridge: NSObject {
     }
 
     private func makeCoreType(from coreType: AuroraCoreType) -> EmulatorCoreType {
-#if SWIFT_PACKAGE
-        UInt32(coreType.rawValue)
-#else
         EmulatorCoreType(rawValue: UInt32(coreType.rawValue))
-#endif
     }
 
     private func makeKey(from key: AuroraCoreKey) -> EmulatorKey {
-#if SWIFT_PACKAGE
-        UInt32(key.rawValue)
-#else
         EmulatorKey(rawValue: UInt32(key.rawValue))
-#endif
     }
 
 }
