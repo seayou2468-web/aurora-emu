@@ -355,8 +355,8 @@ extension SwiftLibraryViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard filteredItems.indices.contains(indexPath.item) else { return }
         let item = filteredItems[indexPath.item]
-        let vc = AUREmulatorViewController(romURL: item.url, coreType: item.coreType)
-        vc.modalPresentationStyle = .fullScreen
+        let vc = AUREmulatorViewController(romurl: item.url, coreType: item.coreType)
+        vc.modalPresentationStyle = UIModalPresentationStyle.fullScreen
         present(vc, animated: true)
     }
 }
