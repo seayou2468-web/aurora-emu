@@ -204,10 +204,13 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
 
         emptyImportButton.setTitle("ROMをインポート", for: .normal)
         emptyImportButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
-        emptyImportButton.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.25)
         emptyImportButton.tintColor = .white
         emptyImportButton.layer.cornerRadius = 12
-        emptyImportButton.contentEdgeInsets = UIEdgeInsets(top: 10, left: 16, bottom: 10, right: 16)
+        var buttonConfig = UIButton.Configuration.filled()
+        buttonConfig.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16)
+        buttonConfig.baseBackgroundColor = UIColor.systemBlue.withAlphaComponent(0.25)
+        buttonConfig.baseForegroundColor = .white
+        emptyImportButton.configuration = buttonConfig
         emptyImportButton.addTarget(self, action: #selector(importROM), for: .touchUpInside)
         emptyImportButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(emptyImportButton)
