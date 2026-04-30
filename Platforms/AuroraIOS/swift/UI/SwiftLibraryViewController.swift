@@ -6,18 +6,27 @@ private struct SwiftROMItem: Hashable {
     let url: URL
     let title: String
     let launchTarget: SwiftLaunchTarget
-    let subtitle: String
+    let extensionLabel: String
     let coreType: EmulatorCoreType
     let accentColor: UIColor
+    let addedDate: Date
+    let fileSizeBytes: Int64
 }
 
 private enum SwiftLaunchTarget: Hashable {
     case coreSession
 }
 
-private enum SwiftSortMode {
-    case name
-    case recentlyAdded
+private enum SwiftSortMode: String, CaseIterable {
+    case name = "名前順"
+    case recentlyAdded = "追加日順"
+    case fileSize = "サイズ順"
+}
+
+private enum SwiftLayoutMode: String {
+    case compact = "コンパクト"
+    case cozy = "標準"
+    case poster = "ポスター"
 }
 
 private final class SwiftROMCardCell: UICollectionViewCell {
@@ -26,6 +35,7 @@ private final class SwiftROMCardCell: UICollectionViewCell {
     private let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
     private let titleLabel = UILabel()
     private let subtitleLabel = UILabel()
+    private let metaLabel = UILabel()
     private let coreLabel = UILabel()
     private let playIcon = UIImageView(image: UIImage(systemName: "play.circle.fill"))
 
@@ -48,7 +58,9 @@ private final class SwiftROMCardCell: UICollectionViewCell {
         titleLabel.font = .systemFont(ofSize: 19, weight: .bold)
         titleLabel.textColor = .white
         subtitleLabel.font = .systemFont(ofSize: 13, weight: .medium)
-        subtitleLabel.textColor = UIColor.white.withAlphaComponent(0.82)
+        subtitleLabel.textColor = UIColor.white.withAlphaComponent(0.88)
+        metaLabel.font = .monospacedSystemFont(ofSize: 11, weight: .medium)
+        metaLabel.textColor = UIColor.white.withAlphaComponent(0.72)
         coreLabel.font = .monospacedSystemFont(ofSize: 11, weight: .semibold)
         coreLabel.textColor = .white
         coreLabel.backgroundColor = UIColor.white.withAlphaComponent(0.2)
@@ -58,7 +70,7 @@ private final class SwiftROMCardCell: UICollectionViewCell {
         playIcon.tintColor = .white
         playIcon.contentMode = .scaleAspectFit
 
-        let textStack = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
+        let textStack = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel, metaLabel])
         textStack.axis = .vertical
         textStack.spacing = 6
 
@@ -67,7 +79,7 @@ private final class SwiftROMCardCell: UICollectionViewCell {
 
         let rootStack = UIStackView(arrangedSubviews: [topRow, textStack])
         rootStack.axis = .vertical
-        rootStack.spacing = 16
+        rootStack.spacing = 14
         rootStack.translatesAutoresizingMaskIntoConstraints = false
         blurView.contentView.addSubview(rootStack)
 
@@ -95,19 +107,28 @@ private final class SwiftROMCardCell: UICollectionViewCell {
 
     func configure(with item: SwiftROMItem) {
         titleLabel.text = item.title
-        subtitleLabel.text = item.subtitle
-        coreLabel.text = "  \(item.subtitle.uppercased())  "
+        subtitleLabel.text = item.extensionLabel.uppercased()
+        metaLabel.text = ByteCountFormatter.string(fromByteCount: item.fileSizeBytes, countStyle: .file)
+        coreLabel.text = "  \(coreDisplayName(for: item.coreType))  "
 
         let gradient = CAGradientLayer()
         gradient.name = "AuroraGradient"
         gradient.frame = bounds
-        gradient.colors = [
-            item.accentColor.withAlphaComponent(0.68).cgColor,
-            UIColor.black.withAlphaComponent(0.82).cgColor
-        ]
+        gradient.colors = [item.accentColor.withAlphaComponent(0.68).cgColor, UIColor.black.withAlphaComponent(0.82).cgColor]
         gradient.startPoint = CGPoint(x: 0, y: 0)
         gradient.endPoint = CGPoint(x: 1, y: 1)
         contentView.layer.insertSublayer(gradient, at: 0)
+    }
+
+    private func coreDisplayName(for coreType: EmulatorCoreType) -> String {
+        switch coreType {
+        case EMULATOR_CORE_TYPE_3DS: return "3DS"
+        case EMULATOR_CORE_TYPE_NDS: return "NDS"
+        case EMULATOR_CORE_TYPE_GBA: return "GBA"
+        case EMULATOR_CORE_TYPE_GB: return "GB"
+        case EMULATOR_CORE_TYPE_NES: return "NES"
+        default: return "CORE"
+        }
     }
 
     override func layoutSubviews() {
@@ -128,6 +149,7 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
     private let emptyImportButton = UIButton(type: .system)
     private let romDirectoryName = "AuroraROMs"
     private var sortMode: SwiftSortMode = .name
+    private var layoutMode: SwiftLayoutMode = .cozy
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -136,17 +158,18 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
     }
 
     private func configureUI() {
-        title = "Aurora Swift"
+        title = "Aurora Multi-Emu"
         navigationController?.navigationBar.prefersLargeTitles = true
         view.backgroundColor = .black
 
         navigationItem.rightBarButtonItems = [
-            UIBarButtonItem(image: UIImage(systemName: "square.and.arrow.down"), style: .plain, target: self, action: #selector(importROM)),
+            UIBarButtonItem(image: UIImage(systemName: "plus.circle.fill"), style: .plain, target: self, action: #selector(importROM)),
             UIBarButtonItem(image: UIImage(systemName: "arrow.clockwise"), style: .plain, target: self, action: #selector(reloadLibrary))
         ]
         navigationItem.leftBarButtonItems = [
+            UIBarButtonItem(image: UIImage(systemName: "square.grid.2x2"), style: .plain, target: self, action: #selector(showLayoutMenu)),
             UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal.decrease.circle"), style: .plain, target: self, action: #selector(showSortMenu)),
-            UIBarButtonItem(image: UIImage(systemName: "gearshape"), style: .plain, target: self, action: #selector(showSettings))
+            UIBarButtonItem(image: UIImage(systemName: "ellipsis.circle"), style: .plain, target: self, action: #selector(showSettings))
         ]
 
         searchController.searchBar.placeholder = "ゲーム検索"
@@ -172,7 +195,7 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
         summaryLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(summaryLabel)
 
-        emptyStateLabel.text = "ROMがありません。右上のインポートから追加してください。"
+        emptyStateLabel.text = "ROMがありません。右上の追加ボタンからインポートしてください。"
         emptyStateLabel.textColor = .secondaryLabel
         emptyStateLabel.textAlignment = .center
         emptyStateLabel.numberOfLines = 0
@@ -193,16 +216,12 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
             filterControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
             filterControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             filterControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-
             summaryLabel.topAnchor.constraint(equalTo: filterControl.bottomAnchor, constant: 10),
             summaryLabel.leadingAnchor.constraint(equalTo: filterControl.leadingAnchor, constant: 4),
-            summaryLabel.trailingAnchor.constraint(equalTo: filterControl.trailingAnchor),
-
             collectionView.topAnchor.constraint(equalTo: summaryLabel.bottomAnchor, constant: 8),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-
             emptyStateLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             emptyStateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 30),
             emptyStateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -30),
@@ -210,80 +229,60 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
             emptyImportButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
 
-        dataSource = UICollectionViewDiffableDataSource<Int, UUID>(collectionView: collectionView) { [weak self] collectionView, indexPath, itemID in
-            guard let self, let item = self.filteredItems.first(where: { $0.id == itemID }) else { return nil }
-            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: SwiftROMCardCell.reuseIdentifier, for: indexPath) as? SwiftROMCardCell else {
-                return nil
-            }
-            cell.configure(with: item)
+        dataSource = UICollectionViewDiffableDataSource<Int, UUID>(collectionView: collectionView) { [weak self] cv, ip, id in
+            guard let self, let item = self.filteredItems.first(where: { $0.id == id }) else { return nil }
+            let cell = cv.dequeueReusableCell(withReuseIdentifier: SwiftROMCardCell.reuseIdentifier, for: ip) as? SwiftROMCardCell
+            cell?.configure(with: item)
             return cell
         }
     }
 
     private func createLayout() -> UICollectionViewLayout {
         UICollectionViewCompositionalLayout { _, env in
-            let isWide = env.container.effectiveContentSize.width > 700
-            let columns = isWide ? 2 : 1
-            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0 / CGFloat(columns)),
-                                                  heightDimension: .absolute(140))
+            let width = env.container.effectiveContentSize.width
+            let columns: Int
+            let height: CGFloat
+            switch self.layoutMode {
+            case .compact: columns = width > 700 ? 3 : 2; height = 118
+            case .cozy: columns = width > 700 ? 2 : 1; height = 142
+            case .poster: columns = width > 700 ? 2 : 1; height = 188
+            }
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0 / CGFloat(columns)), heightDimension: .absolute(height))
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
             item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
-            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                   heightDimension: .absolute(140))
+            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(height))
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: columns)
             return NSCollectionLayoutSection(group: group)
         }
     }
 
-    @objc private func showSettings() {
-        let alert = UIAlertController(title: "Aurora Swift", message: "Swift UI Library Settings", preferredStyle: .actionSheet)
-        alert.addAction(UIAlertAction(title: "ライブラリ再読み込み", style: .default) { [weak self] _ in
-            self?.reloadLibrary()
-        })
-        alert.addAction(UIAlertAction(title: "検索をクリア", style: .default) { [weak self] _ in
-            self?.searchController.searchBar.text = nil
-            self?.applyFilter(searchText: nil)
-        })
-        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel))
-        if let popover = alert.popoverPresentationController {
-            popover.barButtonItem = navigationItem.leftBarButtonItems?.last
+    @objc private func showLayoutMenu() {
+        let alert = UIAlertController(title: "表示密度", message: nil, preferredStyle: .actionSheet)
+        for mode in [SwiftLayoutMode.compact, .cozy, .poster] {
+            alert.addAction(UIAlertAction(title: mode.rawValue, style: .default) { [weak self] _ in
+                self?.layoutMode = mode
+                self?.collectionView.setCollectionViewLayout(self?.createLayout() ?? UICollectionViewFlowLayout(), animated: true)
+            })
         }
+        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel))
         present(alert, animated: true)
     }
 
+    @objc private func showSettings() { reloadLibrary() }
     @objc private func showSortMenu() {
         let alert = UIAlertController(title: "並び順", message: nil, preferredStyle: .actionSheet)
-        alert.addAction(UIAlertAction(title: "名前順", style: .default) { [weak self] _ in
-            self?.sortMode = .name
-            self?.reloadLibrary()
-        })
-        alert.addAction(UIAlertAction(title: "最近追加順", style: .default) { [weak self] _ in
-            self?.sortMode = .recentlyAdded
-            self?.reloadLibrary()
-        })
-        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel))
-        if let popover = alert.popoverPresentationController {
-            popover.barButtonItem = navigationItem.leftBarButtonItems?.first
+        SwiftSortMode.allCases.forEach { mode in
+            alert.addAction(UIAlertAction(title: mode.rawValue, style: .default) { [weak self] _ in self?.sortMode = mode; self?.reloadLibrary() })
         }
+        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel))
         present(alert, animated: true)
     }
-
-    @objc private func filterChanged() {
-        applyFilter(searchText: searchController.searchBar.text)
-    }
-
+    @objc private func filterChanged() { applyFilter(searchText: searchController.searchBar.text) }
     @objc private func importROM() {
-        let supported: [UTType] = [.data]
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: supported, asCopy: true)
-        picker.delegate = self
-        picker.allowsMultipleSelection = true
-        present(picker, animated: true)
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.data], asCopy: true)
+        picker.delegate = self; picker.allowsMultipleSelection = true; present(picker, animated: true)
     }
-
-    @objc private func reloadLibrary() {
-        allItems = loadROMItems()
-        applyFilter(searchText: searchController.searchBar.text)
-    }
+    @objc private func reloadLibrary() { allItems = loadROMItems(); applyFilter(searchText: searchController.searchBar.text) }
 
     private func applyFilter(searchText: String?) {
         let keyword = (searchText ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
@@ -297,167 +296,66 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
             default: return true
             }
         }
-
-        if keyword.isEmpty {
-            filteredItems = filteredByCore
-        } else {
-            filteredItems = filteredByCore.filter { $0.title.localizedCaseInsensitiveContains(keyword) }
-        }
-
+        filteredItems = keyword.isEmpty ? filteredByCore : filteredByCore.filter { $0.title.localizedCaseInsensitiveContains(keyword) }
         var snapshot = NSDiffableDataSourceSnapshot<Int, UUID>()
-        snapshot.appendSections([0])
-        snapshot.appendItems(filteredItems.map(\.id), toSection: 0)
+        snapshot.appendSections([0]); snapshot.appendItems(filteredItems.map(\.id), toSection: 0)
         dataSource.apply(snapshot, animatingDifferences: true)
-
-        summaryLabel.text = "\(filteredItems.count) games ・ \(displaySortMode())"
-        let isEmpty = filteredItems.isEmpty
-        emptyStateLabel.isHidden = !isEmpty
-        emptyImportButton.isHidden = !isEmpty
+        summaryLabel.text = "\(filteredItems.count)件 / 全\(allItems.count)件 ・ \(sortMode.rawValue)"
+        emptyStateLabel.isHidden = !filteredItems.isEmpty
+        emptyImportButton.isHidden = !filteredItems.isEmpty
     }
 
     private func loadROMItems() -> [SwiftROMItem] {
-        let fm = FileManager.default
-        let folder = romFolderURL()
-        try? fm.createDirectory(at: folder, withIntermediateDirectories: true)
-
-        guard let files = try? fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: [.contentModificationDateKey], options: [.skipsHiddenFiles]) else {
-            return []
+        let folder = romFolderURL(); try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        guard let files = try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: [.contentModificationDateKey, .fileSizeKey], options: [.skipsHiddenFiles]) else { return [] }
+        var items = files.compactMap { url -> SwiftROMItem? in
+            guard let launchTarget = launchTarget(for: url) else { return nil }
+            let rv = try? url.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey])
+            return SwiftROMItem(url: url, title: url.deletingPathExtension().lastPathComponent, launchTarget: launchTarget, extensionLabel: url.pathExtension.lowercased(), coreType: coreType(for: url), accentColor: color(for: coreType(for: url)), addedDate: rv?.contentModificationDate ?? .distantPast, fileSizeBytes: Int64(rv?.fileSize ?? 0))
         }
-
-        var items: [SwiftROMItem] = files.compactMap { fileURL in
-            guard let launchTarget = launchTarget(for: fileURL) else { return nil }
-            let ext = fileURL.pathExtension.lowercased()
-            return SwiftROMItem(
-                url: fileURL,
-                title: fileURL.deletingPathExtension().lastPathComponent,
-                launchTarget: launchTarget,
-                subtitle: ext,
-                coreType: coreType(for: fileURL),
-                accentColor: color(for: launchTarget)
-            )
-        }
-
         switch sortMode {
-        case .name:
-            items.sort { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
-        case .recentlyAdded:
-            items.sort {
-                let lhs = (try? $0.url.resourceValues(forKeys: [URLResourceKey.contentModificationDateKey]).contentModificationDate) ?? .distantPast
-                let rhs = (try? $1.url.resourceValues(forKeys: [URLResourceKey.contentModificationDateKey]).contentModificationDate) ?? .distantPast
-                return lhs > rhs
-            }
+        case .name: items.sort { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+        case .recentlyAdded: items.sort { $0.addedDate > $1.addedDate }
+        case .fileSize: items.sort { $0.fileSizeBytes > $1.fileSizeBytes }
         }
         return items
     }
 
-    private func romFolderURL() -> URL {
-        let base = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        return base.appendingPathComponent(romDirectoryName, isDirectory: true)
-    }
-
-    private func launchTarget(for url: URL) -> SwiftLaunchTarget? {
-        switch url.pathExtension.lowercased() {
-        case "3ds", "3dsx", "cci", "cxi":
-            return .coreSession
-        case "nds", "srl", "dsi":
-            return .coreSession
-        case "gba":
-            return .coreSession
-        case "gb", "gbc":
-            return .coreSession
-        case "nes", "fds":
-            return .coreSession
-        default:
-            return nil
-        }
-    }
-
+    private func romFolderURL() -> URL { FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent(romDirectoryName, isDirectory: true) }
+    private func launchTarget(for url: URL) -> SwiftLaunchTarget? { ["3ds","3dsx","cci","cxi","nds","srl","dsi","gba","gb","gbc","nes","fds"].contains(url.pathExtension.lowercased()) ? .coreSession : nil }
     private func coreType(for url: URL) -> EmulatorCoreType {
-        switch url.pathExtension.lowercased() {
-        case "3ds", "3dsx", "cci", "cxi":
-            return EMULATOR_CORE_TYPE_3DS
-        case "nds", "srl", "dsi":
-            return EMULATOR_CORE_TYPE_NDS
-        case "gba":
-            return EMULATOR_CORE_TYPE_GBA
-        case "gb", "gbc":
-            return EMULATOR_CORE_TYPE_GB
-        case "nes", "fds":
-            return EMULATOR_CORE_TYPE_NES
-        default:
-            return EMULATOR_CORE_TYPE_3DS
-        }
+        switch url.pathExtension.lowercased() { case "3ds", "3dsx", "cci", "cxi": return EMULATOR_CORE_TYPE_3DS; case "nds", "srl", "dsi": return EMULATOR_CORE_TYPE_NDS; case "gba": return EMULATOR_CORE_TYPE_GBA; case "gb", "gbc": return EMULATOR_CORE_TYPE_GB; case "nes", "fds": return EMULATOR_CORE_TYPE_NES; default: return EMULATOR_CORE_TYPE_3DS }
     }
-
-    private func color(for launchTarget: SwiftLaunchTarget) -> UIColor {
-        switch launchTarget {
-        case .coreSession: return .systemOrange
-        }
+    private func color(for coreType: EmulatorCoreType) -> UIColor {
+        switch coreType { case EMULATOR_CORE_TYPE_3DS: return .systemOrange; case EMULATOR_CORE_TYPE_NDS: return .systemIndigo; case EMULATOR_CORE_TYPE_GBA: return .systemPurple; case EMULATOR_CORE_TYPE_GB: return .systemGreen; case EMULATOR_CORE_TYPE_NES: return .systemRed; default: return .gray }
     }
 
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        let fm = FileManager.default
-        let targetFolder = romFolderURL()
-        try? fm.createDirectory(at: targetFolder, withIntermediateDirectories: true)
-
-        for sourceURL in urls {
-            guard launchTarget(for: sourceURL) != nil else { continue }
-            let destURL = targetFolder.appendingPathComponent(sourceURL.lastPathComponent)
-            try? fm.removeItem(at: destURL)
-            do {
-                try fm.copyItem(at: sourceURL, to: destURL)
-            } catch {
-                showError(message: "ROM import failed: \(error.localizedDescription)")
-            }
+        let target = romFolderURL(); try? FileManager.default.createDirectory(at: target, withIntermediateDirectories: true)
+        for src in urls where launchTarget(for: src) != nil {
+            let dst = target.appendingPathComponent(src.lastPathComponent)
+            try? FileManager.default.removeItem(at: dst)
+            do { try FileManager.default.copyItem(at: src, to: dst) } catch { showError(message: "ROM import failed: \(error.localizedDescription)") }
         }
-
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         reloadLibrary()
-    }
-
-    private func displaySortMode() -> String {
-        switch sortMode {
-        case .name: return "Sort: Name"
-        case .recentlyAdded: return "Sort: Recent"
-        }
     }
 
     private func showError(message: String) {
         let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
+        alert.addAction(UIAlertAction(title: "OK", style: .default)); present(alert, animated: true)
     }
 }
 
 extension SwiftLibraryViewController: UISearchResultsUpdating {
-    func updateSearchResults(for searchController: UISearchController) {
-        applyFilter(searchText: searchController.searchBar.text)
-    }
+    func updateSearchResults(for searchController: UISearchController) { applyFilter(searchText: searchController.searchBar.text) }
 }
 
 extension SwiftLibraryViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard filteredItems.indices.contains(indexPath.item) else { return }
         let item = filteredItems[indexPath.item]
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
         let vc = AUREmulatorViewController(romURL: item.url, coreType: item.coreType)
-        vc.modalPresentationStyle = UIModalPresentationStyle.fullScreen
+        vc.modalPresentationStyle = .fullScreen
         present(vc, animated: true)
-    }
-
-    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
-        guard filteredItems.indices.contains(indexPath.item) else { return nil }
-        let item = filteredItems[indexPath.item]
-        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
-            let deleteAction = UIAction(title: "Delete ROM", image: UIImage(systemName: "trash"), attributes: .destructive) { _ in
-                do {
-                    try FileManager.default.removeItem(at: item.url)
-                    self?.reloadLibrary()
-                } catch {
-                    self?.showError(message: "Delete failed: \(error.localizedDescription)")
-                }
-            }
-            return UIMenu(title: "", children: [deleteAction])
-        }
     }
 }
