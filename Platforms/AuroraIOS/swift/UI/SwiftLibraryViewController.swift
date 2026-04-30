@@ -122,7 +122,6 @@ private final class SwiftROMCardCell: UICollectionViewCell {
 
     private func coreDisplayName(for coreType: EmulatorCoreType) -> String {
         switch coreType {
-        case EMULATOR_CORE_TYPE_3DS: return "3DS"
         case EMULATOR_CORE_TYPE_NDS: return "NDS"
         case EMULATOR_CORE_TYPE_GBA: return "GBA"
         case EMULATOR_CORE_TYPE_GB: return "GB"
@@ -143,7 +142,7 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
     private var dataSource: UICollectionViewDiffableDataSource<Int, UUID>!
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
     private lazy var searchController = UISearchController(searchResultsController: nil)
-    private let filterControl = UISegmentedControl(items: ["All", "3DS", "NDS", "GBA", "GB", "NES"])
+    private let filterControl = UISegmentedControl(items: ["All", "NDS", "GBA", "GB", "NES"])
     private let summaryLabel = UILabel()
     private let emptyStateLabel = UILabel()
     private let emptyImportButton = UIButton(type: .system)
@@ -291,11 +290,10 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
         let keyword = (searchText ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         let filteredByCore = allItems.filter { item in
             switch filterControl.selectedSegmentIndex {
-            case 1: return item.coreType == EMULATOR_CORE_TYPE_3DS
-            case 2: return item.coreType == EMULATOR_CORE_TYPE_NDS
-            case 3: return item.coreType == EMULATOR_CORE_TYPE_GBA
-            case 4: return item.coreType == EMULATOR_CORE_TYPE_GB
-            case 5: return item.coreType == EMULATOR_CORE_TYPE_NES
+            case 1: return item.coreType == EMULATOR_CORE_TYPE_NDS
+            case 2: return item.coreType == EMULATOR_CORE_TYPE_GBA
+            case 3: return item.coreType == EMULATOR_CORE_TYPE_GB
+            case 4: return item.coreType == EMULATOR_CORE_TYPE_NES
             default: return true
             }
         }
@@ -325,12 +323,12 @@ final class SwiftLibraryViewController: UIViewController, UIDocumentPickerDelega
     }
 
     private func romFolderURL() -> URL { FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent(romDirectoryName, isDirectory: true) }
-    private func launchTarget(for url: URL) -> SwiftLaunchTarget? { ["3ds","3dsx","cci","cxi","nds","srl","dsi","gba","gb","gbc","nes","fds"].contains(url.pathExtension.lowercased()) ? .coreSession : nil }
+    private func launchTarget(for url: URL) -> SwiftLaunchTarget? { ["nds","srl","dsi","gba","gb","gbc","nes","fds"].contains(url.pathExtension.lowercased()) ? .coreSession : nil }
     private func coreType(for url: URL) -> EmulatorCoreType {
-        switch url.pathExtension.lowercased() { case "3ds", "3dsx", "cci", "cxi": return EMULATOR_CORE_TYPE_3DS; case "nds", "srl", "dsi": return EMULATOR_CORE_TYPE_NDS; case "gba": return EMULATOR_CORE_TYPE_GBA; case "gb", "gbc": return EMULATOR_CORE_TYPE_GB; case "nes", "fds": return EMULATOR_CORE_TYPE_NES; default: return EMULATOR_CORE_TYPE_3DS }
+        switch url.pathExtension.lowercased() { case "nds", "srl", "dsi": return EMULATOR_CORE_TYPE_NDS; case "gba": return EMULATOR_CORE_TYPE_GBA; case "gb", "gbc": return EMULATOR_CORE_TYPE_GB; case "nes", "fds": return EMULATOR_CORE_TYPE_NES; default: return EMULATOR_CORE_TYPE_NDS }
     }
     private func color(for coreType: EmulatorCoreType) -> UIColor {
-        switch coreType { case EMULATOR_CORE_TYPE_3DS: return .systemOrange; case EMULATOR_CORE_TYPE_NDS: return .systemIndigo; case EMULATOR_CORE_TYPE_GBA: return .systemPurple; case EMULATOR_CORE_TYPE_GB: return .systemGreen; case EMULATOR_CORE_TYPE_NES: return .systemRed; default: return .gray }
+        switch coreType { case EMULATOR_CORE_TYPE_NDS: return .systemIndigo; case EMULATOR_CORE_TYPE_GBA: return .systemPurple; case EMULATOR_CORE_TYPE_GB: return .systemGreen; case EMULATOR_CORE_TYPE_NES: return .systemRed; default: return .gray }
     }
 
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
