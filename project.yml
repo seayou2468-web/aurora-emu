@@ -2,21 +2,20 @@ name: AuroraIOS
 options:
   minimumXcodeGenVersion: 2.38.0
   deploymentTarget:
-    iOS: '15.0'
+    iOS: '26.0'
 configs:
   Debug: debug
   Release: release
 settings:
   base:
     PRODUCT_BUNDLE_IDENTIFIER: com.frappev.rn
-    SWIFT_VERSION: 5.0
+    SWIFT_VERSION: 6.3
     INFOPLIST_FILE: Config/Info.plist
     CODE_SIGN_STYLE: Automatic
     CLANG_CXX_LANGUAGE_STANDARD: gnu++20
     HEADER_SEARCH_PATHS:
       - $(SRCROOT)
       - $(SRCROOT)/Platforms/API
-      - $(SRCROOT)/Platforms/AuroraIOS/objc
       - $(SRCROOT)/src
     SWIFT_OBJC_BRIDGING_HEADER: Platforms/AuroraIOS/swift/Bridge/AuroraSwift-Bridging-Header.h
     OTHER_LDFLAGS:
@@ -31,7 +30,7 @@ targets:
   AuroraIOS:
     type: application
     platform: iOS
-    deploymentTarget: '15.0'
+    deploymentTarget: '26.0'
     sources:
       - path: Platforms/AuroraIOS/swift
       - path: Platforms/API

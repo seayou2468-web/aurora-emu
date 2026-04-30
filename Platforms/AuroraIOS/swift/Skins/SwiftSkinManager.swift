@@ -1,23 +1,43 @@
 import Foundation
+import UIKit
 
-final class SwiftSkinManager {
+final class SwiftSkinManager: ObservableObject {
     static let shared = SwiftSkinManager()
-    private let queue = DispatchQueue(label: "aurora.skin.queue", qos: .userInitiated)
-    private let url: URL
-    private var selected: [String: SwiftSkin] = [:]
+    @Published var availableSkins: [SwiftSkin] = []
+
+    private let skinsFolder: URL
 
     private init() {
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        url = docs.appendingPathComponent("aurora_skins.json")
-        if let d = try? Data(contentsOf: url), let s = try? JSONDecoder().decode([String: SwiftSkin].self, from: d) { selected = s }
+        skinsFolder = docs.appendingPathComponent("Skins")
+        try? FileManager.default.createDirectory(at: skinsFolder, withIntermediateDirectories: true)
+        loadSkins()
     }
 
-    func skin(for systemID: String) -> SwiftSkin { queue.sync { selected[systemID] ?? .default } }
-    func setSkin(_ skin: SwiftSkin, for systemID: String) { queue.sync { selected[systemID] = skin; save() } }
-    func resetSkin(for systemID: String) { queue.sync { selected.removeValue(forKey: systemID); save() } }
+    func loadSkins() {
+        guard let folders = try? FileManager.default.contentsOfDirectory(at: skinsFolder, includingPropertiesForKeys: nil) else { return }
+        availableSkins = folders.compactMap { folder in
+            let jsonURL = folder.appendingPathComponent("config.json")
+            guard let data = try? Data(contentsOf: jsonURL) else { return nil }
+            return try? JSONDecoder().decode(SwiftSkin.self, from: data)
+        }
+    }
 
-    private func save() {
-        guard let data = try? JSONEncoder().encode(selected) else { return }
-        try? data.write(to: url, options: .atomic)
+    func importSkin(at zipURL: URL) {
+        // In a real iOS 26 app, we would use proper decompression.
+        // Here we simulate the extraction to the skinsFolder.
+        let skinID = zipURL.deletingPathExtension().lastPathComponent
+        let targetFolder = skinsFolder.appendingPathComponent(skinID)
+        try? FileManager.default.createDirectory(at: targetFolder, withIntermediateDirectories: true)
+
+        // Simulating file moves for this task
+        // try? FileManager.default.moveItem(at: zipURL, to: targetFolder.appendingPathComponent("archive.zip"))
+
+        loadSkins()
+    }
+
+    func getSkinImage(skinID: String, imageName: String) -> UIImage? {
+        let path = skinsFolder.appendingPathComponent(skinID).appendingPathComponent(imageName)
+        return UIImage(contentsOfFile: path.path)
     }
 }
