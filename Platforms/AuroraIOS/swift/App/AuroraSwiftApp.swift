@@ -9,7 +9,11 @@ final class AuroraSwiftApp: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         let window = UIWindow(frame: UIScreen.main.bounds)
+#if SWIFT_PACKAGE
         window.rootViewController = UINavigationController(rootViewController: AuroraCompatRootViewController())
+#else
+        window.rootViewController = UINavigationController(rootViewController: SwiftLibraryViewController())
+#endif
         window.makeKeyAndVisible()
         self.window = window
         return true
