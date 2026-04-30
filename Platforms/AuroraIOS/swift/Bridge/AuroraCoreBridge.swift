@@ -19,6 +19,11 @@ final class AuroraCoreBridge {
         }
     }
 
+    func setKey(_ key: EmulatorKey, pressed: Bool) {
+        guard let handle else { return }
+        EmulatorCore_SetKeyStatus(UnsafeMutablePointer<EmulatorCoreHandle>(handle), key, pressed)
+    }
+
     func stepFrame() {
         guard let handle else { return }
         EmulatorCore_StepFrame(UnsafeMutablePointer<EmulatorCoreHandle>(handle))

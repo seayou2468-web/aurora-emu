@@ -1,6 +1,6 @@
 import UIKit
 
-final class SwiftEmulatorViewController: UIViewController {
+final class SwiftEmulatorViewController: UIViewController, SwiftExternalControllerDelegate {
     private let romURL: URL
     private let coreType: EmulatorCoreType
     private var core: AuroraCoreBridge?
@@ -27,16 +27,17 @@ final class SwiftEmulatorViewController: UIViewController {
         view.addSubview(label)
         NSLayoutConstraint.activate([
             label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            label.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 24),
-            label.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -24)
+            label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
 
-        guard let core = AuroraCoreBridge(coreType: coreType) else {
-            label.text = "コア初期化に失敗しました"
-            return
-        }
+        guard let core = AuroraCoreBridge(coreType: coreType) else { label.text = "コア初期化に失敗しました"; return }
         self.core = core
+        SwiftExternalControllerManager.shared.delegate = self
+        SwiftExternalControllerManager.shared.startMonitoring()
         label.text = core.loadROM(url: romURL) ? "ROMをロードしました" : "ROMロードに失敗しました"
+    }
+
+    func externalControllerDidChange(key: EmulatorKey, pressed: Bool) {
+        core?.setKey(key, pressed: pressed)
     }
 }
