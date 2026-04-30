@@ -1,12 +1,15 @@
 # xcodeproj なしビルド（SwiftPM）
 
-`Package.swift` を追加したため、`xcodeproj` なしでも Swift Package として依存解決・ビルド設定管理が可能です。
+この構成では、SwiftPM用エントリ (`AuroraIOSApp`) を最小依存で分離しています。
+
+- **SwiftPMターゲット**: `App` + `CompatApp` のみ
+- 既存の ObjC ブリッジ/UI 実装（`Bridge`, `UI`）は既存アプリ構成側で管理
 
 ## 使い方
 
 ```bash
 swift package resolve
-swift build
+xcodebuild -scheme AuroraIOSApp -configuration Release -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build
 ```
 
-> 実機向けの最終リンクは UIKit / ObjC ブリッジ依存があるため、CI では `xcodebuild -scheme AuroraIOSApp` 併用を推奨。
+CIでは上記ビルドの `.app` を `Payload/` に詰め、zipして `.ipa` としてアップロードします。
