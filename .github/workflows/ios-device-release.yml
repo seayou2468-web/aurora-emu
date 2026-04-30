@@ -26,10 +26,17 @@ jobs:
           sudo xcode-select -s "$DEVELOPER_DIR"
           xcodebuild -version
 
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate xcodeproj from project.yml
+        run: xcodegen generate
+
       - name: Full build (clean + build) for iOS Device
         run: |
           xcodebuild \
-            -scheme AuroraIOSApp \
+            -project AuroraIOS.xcodeproj \
+            -scheme AuroraIOS \
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -derivedDataPath "$DERIVED_DATA" \
@@ -53,14 +60,14 @@ jobs:
           cp -R "$APP_PATH" "$PAYLOAD_DIR/"
 
           pushd "$ARTIFACTS_DIR" >/dev/null
-          zip -r AuroraIOSApp-unsigned.ipa Payload
+          zip -r AuroraIOS-unsigned.ipa Payload
           popd >/dev/null
 
-          echo "IPA_PATH=$ARTIFACTS_DIR/AuroraIOSApp-unsigned.ipa" >> "$GITHUB_ENV"
+          echo "IPA_PATH=$ARTIFACTS_DIR/AuroraIOS-unsigned.ipa" >> "$GITHUB_ENV"
 
       - name: Upload unsigned IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AuroraIOSApp-unsigned-ipa
+          name: AuroraIOS-unsigned-ipa
           path: ${{ env.IPA_PATH }}
           if-no-files-found: error

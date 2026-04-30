@@ -1,0 +1,51 @@
+name: AuroraIOS
+options:
+  minimumXcodeGenVersion: 2.38.0
+  deploymentTarget:
+    iOS: '15.0'
+configs:
+  Debug: debug
+  Release: release
+settings:
+  base:
+    PRODUCT_BUNDLE_IDENTIFIER: com.frappev.rn
+    SWIFT_VERSION: 5.0
+    INFOPLIST_FILE: Config/Info.plist
+    CODE_SIGN_STYLE: Automatic
+    CLANG_CXX_LANGUAGE_STANDARD: gnu++20
+    HEADER_SEARCH_PATHS:
+      - $(SRCROOT)
+      - $(SRCROOT)/Platforms/API
+      - $(SRCROOT)/Platforms/AuroraIOS/objc
+      - $(SRCROOT)/src
+    SWIFT_OBJC_BRIDGING_HEADER: Platforms/AuroraIOS/swift/Bridge/AuroraSwift-Bridging-Header.h
+    OTHER_LDFLAGS:
+      - -ObjC
+      - -lc++
+      - -lz
+      - -liconv
+
+packages: {}
+
+targets:
+  AuroraIOS:
+    type: application
+    platform: iOS
+    deploymentTarget: '15.0'
+    sources:
+      - path: Platforms/AuroraIOS/objc
+      - path: Platforms/AuroraIOS/swift
+      - path: Platforms/API
+      - path: Config
+        excludes:
+          - Project.plist
+      - path: src/core
+    settings:
+      base:
+        PRODUCT_NAME: AuroraIOS
+        TARGETED_DEVICE_FAMILY: '1,2'
+        ENABLE_BITCODE: NO
+    info:
+      path: Config/Info.plist
+    entitlements:
+      path: Config/Entitlements.plist
