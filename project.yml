@@ -17,7 +17,7 @@ settings:
       - $(SRCROOT)
       - $(SRCROOT)/Platforms/API
       - $(SRCROOT)/src
-      - $(SRCROOT)/src/core
+      - $(SRCROOT)/src/core/api
       - $(SRCROOT)/src/core/module_cores
     SWIFT_OBJC_BRIDGING_HEADER: Platforms/AuroraIOS/swift/Bridge/AuroraSwift-Bridging-Header.h
     OTHER_LDFLAGS:
@@ -36,7 +36,8 @@ targets:
     sources:
       - path: Platforms/AuroraIOS/swift
       - path: Platforms/API
-      - path: src/core
+      - path: src/core/api
+      - path: src/core/module_cores
         excludes:
           - '**/CMakeLists.txt'
           - '**/*.md'

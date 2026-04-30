@@ -4,14 +4,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#if defined(__APPLE__)
-#include <TargetConditionals.h>
-#endif
-
-#if !defined(__linux__) && !(defined(__APPLE__) && TARGET_OS_IPHONE)
-#error "emulator_core_c_api supports only iOS and Linux targets"
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -49,7 +41,6 @@ typedef struct EmulatorVideoSpec {
   EmulatorPixelFormat pixel_format;
 } EmulatorVideoSpec;
 
-// Returns a stable core identifier (e.g. "nanoboyadvance") for logging/UI labels.
 const char* EmulatorCoreTypeName(EmulatorCoreType core_type);
 
 EmulatorCoreHandle* EmulatorCore_Create(EmulatorCoreType core_type);
@@ -65,15 +56,11 @@ bool EmulatorCore_GetVideoSpec(const EmulatorCoreHandle* handle, EmulatorVideoSp
 const uint32_t* EmulatorCore_GetFrameBufferRGBA(EmulatorCoreHandle* handle, size_t* pixel_count);
 const char* EmulatorCore_GetLastError(EmulatorCoreHandle* handle);
 
-// Save/load state as raw binary blob owned by the caller.
-// Pass out_buffer=null to query required size in out_size.
 bool EmulatorCore_SaveStateToBuffer(
     EmulatorCoreHandle* handle, void* out_buffer, size_t buffer_size, size_t* out_size);
 bool EmulatorCore_LoadStateFromBuffer(
     EmulatorCoreHandle* handle, const void* state_buffer, size_t state_size);
 
-// Apply a cheat code string.
-// Current implementation supports NES RAM-poke format: "ram:HHHH=VV".
 bool EmulatorCore_ApplyCheatCode(EmulatorCoreHandle* handle, const char* cheat_code);
 
 #ifdef __cplusplus

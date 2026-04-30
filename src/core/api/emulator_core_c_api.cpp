@@ -1,8 +1,8 @@
-#include "./emulator_core_c_api.h"
+#include "emulator_core_c_api.h"
 
 #include <string>
 
-#include "../module_cores/core_adapter.hpp"
+#include "core_adapter.hpp"
 
 struct EmulatorCoreHandle {
   const core::CoreAdapter* adapter = nullptr;
