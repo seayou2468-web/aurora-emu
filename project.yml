@@ -31,9 +31,11 @@ targets:
     sources:
       - path: Platforms/AuroraIOS/swift
       - path: Platforms/API
+      - path: src/core/api/emulator_core_c_api.cpp
       - path: src/core
         excludes:
           - bridge_cores
+          - api
           - '**/CMakeLists.txt'
           - '**/*.md'
           - '**/*.txt'
