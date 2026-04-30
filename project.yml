@@ -1,8 +1,6 @@
 name: AuroraIOS
 options:
   minimumXcodeGenVersion: 2.38.0
-  deploymentTarget:
-    iOS: '26.0'
 configs:
   Debug: debug
   Release: release
@@ -21,12 +19,9 @@ settings:
       - $(SRCROOT)/src/core/module_cores
     SWIFT_OBJC_BRIDGING_HEADER: Platforms/AuroraIOS/swift/Bridge/AuroraSwift-Bridging-Header.h
     OTHER_LDFLAGS:
-      - -ObjC
       - -lc++
       - -lz
       - -liconv
-
-packages: {}
 
 targets:
   AuroraIOS:

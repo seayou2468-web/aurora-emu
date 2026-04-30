@@ -7,8 +7,6 @@ struct SwiftLibraryView: View {
     @State private var isShowingPicker = false
     @State private var selectedItem: SwiftROMItem?
 
-    private let romDirectoryName = "ROMs"
-
     var body: some View {
         NavigationStack {
             ZStack {
@@ -21,20 +19,16 @@ struct SwiftLibraryView: View {
                             .foregroundStyle(.linearGradient(colors: [.purple, .indigo], startPoint: .top, endPoint: .bottom))
                         Text("No Games Found")
                             .font(.title2.bold())
-                        Button("Import ROM") {
-                            isShowingPicker = true
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.indigo)
+                        Button("Import ROM") { isShowingPicker = true }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.indigo)
                     }
                 } else {
                     ScrollView {
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 160))], spacing: 20) {
                             ForEach(filteredItems) { item in
                                 ROMCardView(item: item)
-                                    .onTapGesture {
-                                        selectedItem = item
-                                    }
+                                    .onTapGesture { selectedItem = item }
                             }
                         }
                         .padding()
@@ -58,33 +52,24 @@ struct SwiftLibraryView: View {
                 }
             }
             .navigationTitle("Aurora Library")
-            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
+            .searchable(text: $searchText)
             .sheet(item: $selectedItem) { item in
                 EmulatorContainerView(item: item)
                     .ignoresSafeArea()
             }
             .fileImporter(isPresented: $isShowingPicker, allowedContentTypes: [.data], allowsMultipleSelection: true) { result in
-                switch result {
-                case .success(let urls):
-                    importROMs(urls: urls)
-                case .failure(let error):
-                    print("Import failed: \(error.localizedDescription)")
-                }
+                if case .success(let urls) = result { importROMs(urls: urls) }
             }
         }
-        .onAppear {
-            loadLibrary()
-        }
+        .onAppear { loadLibrary() }
     }
 
     var filteredItems: [SwiftROMItem] {
-        if searchText.isEmpty { return items }
-        return items.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
+        searchText.isEmpty ? items : items.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
     }
 
     private func romFolderURL() -> URL {
-        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let url = docs.appendingPathComponent(romDirectoryName, isDirectory: true)
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("ROMs", isDirectory: true)
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }
@@ -92,26 +77,18 @@ struct SwiftLibraryView: View {
     @MainActor func loadLibrary() {
         let folder = romFolderURL()
         guard let files = try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: [.contentModificationDateKey, .fileSizeKey]) else { return }
-
-        items = files.compactMap { url -> SwiftROMItem? in
+        items = files.compactMap { url in
             let ext = url.pathExtension.lowercased()
-            let coreType: EmulatorCoreType
+            let type: EmulatorCoreType
             switch ext {
-            case "nds", "srl", "dsi": coreType = EMULATOR_CORE_TYPE_NDS
-            case "gba": coreType = EMULATOR_CORE_TYPE_GBA
-            case "gb", "gbc": coreType = EMULATOR_CORE_TYPE_GB
-            case "nes", "fds": coreType = EMULATOR_CORE_TYPE_NES
+            case "nds", "srl", "dsi": type = EMULATOR_CORE_TYPE_NDS
+            case "gba": type = EMULATOR_CORE_TYPE_GBA
+            case "gb", "gbc": type = EMULATOR_CORE_TYPE_GB
+            case "nes", "fds": type = EMULATOR_CORE_TYPE_NES
             default: return nil
             }
-
             let rv = try? url.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey])
-            return SwiftROMItem(url: url,
-                                title: url.deletingPathExtension().lastPathComponent,
-                                launchTarget: .coreSession,
-                                extensionLabel: ext,
-                                coreType: coreType,
-                                addedDate: rv?.contentModificationDate ?? Date(),
-                                fileSizeBytes: Int64(rv?.fileSize ?? 0))
+            return SwiftROMItem(id: UUID(), url: url, title: url.deletingPathExtension().lastPathComponent, launchTarget: "core", extensionLabel: ext, coreType: type, addedDate: rv?.contentModificationDate ?? Date(), fileSizeBytes: Int64(rv?.fileSize ?? 0))
         }
     }
 
@@ -134,26 +111,14 @@ struct ROMCardView: View {
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color.white.opacity(0.05))
                     .frame(height: 200)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.white.opacity(0.1), lineWidth: 0.5)
-                    )
-
+                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1), lineWidth: 0.5))
                 Text(item.extensionLabel.uppercased())
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
+                    .padding(.horizontal, 8).padding(.vertical, 4)
                     .background(item.accentColor.opacity(0.8))
-                    .foregroundColor(.white)
-                    .cornerRadius(6)
-                    .padding(8)
+                    .foregroundColor(.white).cornerRadius(6).padding(8)
             }
-
-            Text(item.title)
-                .font(.subheadline.bold())
-                .foregroundColor(.white)
-                .lineLimit(1)
-                .padding(.horizontal, 4)
+            Text(item.title).font(.subheadline.bold()).foregroundColor(.white).lineLimit(1).padding(.horizontal, 4)
         }
     }
 }
