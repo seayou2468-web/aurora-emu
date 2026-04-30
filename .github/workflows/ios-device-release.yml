@@ -1,4 +1,4 @@
-name: iOS Device Release Build
+name: iOS Device Full Build
 
 on:
   push:
@@ -26,7 +26,7 @@ jobs:
           sudo xcode-select -s "$DEVELOPER_DIR"
           xcodebuild -version
 
-      - name: Build unsigned .app for iOS Device from Swift Package
+      - name: Full build (clean + build) for iOS Device
         run: |
           xcodebuild \
             -scheme AuroraIOSApp \
@@ -35,7 +35,7 @@ jobs:
             -derivedDataPath "$DERIVED_DATA" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            build
+            clean build
 
       - name: Package unsigned IPA manually (Payload zip -> .ipa)
         run: |

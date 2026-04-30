@@ -11,7 +11,8 @@ let package = Package(
         .executableTarget(
             name: "AuroraIOSApp",
             path: "Platforms/AuroraIOS/swift",
-            sources: ["App", "CompatApp"]
+            exclude: ["Bridge/AuroraSwift-Bridging-Header.h"],
+            sources: ["App", "UI", "Bridge", "CompatApp"]
         )
     ]
 )
