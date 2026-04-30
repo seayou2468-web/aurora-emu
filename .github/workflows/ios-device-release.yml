@@ -25,11 +25,10 @@ jobs:
           sudo xcode-select -s "$DEVELOPER_DIR"
           xcodebuild -version
 
-      - name: Build Release for iOS Device (no simulator)
+      - name: Build Release for iOS Device from Swift Package (no xcodeproj)
         run: |
           xcodebuild \
-            -project AuroraIOS.xcodeproj \
-            -scheme AuroraIOS \
+            -scheme AuroraIOSApp \
             -configuration Release \
             -destination 'generic/platform=iOS' \
             CODE_SIGNING_ALLOWED=NO \
