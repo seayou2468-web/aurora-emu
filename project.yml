@@ -54,10 +54,6 @@ targets:
         buildPhase: sources
         excludes:
           - bridge_cores
-          - core/module_cores/nanoboyadvance
-          - core/module_cores/quick_nes
-          - core/module_cores/sameboy
-          - core/module_cores/melonds
           - '**/teakra/tests/**'
           - '**/teakra/src/*/main.cpp'
           - '**/teakra/src/test_generator.cpp'
