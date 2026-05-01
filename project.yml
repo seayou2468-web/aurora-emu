@@ -35,6 +35,7 @@ targets:
       - path: src/core/module_cores/core_adapter_registry.cpp
       - path: src/core/module_cores/nanoboyadvance
         excludes:
+          - core_adapter.cpp
           - '**/CMakeLists.txt'
           - '**/*.md'
           - '**/*.txt'
@@ -42,6 +43,7 @@ targets:
           - '**/.*'
       - path: src/core/module_cores/quick_nes
         excludes:
+          - core_adapter.cpp
           - '**/CMakeLists.txt'
           - '**/*.md'
           - '**/*.txt'
@@ -49,6 +51,7 @@ targets:
           - '**/.*'
       - path: src/core/module_cores/sameboy
         excludes:
+          - core_adapter.cpp
           - '**/CMakeLists.txt'
           - '**/*.md'
           - '**/*.txt'
@@ -56,6 +59,7 @@ targets:
           - '**/.*'
       - path: src/core/module_cores/melonds
         excludes:
+          - core_adapter.cpp
           - '**/CMakeLists.txt'
           - '**/*.md'
           - '**/*.txt'
@@ -75,6 +79,10 @@ targets:
           - '**/*.yml'
           - '**/.*'
           - '**/*.plist'
+      - path: src/core/module_cores/nanoboyadvance/core_adapter.cpp
+      - path: src/core/module_cores/quick_nes/core_adapter.cpp
+      - path: src/core/module_cores/sameboy/core_adapter.cpp
+      - path: src/core/module_cores/melonds/core_adapter.cpp
     settings:
       base:
         PRODUCT_NAME: AuroraIOS
