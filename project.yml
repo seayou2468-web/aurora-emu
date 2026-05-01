@@ -37,11 +37,27 @@ targets:
       - path: src/core/module_cores/quick_nes/core_adapter.cpp
       - path: src/core/module_cores/sameboy/core_adapter.cpp
       - path: src/core/module_cores/melonds/core_adapter.cpp
+      - path: src/core/module_cores/nanoboyadvance
+        recursive: true
+        buildPhase: sources
+      - path: src/core/module_cores/quick_nes
+        recursive: true
+        buildPhase: sources
+      - path: src/core/module_cores/sameboy
+        recursive: true
+        buildPhase: sources
+      - path: src/core/module_cores/melonds
+        recursive: true
+        buildPhase: sources
       - path: src
         recursive: true
         buildPhase: sources
         excludes:
           - bridge_cores
+          - core/module_cores/nanoboyadvance
+          - core/module_cores/quick_nes
+          - core/module_cores/sameboy
+          - core/module_cores/melonds
           - '**/teakra/tests/**'
           - '**/teakra/src/*/main.cpp'
           - '**/teakra/src/test_generator.cpp'
