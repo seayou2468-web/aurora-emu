@@ -2,12 +2,30 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct SwiftLibraryView: View {
+    enum LibraryFilter: String, CaseIterable, Identifiable {
+        case all = "All"
+        case gba = "GBA"
+        case nes = "NES"
+        case gb = "GB"
+        case nds = "NDS"
+        var id: String { rawValue }
+    }
+
+    enum SortMode: String, CaseIterable, Identifiable {
+        case recentlyAdded = "Recently Added"
+        case title = "Title"
+        case fileSize = "File Size"
+        var id: String { rawValue }
+    }
+
     @State private var searchText = ""
     @State private var items: [SwiftROMItem] = []
     @State private var isShowingPicker = false
     @State private var selectedItem: SwiftROMItem?
     @State private var showSettings = false
     @State private var importError: String?
+    @State private var libraryFilter: LibraryFilter = .all
+    @State private var sortMode: SortMode = .recentlyAdded
 
     var body: some View {
         NavigationStack {
@@ -26,14 +44,20 @@ struct SwiftLibraryView: View {
                             .tint(.indigo)
                     }
                 } else {
-                    ScrollView {
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 160))], spacing: 20) {
-                            ForEach(filteredItems) { item in
-                                ROMCardView(item: item)
-                                    .onTapGesture { selectedItem = item }
+                    VStack(spacing: 10) {
+                        Picker("Core", selection: $libraryFilter) {
+                            ForEach(LibraryFilter.allCases) { filter in
+                                Text(filter.rawValue).tag(filter)
                             }
                         }
-                        .padding()
+                        .pickerStyle(.segmented)
+                        .padding(.horizontal)
+
+                        List(sortedAndFilteredItems) { item in
+                            ROMRowView(item: item)
+                                .contentShape(Rectangle())
+                                .onTapGesture { selectedItem = item }
+                        }
                     }
                 }
 
@@ -56,10 +80,19 @@ struct SwiftLibraryView: View {
             .navigationTitle("Aurora Library")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showSettings = true
+                    Menu {
+                        Picker("Sort", selection: $sortMode) {
+                            ForEach(SortMode.allCases) { mode in
+                                Text(mode.rawValue).tag(mode)
+                            }
+                        }
+                        Button {
+                            showSettings = true
+                        } label: {
+                            Label("Settings", systemImage: "gearshape.fill")
+                        }
                     } label: {
-                        Image(systemName: "gearshape.fill")
+                        Image(systemName: "ellipsis.circle")
                     }
                 }
             }
@@ -83,8 +116,27 @@ struct SwiftLibraryView: View {
         .onAppear { loadLibrary() }
     }
 
-    var filteredItems: [SwiftROMItem] {
-        searchText.isEmpty ? items : items.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
+    var sortedAndFilteredItems: [SwiftROMItem] {
+        let scoped = items.filter { item in
+            switch libraryFilter {
+            case .all: return true
+            case .gba: return item.coreType == EMULATOR_CORE_TYPE_GBA
+            case .nes: return item.coreType == EMULATOR_CORE_TYPE_NES
+            case .gb: return item.coreType == EMULATOR_CORE_TYPE_GB
+            case .nds: return item.coreType == EMULATOR_CORE_TYPE_NDS
+            }
+        }.filter { item in
+            searchText.isEmpty || item.title.localizedCaseInsensitiveContains(searchText)
+        }
+
+        switch sortMode {
+        case .recentlyAdded:
+            return scoped.sorted { $0.addedDate > $1.addedDate }
+        case .title:
+            return scoped.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+        case .fileSize:
+            return scoped.sorted { $0.fileSizeBytes > $1.fileSizeBytes }
+        }
     }
 
     private func romFolderURL() -> URL {
@@ -160,5 +212,33 @@ struct ROMCardView: View {
             }
             Text(item.title).font(.subheadline.bold()).foregroundColor(.white).lineLimit(1).padding(.horizontal, 4)
         }
+    }
+}
+
+struct ROMRowView: View {
+    let item: SwiftROMItem
+
+    private var fileSizeLabel: String {
+        ByteCountFormatter.string(fromByteCount: item.fileSizeBytes, countStyle: .file)
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(item.accentColor.opacity(0.25))
+                .frame(width: 42, height: 42)
+                .overlay(Text(item.extensionLabel.uppercased()).font(.caption2.bold()))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.title).font(.headline)
+                Text("\(item.extensionLabel.uppercased()) • \(fileSizeLabel)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .foregroundStyle(.secondary)
+                .font(.caption)
+        }
+        .padding(.vertical, 4)
     }
 }
