@@ -39,6 +39,7 @@ targets:
       - path: src/core/module_cores/melonds/core_adapter.cpp
       - path: src
         recursive: true
+        buildPhase: sources
         excludes:
           - bridge_cores
           - '**/teakra/tests/**'
