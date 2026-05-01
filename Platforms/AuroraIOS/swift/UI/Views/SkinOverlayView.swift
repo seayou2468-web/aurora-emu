@@ -29,7 +29,7 @@ struct SkinOverlayView: View {
                                 .fill(Color.white.opacity(0.14))
                             RoundedRectangle(cornerRadius: 12)
                                 .stroke(Color.white.opacity(0.35), lineWidth: 1)
-                            Text(button.id.uppercased())
+                            Text((button.title ?? button.id).uppercased())
                                 .font(.caption2.bold())
                                 .foregroundStyle(.white.opacity(0.8))
                         }

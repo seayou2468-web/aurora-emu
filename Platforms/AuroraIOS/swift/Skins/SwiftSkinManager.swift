@@ -11,6 +11,7 @@ import UIKit
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         skinsFolder = docs.appendingPathComponent("Skins")
         try? FileManager.default.createDirectory(at: skinsFolder, withIntermediateDirectories: true)
+        ensureTemplateSkinExists()
         loadSkins()
     }
 
@@ -20,6 +21,15 @@ import UIKit
             let jsonURL = folder.appendingPathComponent("config.json")
             guard let data = try? Data(contentsOf: jsonURL) else { return nil }
             return try? JSONDecoder().decode(SwiftSkin.self, from: data)
+        }
+    }
+
+    func ensureTemplateSkinExists() {
+        let templateFolder = skinsFolder.appendingPathComponent("TemplateSkin")
+        guard !FileManager.default.fileExists(atPath: templateFolder.path) else { return }
+        try? FileManager.default.createDirectory(at: templateFolder, withIntermediateDirectories: true)
+        if let data = try? JSONEncoder().encode(SwiftSkin.default) {
+            try? data.write(to: templateFolder.appendingPathComponent("config.json"))
         }
     }
 
