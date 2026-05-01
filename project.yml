@@ -31,56 +31,14 @@ targets:
     sources:
       - path: Platforms/AuroraIOS/swift
       - path: Platforms/API
-      - path: src/core/api/emulator_core_c_api.cpp
-      - path: src/core/module_cores/core_adapter_registry.cpp
-      - path: src/core/module_cores/nanoboyadvance
-        recursive: true
-        excludes:
-          - core_adapter.cpp
-          - runtime.cpp
-          - '**/CMakeLists.txt'
-          - '**/*.md'
-          - '**/*.txt'
-          - '**/*.yml'
-          - '**/.*'
-      - path: src/core/module_cores/quick_nes
-        recursive: true
-        excludes:
-          - core_adapter.cpp
-          - runtime.cpp
-          - '**/CMakeLists.txt'
-          - '**/*.md'
-          - '**/*.txt'
-          - '**/*.yml'
-          - '**/.*'
-      - path: src/core/module_cores/sameboy
-        recursive: true
-        excludes:
-          - core_adapter.cpp
-          - runtime.cpp
-          - c_api.c
-          - '**/CMakeLists.txt'
-          - '**/*.md'
-          - '**/*.txt'
-          - '**/*.yml'
-          - '**/.*'
-      - path: src/core/module_cores/melonds
-        recursive: true
-        excludes:
-          - core_adapter.cpp
-          - runtime.cpp
-          - '**/CMakeLists.txt'
-          - '**/*.md'
-          - '**/*.txt'
-          - '**/*.yml'
-          - '**/.*'
-          - teakra/tests
-      - path: src/core
+      - path: src
         recursive: true
         excludes:
           - bridge_cores
-          - api
-          - module_cores
+          - '**/teakra/tests/**'
+          - '**/teakra/src/*/main.cpp'
+          - '**/teakra/src/test_generator.cpp'
+          - '**/teakra/src/test_verifier/**'
           - '**/CMakeLists.txt'
           - '**/*.md'
           - '**/*.txt'
@@ -89,15 +47,6 @@ targets:
           - '**/*.yml'
           - '**/.*'
           - '**/*.plist'
-      - path: src/core/module_cores/nanoboyadvance/core_adapter.cpp
-      - path: src/core/module_cores/quick_nes/core_adapter.cpp
-      - path: src/core/module_cores/sameboy/core_adapter.cpp
-      - path: src/core/module_cores/melonds/core_adapter.cpp
-      - path: src/core/module_cores/nanoboyadvance/runtime.cpp
-      - path: src/core/module_cores/quick_nes/runtime.cpp
-      - path: src/core/module_cores/sameboy/runtime.cpp
-      - path: src/core/module_cores/sameboy/c_api.c
-      - path: src/core/module_cores/melonds/runtime.cpp
     settings:
       base:
         PRODUCT_NAME: AuroraIOS
