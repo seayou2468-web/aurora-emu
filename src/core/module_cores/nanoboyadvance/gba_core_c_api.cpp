@@ -1,4 +1,4 @@
-#include "gba_core_c_api.h"
+#include "./gba_core_c_api.h"
 
 extern "C" {
 

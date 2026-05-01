@@ -1,8 +1,8 @@
 
-#include "Nes_Core.h"
-#include "Nes_Mapper.h"
+#include "./Nes_Core.h"
+#include "./Nes_Mapper.h"
 
-#include "blargg_source.h"
+#include "./blargg_source.h"
 
 int Nes_Core::cpu_read( nes_addr_t addr, nes_time_t time )
 {

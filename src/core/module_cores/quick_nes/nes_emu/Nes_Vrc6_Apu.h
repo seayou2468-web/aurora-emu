@@ -6,8 +6,8 @@
 #ifndef NES_VRC6_APU_H
 #define NES_VRC6_APU_H
 
-#include "Nes_Apu.h"
-#include "Blip_Buffer.h"
+#include "./Nes_Apu.h"
+#include "./Blip_Buffer.h"
 
 struct vrc6_apu_state_t;
 

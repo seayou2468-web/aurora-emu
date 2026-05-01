@@ -13,7 +13,7 @@
 
 // User configuration (allow it to #include "blargg_common.h" normally)
 #undef BLARGG_COMMON_H
-#include "blargg_config.h"
+#include "./blargg_config.h"
 #define BLARGG_COMMON_H
 
 /* BLARGG_COMPILER_HAS_BOOL: If 0, provides bool support for old compiler. If 1,

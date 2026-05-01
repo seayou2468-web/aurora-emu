@@ -6,10 +6,10 @@
 #ifndef NES_CORE_H
 #define NES_CORE_H
 
-#include "blargg_common.h"
-#include "Nes_Apu.h"
-#include "Nes_Cpu.h"
-#include "Nes_Ppu.h"
+#include "./blargg_common.h"
+#include "./Nes_Apu.h"
+#include "./Nes_Cpu.h"
+#include "./Nes_Ppu.h"
 class Nes_Mapper;
 class Nes_Cart;
 class Nes_State;

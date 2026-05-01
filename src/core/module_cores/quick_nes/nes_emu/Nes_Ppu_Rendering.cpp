@@ -1,7 +1,7 @@
 
 // Nes_Emu 0.7.0. http://www.slack.net/~ant/
 
-#include "Nes_Ppu_Rendering.h"
+#include "./Nes_Ppu_Rendering.h"
 
 #include <string.h>
 #include <stddef.h>
@@ -17,7 +17,7 @@ more details. You should have received a copy of the GNU Lesser General
 Public License along with this module; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
 
-#include "blargg_source.h"
+#include "./blargg_source.h"
 
 #ifdef BLARGG_ENABLE_OPTIMIZER
 	#include BLARGG_ENABLE_OPTIMIZER
@@ -198,7 +198,7 @@ void Nes_Ppu_Rendering::draw_background_( int remain )
 			addr &= 0x03ff;
 			int const fine_y = 0;
 			int const clipped = false;
-			#include "Nes_Ppu_Bg.h"
+			#include "./Nes_Ppu_Bg.h"
 		}
 		else
 		{
@@ -207,7 +207,7 @@ void Nes_Ppu_Rendering::draw_background_( int remain )
 			addr &= 0x03ff;
 			height -= fine_y & 1;
 			int const clipped = true;
-			#include "Nes_Ppu_Bg.h"
+			#include "./Nes_Ppu_Bg.h"
 		}
 	}
 	while ( remain );
@@ -250,7 +250,7 @@ void Nes_Ppu_Rendering::draw_sprites_( int begin, int end )
 			int visible = sprite_height;
 			
 			#define CLIPPED 0
-			#include "Nes_Ppu_Sprites.h"
+			#include "./Nes_Ppu_Sprites.h"
 		}
 		else
 		{
@@ -278,7 +278,7 @@ void Nes_Ppu_Rendering::draw_sprites_( int begin, int end )
 			//      begin, end, top_minus_one + 1, skip, visible );
 			
 			#define CLIPPED 1
-			#include "Nes_Ppu_Sprites.h"
+			#include "./Nes_Ppu_Sprites.h"
 		}
 	}
 	while ( index < 0x100 );

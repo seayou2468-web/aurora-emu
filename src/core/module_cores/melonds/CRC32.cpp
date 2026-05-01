@@ -16,7 +16,7 @@
     with melonDS. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "CRC32.h"
+#include "./CRC32.h"
 
 // http://www.codeproject.com/KB/recipes/crc32_large.aspx
 

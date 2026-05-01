@@ -1,4 +1,4 @@
-#import "AURControllerSkinsViewController.h"
+#import "./AURControllerSkinsViewController.h"
 #import "../Views/AURControllerSkinTableViewCell.h"
 #import "../Managers/AURSkinManager.h"
 #import "../Models/AURDeltaSkin.h"

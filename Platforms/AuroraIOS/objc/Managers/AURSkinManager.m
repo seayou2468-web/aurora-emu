@@ -1,4 +1,4 @@
-#import "AURSkinManager.h"
+#import "./AURSkinManager.h"
 #import <zlib.h>
 
 @interface AURSkinManager ()

@@ -1,7 +1,7 @@
 
 // Blip_Buffer 0.4.0. http://www.slack.net/~ant/
 
-#include "Multi_Buffer.h"
+#include "./Multi_Buffer.h"
 
 /* Copyright (C) 2003-2006 Shay Green. This module is free software; you
 can redistribute it and/or modify it under the terms of the GNU Lesser
@@ -14,7 +14,7 @@ more details. You should have received a copy of the GNU Lesser General
 Public License along with this module; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
 
-#include "blargg_source.h"
+#include "./blargg_source.h"
 
 Multi_Buffer::Multi_Buffer( int spf ) : samples_per_frame_( spf )
 {

@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <cstring>
 
-#include "blargg_common.h"
+#include "./blargg_common.h"
 
 class Data_Reader {
 public:

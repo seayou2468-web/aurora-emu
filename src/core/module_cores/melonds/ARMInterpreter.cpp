@@ -17,11 +17,11 @@
 */
 
 #include <stdio.h>
-#include "NDS.h"
-#include "ARMInterpreter.h"
-#include "ARMInterpreter_ALU.h"
-#include "ARMInterpreter_Branch.h"
-#include "ARMInterpreter_LoadStore.h"
+#include "./NDS.h"
+#include "./ARMInterpreter.h"
+#include "./ARMInterpreter_ALU.h"
+#include "./ARMInterpreter_Branch.h"
+#include "./ARMInterpreter_LoadStore.h"
 
 
 namespace ARMInterpreter
@@ -279,7 +279,7 @@ void T_SVC(ARM* cpu)
 
 
 #define INSTRFUNC_PROTO(x)  void (*x)(ARM* cpu)
-#include "ARM_InstrTable.h"
+#include "./ARM_InstrTable.h"
 #undef INSTRFUNC_PROTO
 
 }

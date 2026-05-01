@@ -19,15 +19,15 @@
 #include <stdio.h>
 #include <codecvt>
 
-#include "DSi.h"
-#include "DSi_AES.h"
-#include "DSi_NAND.h"
-#include "Platform.h"
+#include "./DSi.h"
+#include "./DSi_AES.h"
+#include "./DSi_NAND.h"
+#include "./Platform.h"
 
-#include "sha1/sha1.hpp"
-#include "tiny-AES-c/aes.hpp"
+#include "./sha1/sha1.hpp"
+#include "./tiny-AES-c/aes.hpp"
 
-#include "fatfs/ff.h"
+#include "./fatfs/ff.h"
 
 
 namespace DSi_NAND

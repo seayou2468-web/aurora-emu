@@ -4,7 +4,7 @@
 #include <type_traits>
 
 #ifndef COMMON_TYPE_3DS
-#include "common_types.h"
+#include "./common_types.h"
 #endif
 
 constexpr u16 TestSpaceX = 0x6400;

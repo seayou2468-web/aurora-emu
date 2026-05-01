@@ -1,4 +1,4 @@
-#import "AURBridgeCoreAdapter.h"
+#import "./AURBridgeCoreAdapter.h"
 
 @interface AURBridgeCoreAdapter () {
     EmulatorCoreHandle *_coreHandle;

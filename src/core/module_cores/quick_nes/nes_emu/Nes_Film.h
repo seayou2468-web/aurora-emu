@@ -6,8 +6,8 @@
 #ifndef NES_FILM_H
 #define NES_FILM_H
 
-#include "blargg_common.h"
-#include "Nes_Film_Data.h"
+#include "./blargg_common.h"
+#include "./Nes_Film_Data.h"
 
 // See below for custom reader and writer classes that allow user data in movie files
 class Nes_Film_Writer;

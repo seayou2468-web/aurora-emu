@@ -6,8 +6,8 @@
 #ifndef NES_STATE_H
 #define NES_STATE_H
 
-#include "Nes_File.h"
-#include "Nes_Cpu.h"
+#include "./Nes_File.h"
+#include "./Nes_Cpu.h"
 class Nes_Emu;
 class Nes_State;
 

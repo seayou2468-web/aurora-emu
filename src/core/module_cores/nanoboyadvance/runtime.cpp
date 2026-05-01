@@ -1,4 +1,4 @@
-#include "runtime.hpp"
+#include "./runtime.hpp"
 
 #include <algorithm>
 #include <array>
@@ -7,12 +7,12 @@
 #include <fstream>
 #include <vector>
 
-#include "nba/include/nba/config.hpp"
-#include "nba/include/nba/core.hpp"
-#include "nba/include/nba/device/video_device.hpp"
-#include "nba/include/nba/integer.hpp"
-#include "nba/include/nba/rom/rom.hpp"
-#include "nba/include/nba/save_state.hpp"
+#include "./nba/include/nba/config.hpp"
+#include "./nba/include/nba/core.hpp"
+#include "./nba/include/nba/device/video_device.hpp"
+#include "./nba/include/nba/integer.hpp"
+#include "./nba/include/nba/rom/rom.hpp"
+#include "./nba/include/nba/save_state.hpp"
 
 namespace core::gba {
 

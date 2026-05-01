@@ -19,8 +19,8 @@
 #ifndef GPU2D_H
 #define GPU2D_H
 
-#include "types.h"
-#include "Savestate.h"
+#include "./types.h"
+#include "./Savestate.h"
 
 namespace GPU2D
 {

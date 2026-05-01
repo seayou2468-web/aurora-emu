@@ -2,7 +2,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "common_types.h"
+#include "./common_types.h"
 
 namespace Teakra {
 

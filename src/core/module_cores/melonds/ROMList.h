@@ -19,7 +19,7 @@
 #ifndef ROMLIST_H
 #define ROMLIST_H
 
-#include "types.h"
+#include "./types.h"
 
 struct ROMListEntry
 {

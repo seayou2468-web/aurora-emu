@@ -1,4 +1,4 @@
-#import "AURInGameMenuViewController.h"
+#import "./AURInGameMenuViewController.h"
 
 @interface AURInGameMenuViewController ()
 @property (nonatomic, strong) UIVisualEffectView *blurView;

@@ -5,7 +5,7 @@
 #include <string>
 #include "../common_types.h"
 #include "../parser.h"
-#include "sha256.h"
+#include "./sha256.h"
 
 template <typename T>
 std::vector<u8> Sha256(const std::vector<T>& data) {

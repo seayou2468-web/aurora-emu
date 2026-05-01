@@ -23,11 +23,11 @@
 #include <algorithm>
 #include <codecvt>
 #include <locale>
-#include "NDS.h"
-#include "DSi.h"
-#include "SPI.h"
-#include "DSi_SPI_TSC.h"
-#include "Platform.h"
+#include "./NDS.h"
+#include "./DSi.h"
+#include "./SPI.h"
+#include "./DSi_SPI_TSC.h"
+#include "./Platform.h"
 
 
 namespace SPI_Firmware

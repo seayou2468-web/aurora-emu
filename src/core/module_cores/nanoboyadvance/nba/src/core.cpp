@@ -9,7 +9,7 @@
 #include "../include/nba/rom/gpio/rtc.hpp"
 #include "../include/nba/rom/gpio/solar_sensor.hpp"
 
-#include "core.hpp"
+#include "./core.hpp"
 
 namespace nba {
 

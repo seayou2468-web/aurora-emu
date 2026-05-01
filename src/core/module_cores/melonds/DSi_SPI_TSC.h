@@ -19,8 +19,8 @@
 #ifndef DSI_SPI_TSC
 #define DSI_SPI_TSC
 
-#include "types.h"
-#include "Savestate.h"
+#include "./types.h"
+#include "./Savestate.h"
 
 namespace DSi_SPI_TSC
 {

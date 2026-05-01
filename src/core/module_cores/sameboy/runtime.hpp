@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "c_api.hpp"
+#include "./c_api.hpp"
 
 namespace core::sameboy {
 

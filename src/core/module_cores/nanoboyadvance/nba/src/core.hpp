@@ -8,14 +8,14 @@
 #include "../include/nba/core.hpp"
 #include "../include/nba/scheduler.hpp"
 
-#include "arm/arm7tdmi.hpp"
-#include "bus/bus.hpp"
-#include "hw/apu/apu.hpp"
-#include "hw/ppu/ppu.hpp"
-#include "hw/dma/dma.hpp"
-#include "hw/irq/irq.hpp"
-#include "hw/keypad/keypad.hpp"
-#include "hw/timer/timer.hpp"
+#include "./arm/arm7tdmi.hpp"
+#include "./bus/bus.hpp"
+#include "./hw/apu/apu.hpp"
+#include "./hw/ppu/ppu.hpp"
+#include "./hw/dma/dma.hpp"
+#include "./hw/irq/irq.hpp"
+#include "./hw/keypad/keypad.hpp"
+#include "./hw/timer/timer.hpp"
 
 namespace nba::core {
 

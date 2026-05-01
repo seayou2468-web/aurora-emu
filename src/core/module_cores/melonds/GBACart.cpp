@@ -18,10 +18,10 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "NDS.h"
-#include "GBACart.h"
-#include "CRC32.h"
-#include "Platform.h"
+#include "./NDS.h"
+#include "./GBACart.h"
+#include "./CRC32.h"
+#include "./Platform.h"
 
 
 namespace GBACart

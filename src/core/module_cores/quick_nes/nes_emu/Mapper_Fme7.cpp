@@ -3,10 +3,10 @@
 
 // Nes_Emu 0.7.0. http://www.slack.net/~ant/libs/
 
-#include "Nes_Mapper.h"
+#include "./Nes_Mapper.h"
 
-#include "blargg_endian.h"
-#include "Nes_Fme7_Apu.h"
+#include "./blargg_endian.h"
+#include "./Nes_Fme7_Apu.h"
 
 /* Copyright (C) 2005 Chris Moeller */
 /* Copyright (C) 2005-2006 Shay Green. This module is free software; you
@@ -20,7 +20,7 @@ more details. You should have received a copy of the GNU Lesser General
 Public License along with this module; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
 
-#include "blargg_source.h"
+#include "./blargg_source.h"
 
 struct fme7_state_t
 {

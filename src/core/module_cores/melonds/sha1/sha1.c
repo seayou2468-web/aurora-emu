@@ -27,7 +27,7 @@ A million repetitions of "a"
 #if defined(__sun)
 #include "solarisfixes.h"
 #endif
-#include "sha1.h"
+#include "./sha1.h"
 
 #ifndef BYTE_ORDER
 #if (BSD >= 199103)

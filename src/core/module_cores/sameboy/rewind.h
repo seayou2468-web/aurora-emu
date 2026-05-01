@@ -2,7 +2,7 @@
 
 #ifndef GB_DISABLE_REWIND
 #include <stdbool.h>
-#include "defs.h"
+#include "./defs.h"
 
 #ifdef GB_INTERNAL
 internal void GB_rewind_push(GB_gameboy_t *gb);

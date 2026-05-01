@@ -6,8 +6,8 @@
 #ifndef NES_DATA_H
 #define NES_DATA_H
 
-#include "blargg_common.h"
-#include "apu_state.h"
+#include "./blargg_common.h"
+#include "./apu_state.h"
 
 typedef long nes_tag_t;
 

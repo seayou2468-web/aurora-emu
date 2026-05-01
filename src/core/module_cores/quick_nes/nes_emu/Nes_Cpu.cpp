@@ -10,13 +10,13 @@
 	#undef BLARGG_ENABLE_OPTIMIZER
 #endif
 
-#include "Nes_Cpu.h"
+#include "./Nes_Cpu.h"
 
 #include <string.h>
 #include <limits.h>
-#include "blargg_endian.h"
+#include "./blargg_endian.h"
 
-#include "nes_cpu_io.h"
+#include "./nes_cpu_io.h"
 
 /* Copyright (C) 2003-2006 Shay Green. This module is free software; you
 can redistribute it and/or modify it under the terms of the GNU Lesser
@@ -29,7 +29,7 @@ more details. You should have received a copy of the GNU Lesser General
 Public License along with this module; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
 
-#include "blargg_source.h"
+#include "./blargg_source.h"
 
 #ifdef BLARGG_ENABLE_OPTIMIZER
 	#include BLARGG_ENABLE_OPTIMIZER

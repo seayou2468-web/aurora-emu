@@ -19,8 +19,8 @@
 #ifndef DSI_I2C_H
 #define DSI_I2C_H
 
-#include "types.h"
-#include "Savestate.h"
+#include "./types.h"
+#include "./Savestate.h"
 
 namespace DSi_BPTWL
 {

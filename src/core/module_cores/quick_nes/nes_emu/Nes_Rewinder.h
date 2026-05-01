@@ -6,7 +6,7 @@
 #ifndef NES_REWINDER_H
 #define NES_REWINDER_H
 
-#include "Nes_Recorder.h"
+#include "./Nes_Recorder.h"
 
 class Nes_Rewinder : public Nes_Recorder {
 	typedef Nes_Recorder recorder;

@@ -6,8 +6,8 @@
 #ifndef NES_SNAPSHOT_H
 #define NES_SNAPSHOT_H
 
-#include "Nes_File.h"
-#include "Nes_Cpu.h"
+#include "./Nes_File.h"
+#include "./Nes_Cpu.h"
 class Nes_Emu;
 
 typedef long frame_count_t;

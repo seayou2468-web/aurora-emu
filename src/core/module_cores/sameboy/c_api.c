@@ -1,8 +1,8 @@
-#include "c_api.hpp"
+#include "./c_api.hpp"
 
 #include <stdlib.h>
 
-#include "gb.h"
+#include "./gb.h"
 
 struct SBA_Gameboy {
     GB_gameboy_t *gb;

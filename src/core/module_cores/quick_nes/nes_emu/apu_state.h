@@ -6,7 +6,7 @@
 #ifndef APU_STATE_H
 #define APU_STATE_H
 
-#include "blargg_common.h"
+#include "./blargg_common.h"
 
 struct apu_state_t
 {

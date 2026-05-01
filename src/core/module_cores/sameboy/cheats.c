@@ -2,8 +2,8 @@
 #define GB_INTERNAL
 #endif
 
-#include "gb.h"
-#include "cheats.h"
+#include "./gb.h"
+#include "./cheats.h"
 #include <stdio.h>
 #include <assert.h>
 #include <errno.h>

@@ -1,4 +1,4 @@
-#include "GPU3D_OpenGL.h"
+#include "./GPU3D_OpenGL.h"
 
 namespace GPU3D {
 

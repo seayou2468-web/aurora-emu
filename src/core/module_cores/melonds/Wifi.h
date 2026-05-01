@@ -19,7 +19,7 @@
 #ifndef WIFI_H
 #define WIFI_H
 
-#include "Savestate.h"
+#include "./Savestate.h"
 
 namespace Wifi
 {

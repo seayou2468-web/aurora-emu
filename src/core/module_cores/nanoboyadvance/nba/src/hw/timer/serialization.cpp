@@ -5,7 +5,7 @@
  * Refer to the included LICENSE file.
  */
 
-#include "timer.hpp"
+#include "./timer.hpp"
 
 namespace nba::core {
 

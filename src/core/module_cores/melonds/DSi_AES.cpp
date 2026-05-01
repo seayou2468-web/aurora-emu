@@ -18,11 +18,11 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "DSi.h"
-#include "DSi_AES.h"
-#include "FIFO.h"
-#include "tiny-AES-c/aes.hpp"
-#include "Platform.h"
+#include "./DSi.h"
+#include "./DSi_AES.h"
+#include "./FIFO.h"
+#include "./tiny-AES-c/aes.hpp"
+#include "./Platform.h"
 
 
 namespace DSi_AES

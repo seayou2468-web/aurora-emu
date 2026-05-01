@@ -6,7 +6,7 @@
 #ifndef NES_PPU_IMPL_H
 #define NES_PPU_IMPL_H
 
-#include "nes_data.h"
+#include "./nes_data.h"
 class Nes_State_;
 
 class Nes_Ppu_Impl : public ppu_state_t {

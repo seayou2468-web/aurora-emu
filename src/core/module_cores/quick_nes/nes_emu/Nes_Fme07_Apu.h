@@ -6,7 +6,7 @@
 #ifndef NES_FME07_APU_H
 #define NES_FME07_APU_H
 
-#include "Blip_Buffer.h"
+#include "./Blip_Buffer.h"
 
 struct fme07_snapshot_t
 {

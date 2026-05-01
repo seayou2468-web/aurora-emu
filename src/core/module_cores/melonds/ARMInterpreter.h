@@ -19,8 +19,8 @@
 #ifndef ARMINTERPRETER_H
 #define ARMINTERPRETER_H
 
-#include "types.h"
-#include "ARM.h"
+#include "./types.h"
+#include "./ARM.h"
 
 namespace ARMInterpreter
 {

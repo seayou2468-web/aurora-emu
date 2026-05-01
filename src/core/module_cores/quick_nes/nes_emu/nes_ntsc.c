@@ -1,7 +1,7 @@
 
 /* nes_ntsc 0.2.0. http://www.slack.net/~ant/ */
 
-#include "nes_ntsc.h"
+#include "./nes_ntsc.h"
 
 /* Copyright (C) 2006 Shay Green. This module is free software; you
 can redistribute it and/or modify it under the terms of the GNU Lesser
@@ -28,7 +28,7 @@ nes_ntsc_setup_t const nes_ntsc_rgb        = { 0, 0, 0, 0,.2,  0,.7, -1, -1,-1, 
 #define fringing_mid    1.0f
 #define std_decoder_hue -15
 
-#include "nes_ntsc_impl.h"
+#include "./nes_ntsc_impl.h"
 
 pixel_info_t const ntsc_pixels [alignment_count] = {
 	{ PIXEL_OFFSET( -4, -9 ), { 1, 1, .6667f, 0 } },

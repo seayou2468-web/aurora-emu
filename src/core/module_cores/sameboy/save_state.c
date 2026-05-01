@@ -2,7 +2,7 @@
 #define GB_INTERNAL
 #endif
 
-#include "gb.h"
+#include "./gb.h"
 #include <stdio.h>
 #include <errno.h>
 #include <assert.h>

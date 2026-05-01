@@ -6,7 +6,7 @@
 #ifndef NES_PPU_H
 #define NES_PPU_H
 
-#include "Nes_Ppu_Rendering.h"
+#include "./Nes_Ppu_Rendering.h"
 class Nes_Mapper;
 class Nes_Core;
 

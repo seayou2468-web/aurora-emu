@@ -10,8 +10,8 @@
 #include <algorithm>
 #include <memory>
 #include "../integer.hpp"
-#include "backup/eeprom.hpp"
-#include "gpio/gpio.hpp"
+#include "./backup/eeprom.hpp"
+#include "./gpio/gpio.hpp"
 #include "../common/compiler.hpp"
 #include "../common/punning.hpp"
 #include "../save_state.hpp"

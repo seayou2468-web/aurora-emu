@@ -6,8 +6,8 @@
 #ifndef MULTI_BUFFER_H
 #define MULTI_BUFFER_H
 
-#include "blargg_common.h"
-#include "Blip_Buffer.h"
+#include "./blargg_common.h"
+#include "./Blip_Buffer.h"
 
 // Interface to one or more Blip_Buffers mapped to one or more channels
 // consisting of left, center, and right buffers.

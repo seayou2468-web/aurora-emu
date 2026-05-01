@@ -6,7 +6,7 @@
 #ifndef NES_UTIL_H
 #define NES_UTIL_H
 
-#include "blargg_common.h"
+#include "./blargg_common.h"
 class Nes_Emu;
 class Nes_Cart;
 

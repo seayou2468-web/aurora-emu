@@ -1,5 +1,5 @@
 #pragma once
-#include "defs.h"
+#include "./defs.h"
 #include <stdint.h>
 
 #ifndef GB_DISABLE_DEBUGGER

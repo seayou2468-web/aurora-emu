@@ -18,10 +18,10 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "DSi.h"
-#include "DSi_SD.h"
-#include "DSi_NWifi.h"
-#include "Platform.h"
+#include "./DSi.h"
+#include "./DSi_SD.h"
+#include "./DSi_NWifi.h"
+#include "./Platform.h"
 
 
 // observed IRQ behavior during transfers

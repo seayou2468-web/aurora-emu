@@ -6,7 +6,7 @@
 #ifndef NES_BUFFER_H
 #define NES_BUFFER_H
 
-#include "Multi_Buffer.h"
+#include "./Multi_Buffer.h"
 class Nes_Apu;
 
 class Nes_Nonlinearizer {

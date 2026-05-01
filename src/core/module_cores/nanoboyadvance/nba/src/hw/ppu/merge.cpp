@@ -7,7 +7,7 @@
 
 #include <algorithm>
 
-#include "ppu.hpp"
+#include "./ppu.hpp"
 
 namespace nba::core {
 

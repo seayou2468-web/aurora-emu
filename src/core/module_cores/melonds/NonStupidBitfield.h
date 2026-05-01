@@ -19,7 +19,7 @@
 #ifndef NONSTUPIDBITFIELD_H
 #define NONSTUPIDBITFIELD_H
 
-#include "types.h"
+#include "./types.h"
 
 #include <memory.h>
 

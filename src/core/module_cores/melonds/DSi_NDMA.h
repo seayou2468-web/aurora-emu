@@ -19,8 +19,8 @@
 #ifndef DSI_NDMA_H
 #define DSI_NDMA_H
 
-#include "types.h"
-#include "Savestate.h"
+#include "./types.h"
+#include "./Savestate.h"
 
 class DSi_NDMA
 {

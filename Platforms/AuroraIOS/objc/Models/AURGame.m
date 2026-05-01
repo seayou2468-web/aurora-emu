@@ -1,4 +1,4 @@
-#import "AURGame.h"
+#import "./AURGame.h"
 
 @implementation AURGame
 + (BOOL)supportsSecureCoding { return YES; }

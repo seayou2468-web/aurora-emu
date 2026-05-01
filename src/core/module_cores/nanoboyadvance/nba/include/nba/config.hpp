@@ -8,9 +8,9 @@
 #pragma once
 
 #include <memory>
-#include "device/audio_device.hpp"
-#include "device/video_device.hpp"
-#include "integer.hpp"
+#include "./device/audio_device.hpp"
+#include "./device/video_device.hpp"
+#include "./integer.hpp"
 #include <string>
 
 namespace nba {

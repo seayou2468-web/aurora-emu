@@ -18,8 +18,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "NDS.h"
-#include "GPU.h"
+#include "./NDS.h"
+#include "./GPU.h"
 
 
 // notes on color conversion

@@ -6,8 +6,8 @@
 #ifndef NONLINEAR_EFFECTS_BUFFER_H
 #define NONLINEAR_EFFECTS_BUFFER_H
 
-#include "Nes_Buffer.h"
-#include "Effects_Buffer.h"
+#include "./Nes_Buffer.h"
+#include "./Effects_Buffer.h"
 
 // Effects_Buffer uses several buffers and outputs stereo sample pairs.
 class Nonlinear_Effects_Buffer : public Effects_Buffer {

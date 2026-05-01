@@ -22,10 +22,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <cmath>
-#include "Platform.h"
-#include "NDS.h"
-#include "DSi.h"
-#include "SPU.h"
+#include "./Platform.h"
+#include "./NDS.h"
+#include "./DSi.h"
+#include "./SPU.h"
 
 
 // SPU TODO

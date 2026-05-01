@@ -7,7 +7,7 @@
 
 #include "../../../include/nba/log.hpp"
 
-#include "timer.hpp"
+#include "./timer.hpp"
 
 namespace nba::core {
 

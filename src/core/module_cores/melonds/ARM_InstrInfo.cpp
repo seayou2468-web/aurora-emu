@@ -16,7 +16,7 @@
     with melonDS. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "ARM_InstrInfo.h"
+#include "./ARM_InstrInfo.h"
 
 #include <stdio.h>
 
@@ -310,7 +310,7 @@ const u32 T_UNK = T_BranchAlways | T_WriteR14 | tk(tk_UNK);
 const u32 T_SVC = T_BranchAlways | T_WriteR14 | tk(tk_SVC);
 
 #define INSTRFUNC_PROTO(x) u32 x
-#include "ARM_InstrTable.h"
+#include "./ARM_InstrTable.h"
 #undef INSTRFUNC_PROTO
 
 Info Decode(bool thumb, u32 num, u32 instr)

@@ -8,7 +8,7 @@
 #define BLIP_SYNTH_H
 
 #ifndef BLIP_BUFFER_H
-	#include "Blip_Buffer.h"
+	#include "./Blip_Buffer.h"
 #endif
 
 // Quality level. Higher levels are slower, and worse in a few cases.

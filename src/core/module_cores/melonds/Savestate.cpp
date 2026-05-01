@@ -17,8 +17,8 @@
 */
 
 #include <stdio.h>
-#include "Savestate.h"
-#include "Platform.h"
+#include "./Savestate.h"
+#include "./Platform.h"
 
 /*
     Savestate format

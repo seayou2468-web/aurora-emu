@@ -1,4 +1,4 @@
-#include "emulator_core_c_api.h"
+#include "./emulator_core_c_api.h"
 #include "core_adapter.hpp"
 #include <string>
 

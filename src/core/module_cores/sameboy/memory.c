@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
-#include "gb.h"
+#include "./gb.h"
 
 typedef uint8_t read_function_t(GB_gameboy_t *gb, uint16_t addr);
 typedef void write_function_t(GB_gameboy_t *gb, uint16_t addr, uint8_t value);

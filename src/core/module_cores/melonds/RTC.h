@@ -19,8 +19,8 @@
 #ifndef RTC_H
 #define RTC_H
 
-#include "types.h"
-#include "Savestate.h"
+#include "./types.h"
+#include "./Savestate.h"
 
 namespace RTC
 {

@@ -5,7 +5,7 @@
  * Refer to the included LICENSE file.
  */
 
-#include "core.hpp"
+#include "./core.hpp"
 
 namespace nba::core {
 

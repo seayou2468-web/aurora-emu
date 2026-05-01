@@ -8,7 +8,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
-#include "gb.h"
+#include "./gb.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

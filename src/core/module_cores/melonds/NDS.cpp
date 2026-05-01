@@ -19,27 +19,27 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
-#include "NDS.h"
-#include "ARM.h"
-#include "NDSCart.h"
-#include "GBACart.h"
-#include "DMA.h"
-#include "FIFO.h"
-#include "GPU.h"
-#include "SPU.h"
-#include "SPI.h"
-#include "RTC.h"
-#include "Wifi.h"
-#include "AREngine.h"
-#include "Platform.h"
-#include "FreeBIOS.h"
+#include "./NDS.h"
+#include "./ARM.h"
+#include "./NDSCart.h"
+#include "./GBACart.h"
+#include "./DMA.h"
+#include "./FIFO.h"
+#include "./GPU.h"
+#include "./SPU.h"
+#include "./SPI.h"
+#include "./RTC.h"
+#include "./Wifi.h"
+#include "./AREngine.h"
+#include "./Platform.h"
+#include "./FreeBIOS.h"
 
 
-#include "DSi.h"
-#include "DSi_SPI_TSC.h"
-#include "DSi_NWifi.h"
-#include "DSi_Camera.h"
-#include "DSi_DSP.h"
+#include "./DSi.h"
+#include "./DSi_SPI_TSC.h"
+#include "./DSi_NWifi.h"
+#include "./DSi_Camera.h"
+#include "./DSi_DSP.h"
 
 
 namespace NDS

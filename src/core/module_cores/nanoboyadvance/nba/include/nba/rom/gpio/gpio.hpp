@@ -8,7 +8,7 @@
 #pragma once
 
 #include <cassert>
-#include "device.hpp"
+#include "./device.hpp"
 #include "../../integer.hpp"
 #include "../../save_state.hpp"
 #include <memory>

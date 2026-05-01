@@ -21,8 +21,8 @@
 
 #include <algorithm>
 
-#include "types.h"
-#include "NDS.h"
+#include "./types.h"
+#include "./NDS.h"
 
 inline u32 ROR(u32 x, u32 n)
 {

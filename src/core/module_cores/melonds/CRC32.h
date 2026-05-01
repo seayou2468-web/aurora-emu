@@ -19,7 +19,7 @@
 #ifndef CRC32_H
 #define CRC32_H
 
-#include "types.h"
+#include "./types.h"
 
 u32 CRC32(u8* data, int len, u32 start=0);
 

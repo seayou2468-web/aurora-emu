@@ -19,7 +19,7 @@
 #ifndef DMA_TIMINGS_H
 #define DMA_TIMINGS_H
 
-#include "types.h"
+#include "./types.h"
 
 namespace DMATiming
 {

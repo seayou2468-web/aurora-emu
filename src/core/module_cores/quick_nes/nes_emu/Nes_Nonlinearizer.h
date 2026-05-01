@@ -6,7 +6,7 @@
 #ifndef NES_NONLINEARIZER_H
 #define NES_NONLINEARIZER_H
 
-#include "Multi_Buffer.h"
+#include "./Multi_Buffer.h"
 
 class Nes_Nonlinearizer : public Multi_Buffer {
 public:

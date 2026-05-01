@@ -7,7 +7,7 @@
 #define _POSIX_THREAD_SAFE_FUNCTIONS
 #include <time.h>
 
-#include "ff.h"
+#include "./ff.h"
 
 
 #if FF_USE_LFN == 3	/* Dynamic memory allocation */

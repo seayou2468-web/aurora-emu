@@ -25,8 +25,8 @@ struct TableGen {
   #pragma clang diagnostic ignored "-Weverything"
   #endif
 
-  #include "gen_arm.hpp"
-  #include "gen_thumb.hpp"
+  #include "./gen_arm.hpp"
+  #include "./gen_thumb.hpp"
 
   #ifdef __clang__
   #pragma clang diagnostic pop

@@ -3,12 +3,12 @@
 
 // Nes_Emu 0.7.0. http://www.slack.net/~ant/
 
-#include "Nes_Ppu.h"
+#include "./Nes_Ppu.h"
 
 #include <string.h>
-#include "Nes_State.h"
-#include "Nes_Mapper.h"
-#include "Nes_Core.h"
+#include "./Nes_State.h"
+#include "./Nes_Mapper.h"
+#include "./Nes_Core.h"
 
 /* Copyright (C) 2004-2006 Shay Green. This module is free software; you
 can redistribute it and/or modify it under the terms of the GNU Lesser
@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
 
 // to do: remove unnecessary run_until() calls
 
-#include "blargg_source.h"
+#include "./blargg_source.h"
 
 // Timing
 

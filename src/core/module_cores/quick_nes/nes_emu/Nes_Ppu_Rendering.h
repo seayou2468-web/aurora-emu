@@ -6,7 +6,7 @@
 #ifndef NES_PPU_RENDERING_H
 #define NES_PPU_RENDERING_H
 
-#include "Nes_Ppu_Impl.h"
+#include "./Nes_Ppu_Impl.h"
 
 class Nes_Ppu_Rendering : public Nes_Ppu_Impl {
 	typedef Nes_Ppu_Impl base;

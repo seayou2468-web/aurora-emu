@@ -6,7 +6,7 @@
  */
 
 #include "../arm/arm7tdmi.hpp"
-#include "bus.hpp"
+#include "./bus.hpp"
 
 namespace nba::core {
 

@@ -1,4 +1,4 @@
-#import "AURBoxArtManager.h"
+#import "./AURBoxArtManager.h"
 
 @implementation AURBoxArtManager
 

@@ -1,4 +1,4 @@
-#import "AURControllerView.h"
+#import "./AURControllerView.h"
 
 @interface AURControllerView ()
 @property (nonatomic, strong) UIImageView *backgroundImageView;

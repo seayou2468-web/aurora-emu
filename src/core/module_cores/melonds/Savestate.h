@@ -21,7 +21,7 @@
 
 #include <string>
 #include <stdio.h>
-#include "types.h"
+#include "./types.h"
 
 #define SAVESTATE_MAJOR 9
 #define SAVESTATE_MINOR 0

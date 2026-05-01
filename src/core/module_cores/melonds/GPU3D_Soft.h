@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include "GPU3D.h"
-#include "Platform.h"
+#include "./GPU3D.h"
+#include "./Platform.h"
 #include <thread>
 #include <atomic>
 

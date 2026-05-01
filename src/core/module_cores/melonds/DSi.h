@@ -19,8 +19,8 @@
 #ifndef DSI_H
 #define DSI_H
 
-#include "NDS.h"
-#include "DSi_SD.h"
+#include "./NDS.h"
+#include "./DSi_SD.h"
 
 namespace DSi
 {

@@ -19,8 +19,8 @@
     with melonDS. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "GPU2D_Soft.h"
-#include "GPU.h"
+#include "./GPU2D_Soft.h"
+#include "./GPU.h"
 
 namespace GPU2D
 {

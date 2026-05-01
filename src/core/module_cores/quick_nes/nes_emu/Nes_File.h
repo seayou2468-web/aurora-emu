@@ -6,9 +6,9 @@
 #ifndef NES_FILE_H
 #define NES_FILE_H
 
-#include "blargg_common.h"
-#include "abstract_file.h"
-#include "nes_data.h"
+#include "./blargg_common.h"
+#include "./abstract_file.h"
+#include "./nes_data.h"
 
 // Writes a structured file
 class Nes_File_Writer : public Data_Writer {

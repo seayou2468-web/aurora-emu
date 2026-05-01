@@ -5,7 +5,7 @@
  * Refer to the included LICENSE file.
  */
 
-#include "wave_channel.hpp"
+#include "./wave_channel.hpp"
 
 namespace nba::core {
 
