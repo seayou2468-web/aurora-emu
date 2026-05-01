@@ -58,10 +58,17 @@ jobs:
       - name: Package unsigned IPA manually (Payload zip -> .ipa)
         run: |
           set -euo pipefail
-          APP_PATH=$(find "$DERIVED_DATA/Build/Products" -type d -path '*/Release-iphoneos/*.app' | head -n 1)
+          APP_PATH=""
+          if [ -d "$GITHUB_WORKSPACE/build-ios/Release-iphoneos" ]; then
+            APP_PATH=$(find "$GITHUB_WORKSPACE/build-ios/Release-iphoneos" -maxdepth 1 -type d -name '*.app' | head -n 1 || true)
+          fi
+          if [ -z "${APP_PATH:-}" ] && [ -d "$DERIVED_DATA/Build/Products" ]; then
+            APP_PATH=$(find "$DERIVED_DATA/Build/Products" -type d -path '*/Release-iphoneos/*.app' | head -n 1 || true)
+          fi
           if [ -z "${APP_PATH:-}" ]; then
-            echo "Release-iphoneos 内に .app が見つかりませんでした" >&2
-            find "$DERIVED_DATA/Build/Products" -maxdepth 4 -type d || true
+            echo ".app が見つかりませんでした (build-ios/Release-iphoneos および DerivedData を確認)" >&2
+            find "$GITHUB_WORKSPACE/build-ios" -maxdepth 4 -type d || true
+            find "$DERIVED_DATA" -maxdepth 4 -type d || true
             exit 1
           fi
 
