@@ -37,8 +37,16 @@ jobs:
 
       - name: Full build (clean + build) for iOS Device
         run: |
+          XCODEPROJ_PATH=$(find build-ios -maxdepth 1 -name '*.xcodeproj' | head -n 1)
+          if [ -z "${XCODEPROJ_PATH:-}" ]; then
+            echo "CMake generated .xcodeproj was not found under build-ios" >&2
+            find build-ios -maxdepth 3 -type d || true
+            exit 1
+          fi
+          echo "Using project: $XCODEPROJ_PATH"
+
           xcodebuild \
-            -project build-ios/AuroraIOS.xcodeproj \
+            -project "$XCODEPROJ_PATH" \
             -scheme AuroraIOS \
             -configuration Release \
             -destination 'generic/platform=iOS' \
