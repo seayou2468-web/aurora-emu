@@ -32,6 +32,7 @@ jobs:
             -DCMAKE_SYSTEM_NAME=iOS \
             -DCMAKE_OSX_ARCHITECTURES=arm64 \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=26.0 \
+            -DAURORA_BUILD_LINUX=OFF \
             -DAURORA_BUILD_IOS_APP=ON
 
       - name: Full build (clean + build) for iOS Device

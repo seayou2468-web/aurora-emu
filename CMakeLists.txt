@@ -5,8 +5,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(SDL2 REQUIRED sdl2)
+option(AURORA_BUILD_LINUX "Build aurora_linux frontend target" ON)
 
 file(GLOB_RECURSE CORE_CPP CONFIGURE_DEPENDS src/core/*.cpp)
 file(GLOB_RECURSE CORE_C CONFIGURE_DEPENDS src/core/*.c)
@@ -34,21 +33,26 @@ target_compile_options(aurora_core PRIVATE
   $<$<COMPILE_LANGUAGE:CXX>:-Wno-error>
 )
 
-add_executable(aurora_linux
-  Platforms/linux/main.c
-)
+if(AURORA_BUILD_LINUX)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(SDL2 REQUIRED sdl2)
 
-target_include_directories(aurora_linux PRIVATE
-  .
-  Platforms/API
-  ${SDL2_INCLUDE_DIRS}
-)
+  add_executable(aurora_linux
+    Platforms/linux/main.c
+  )
 
-target_compile_options(aurora_linux PRIVATE
-  $<$<COMPILE_LANGUAGE:C>:-Wno-error>
-)
+  target_include_directories(aurora_linux PRIVATE
+    .
+    Platforms/API
+    ${SDL2_INCLUDE_DIRS}
+  )
 
-target_link_libraries(aurora_linux PRIVATE aurora_core ${SDL2_LIBRARIES} z)
+  target_compile_options(aurora_linux PRIVATE
+    $<$<COMPILE_LANGUAGE:C>:-Wno-error>
+  )
+
+  target_link_libraries(aurora_linux PRIVATE aurora_core ${SDL2_LIBRARIES} z)
+endif()
 
 option(AURORA_BUILD_IOS_APP "Build AuroraIOS .app via CMake/Xcode" OFF)
 
