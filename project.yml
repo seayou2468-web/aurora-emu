@@ -32,12 +32,20 @@ targets:
       - path: Platforms/AuroraIOS/swift
       - path: Platforms/API
       - path: src/core/api/emulator_core_c_api.cpp
-      - path: src/core/module_cores/core_adapter_registry.cpp
+      - path: src/core/module_cores
+        excludes:
+          - '**/CMakeLists.txt'
+          - '**/*.md'
+          - '**/*.txt'
+          - '**/*.inc'
+          - '**/*.inl'
+          - '**/*.yml'
+          - '**/.*'
       - path: src/core
         excludes:
           - bridge_cores
           - api
-          - module_cores/core_adapter_registry.cpp
+          - module_cores
           - '**/CMakeLists.txt'
           - '**/*.md'
           - '**/*.txt'
