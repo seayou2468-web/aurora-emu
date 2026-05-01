@@ -23,7 +23,17 @@ struct SkinOverlayView: View {
                     .frame(width: screenRect.width, height: screenRect.height)
                     .position(x: screenRect.midX, y: screenRect.midY)
                 ForEach(layout.buttons, id: \.id) { button in
-                    Button(action: {}) { RoundedRectangle(cornerRadius: 8).fill(Color.white.opacity(0.001)) }
+                    Button(action: {}) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.white.opacity(0.14))
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.white.opacity(0.35), lineWidth: 1)
+                            Text(button.id.uppercased())
+                                .font(.caption2.bold())
+                                .foregroundStyle(.white.opacity(0.8))
+                        }
+                    }
                     .frame(width: button.width * geometry.size.width, height: button.height * geometry.size.height)
                     .position(x: (button.x + button.width / 2) * geometry.size.width, y: (button.y + button.height / 2) * geometry.size.height)
                     .onLongPressGesture(minimumDuration: 0) { } onPressingChanged: { pressing in

@@ -4,12 +4,13 @@ struct EmulatorContainerView: View {
     let item: SwiftROMItem
     @State private var bridge: AuroraCoreBridge?
     @State private var isShowingSaves = false
+    @State private var activeSkin: SwiftSkin = .default
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
         ZStack {
             if let bridge = bridge {
-                SkinOverlayView(skin: .default, bridge: bridge)
+                SkinOverlayView(skin: activeSkin, bridge: bridge)
                     .ignoresSafeArea()
             } else {
                 Color.black.ignoresSafeArea()
@@ -41,6 +42,8 @@ struct EmulatorContainerView: View {
             }
         }
         .onAppear {
+            SwiftSkinManager.shared.loadSkins()
+            activeSkin = SwiftSkinManager.shared.availableSkins.first ?? .default
             bridge = AuroraCoreBridge(coreType: item.coreType)
             _ = bridge?.loadROM(url: item.url)
         }
