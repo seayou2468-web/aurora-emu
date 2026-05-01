@@ -25,10 +25,18 @@ struct SkinOverlayView: View {
                 ForEach(layout.buttons, id: \.id) { button in
                     Button(action: {}) {
                         ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.white.opacity(0.14))
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.white.opacity(0.35), lineWidth: 1)
+                            Group {
+                                if button.style == "face" {
+                                    Circle().fill(Color.white.opacity(0.18))
+                                    Circle().stroke(Color.white.opacity(0.35), lineWidth: 1)
+                                } else if button.style == "dpad" {
+                                    RoundedRectangle(cornerRadius: 8).fill(Color.white.opacity(0.18))
+                                    RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.35), lineWidth: 1)
+                                } else {
+                                    Capsule().fill(Color.white.opacity(0.14))
+                                    Capsule().stroke(Color.white.opacity(0.35), lineWidth: 1)
+                                }
+                            }
                             Text((button.title ?? button.id).uppercased())
                                 .font(.caption2.bold())
                                 .foregroundStyle(.white.opacity(0.8))
@@ -37,7 +45,8 @@ struct SkinOverlayView: View {
                     .frame(width: button.width * geometry.size.width, height: button.height * geometry.size.height)
                     .position(x: (button.x + button.width / 2) * geometry.size.width, y: (button.y + button.height / 2) * geometry.size.height)
                     .onLongPressGesture(minimumDuration: 0) { } onPressingChanged: { pressing in
-                        bridge.setKey(EmulatorKey(rawValue: UInt32(button.key)), pressed: pressing)
+                        guard let raw = button.key else { return }
+                        bridge.setKey(EmulatorKey(rawValue: UInt32(raw)), pressed: pressing)
                     }
                 }
             }
