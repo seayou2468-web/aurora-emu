@@ -45,6 +45,8 @@ struct SwiftLibraryView: View {
                     }
                 } else {
                     VStack(spacing: 10) {
+                        LibrarySummaryHeader(items: items)
+                            .padding(.horizontal)
                         Picker("Core", selection: $libraryFilter) {
                             ForEach(LibraryFilter.allCases) { filter in
                                 Text(filter.rawValue).tag(filter)
@@ -240,5 +242,49 @@ struct ROMRowView: View {
                 .font(.caption)
         }
         .padding(.vertical, 4)
+    }
+}
+
+struct LibrarySummaryHeader: View {
+    let items: [SwiftROMItem]
+
+    private var totalSize: String {
+        let bytes = items.reduce(Int64(0)) { $0 + $1.fileSizeBytes }
+        return ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
+    }
+
+    var body: some View {
+        HStack(spacing: 10) {
+            SummaryPill(title: "Games", value: "\(items.count)", color: .indigo)
+            SummaryPill(title: "Storage", value: totalSize, color: .purple)
+        }
+    }
+}
+
+struct SummaryPill: View {
+    let title: String
+    let value: String
+    let color: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(.headline)
+                .foregroundStyle(.white)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(LinearGradient(colors: [color.opacity(0.35), color.opacity(0.15)], startPoint: .topLeading, endPoint: .bottomTrailing))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
     }
 }
