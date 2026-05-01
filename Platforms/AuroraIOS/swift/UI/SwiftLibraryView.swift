@@ -6,6 +6,8 @@ struct SwiftLibraryView: View {
     @State private var items: [SwiftROMItem] = []
     @State private var isShowingPicker = false
     @State private var selectedItem: SwiftROMItem?
+    @State private var showSettings = false
+    @State private var importError: String?
 
     var body: some View {
         NavigationStack {
@@ -52,14 +54,31 @@ struct SwiftLibraryView: View {
                 }
             }
             .navigationTitle("Aurora Library")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "gearshape.fill")
+                    }
+                }
+            }
             .searchable(text: $searchText)
             .sheet(item: $selectedItem) { item in
                 EmulatorContainerView(item: item)
                     .ignoresSafeArea()
             }
+            .sheet(isPresented: $showSettings) {
+                AuroraSettingsView()
+            }
             .fileImporter(isPresented: $isShowingPicker, allowedContentTypes: [.data], allowsMultipleSelection: true) { result in
                 if case .success(let urls) = result { importROMs(urls: urls) }
             }
+            .alert("Import Error", isPresented: Binding(get: { importError != nil }, set: { if !$0 { importError = nil } }), actions: {
+                Button("OK") { importError = nil }
+            }, message: {
+                Text(importError ?? "")
+            })
         }
         .onAppear { loadLibrary() }
     }
@@ -94,10 +113,31 @@ struct SwiftLibraryView: View {
 
     @MainActor func importROMs(urls: [URL]) {
         let target = romFolderURL()
+        var copied = 0
+        var failures: [String] = []
         for src in urls {
-            let dst = target.appendingPathComponent(src.lastPathComponent)
-            try? FileManager.default.removeItem(at: dst)
-            try? FileManager.default.copyItem(at: src, to: dst)
+            let access = src.startAccessingSecurityScopedResource()
+            defer {
+                if access { src.stopAccessingSecurityScopedResource() }
+            }
+            let ext = src.pathExtension.lowercased()
+            guard ["gba", "gb", "gbc", "nes", "fds", "nds", "srl", "dsi"].contains(ext) else {
+                failures.append("\(src.lastPathComponent): unsupported format")
+                continue
+            }
+            do {
+                let dst = target.appendingPathComponent(src.lastPathComponent)
+                if FileManager.default.fileExists(atPath: dst.path) {
+                    try FileManager.default.removeItem(at: dst)
+                }
+                try FileManager.default.copyItem(at: src, to: dst)
+                copied += 1
+            } catch {
+                failures.append("\(src.lastPathComponent): \(error.localizedDescription)")
+            }
+        }
+        if copied == 0, !failures.isEmpty {
+            importError = failures.joined(separator: "\n")
         }
         loadLibrary()
     }
