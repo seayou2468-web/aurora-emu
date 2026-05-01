@@ -6,8 +6,8 @@
 #ifndef NES_RECORDER_H
 #define NES_RECORDER_H
 
-#include "Nes_Emu.h"
-#include "Nes_Film.h"
+#include "./Nes_Emu.h"
+#include "./Nes_Film.h"
 
 class Nes_Recorder : public Nes_Emu {
 public:

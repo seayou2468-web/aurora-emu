@@ -2,7 +2,7 @@
 #define GB_INTERNAL
 #endif
 
-#include "gb.h"
+#include "./gb.h"
 #ifdef _WIN32
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0500

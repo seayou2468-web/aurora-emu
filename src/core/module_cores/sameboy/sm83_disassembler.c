@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-#include "gb.h"
+#include "./gb.h"
 
 #define GB_read_memory GB_safe_read_memory
 

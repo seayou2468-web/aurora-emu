@@ -6,7 +6,7 @@
 #ifndef NONLINEAR_BUFFER_H
 #define NONLINEAR_BUFFER_H
 
-#include "Multi_Buffer.h"
+#include "./Multi_Buffer.h"
 class Nes_Apu;
 
 // Use to make samples non-linear in Blip_Buffer used for triangle, noise, and DMC only

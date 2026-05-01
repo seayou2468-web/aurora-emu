@@ -8,7 +8,7 @@
 #pragma once
 
 #include <array>
-#include "integer.hpp"
+#include "./integer.hpp"
 
 namespace nba {
 

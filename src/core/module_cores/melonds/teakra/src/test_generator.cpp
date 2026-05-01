@@ -4,10 +4,10 @@
 #include <memory>
 #include <random>
 #include <unordered_set>
-#include "common_types.h"
-#include "decoder.h"
-#include "operand.h"
-#include "test.h"
+#include "./common_types.h"
+#include "./decoder.h"
+#include "./operand.h"
+#include "./test.h"
 
 namespace Teakra::Test {
 

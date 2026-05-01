@@ -18,11 +18,11 @@
 
 #include <string.h>
 #include <stdio.h>
-#include "DSi.h"
-#include "DSi_NWifi.h"
-#include "SPI.h"
-#include "WifiAP.h"
-#include "Platform.h"
+#include "./DSi.h"
+#include "./DSi_NWifi.h"
+#include "./SPI.h"
+#include "./WifiAP.h"
+#include "./Platform.h"
 
 
 const u8 CIS0[256] =

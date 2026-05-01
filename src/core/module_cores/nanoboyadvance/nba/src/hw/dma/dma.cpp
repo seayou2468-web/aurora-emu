@@ -9,7 +9,7 @@
 
 #include "../../bus/bus.hpp"
 #include "../../bus/io.hpp"
-#include "dma.hpp"
+#include "./dma.hpp"
 
 namespace nba::core {
 

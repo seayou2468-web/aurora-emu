@@ -19,8 +19,8 @@
 #ifndef GBACART_H
 #define GBACART_H
 
-#include "types.h"
-#include "Savestate.h"
+#include "./types.h"
+#include "./Savestate.h"
 
 namespace GBACart
 {

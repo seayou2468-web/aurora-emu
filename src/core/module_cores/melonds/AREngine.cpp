@@ -18,9 +18,9 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "NDS.h"
-#include "DSi.h"
-#include "AREngine.h"
+#include "./NDS.h"
+#include "./DSi.h"
+#include "./AREngine.h"
 
 
 namespace AREngine

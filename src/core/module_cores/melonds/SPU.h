@@ -19,7 +19,7 @@
 #ifndef SPU_H
 #define SPU_H
 
-#include "Savestate.h"
+#include "./Savestate.h"
 
 namespace SPU
 {

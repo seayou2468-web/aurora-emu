@@ -9,9 +9,9 @@
 
 #include "../../../../include/nba/save_state.hpp"
 
-#include "length_counter.hpp"
-#include "envelope.hpp"
-#include "sweep.hpp"
+#include "./length_counter.hpp"
+#include "./envelope.hpp"
+#include "./sweep.hpp"
 
 namespace nba::core {
 

@@ -20,8 +20,8 @@
 #include <inttypes.h>
 #include <vector>
 
-#include "FATStorage.h"
-#include "Platform.h"
+#include "./FATStorage.h"
+#include "./Platform.h"
 
 namespace fs = std::filesystem;
 

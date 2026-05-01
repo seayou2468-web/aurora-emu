@@ -6,7 +6,7 @@
 #endif //__cplusplus
 
 extern "C" {
-#include "aes.h"
+#include "./aes.h"
 }
 
 #endif //_AES_HPP_

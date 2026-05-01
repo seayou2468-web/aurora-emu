@@ -1,7 +1,7 @@
 
 // Game_Music_Emu 0.3.0. http://www.slack.net/~ant/
 
-#include "Effects_Buffer.h"
+#include "./Effects_Buffer.h"
 
 #include <string.h>
 
@@ -16,7 +16,7 @@ more details. You should have received a copy of the GNU Lesser General
 Public License along with this module; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
 
-#include "blargg_source.h"
+#include "./blargg_source.h"
 
 #ifdef BLARGG_ENABLE_OPTIMIZER
 	#include BLARGG_ENABLE_OPTIMIZER

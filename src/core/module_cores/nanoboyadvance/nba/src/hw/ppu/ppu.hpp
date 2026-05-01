@@ -16,7 +16,7 @@
 #include "../../../include/nba/scheduler.hpp"
 #include <type_traits>
 
-#include "registers.hpp"
+#include "./registers.hpp"
 #include "../dma/dma.hpp"
 #include "../irq/irq.hpp"
 
@@ -459,7 +459,7 @@ private:
 
   bool dma3_video_transfer_running;
 
-  #include "background.inl"
+  #include "./background.inl"
 };
 
 } // namespace nba::core

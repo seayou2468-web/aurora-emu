@@ -6,7 +6,7 @@
 #ifndef APU_SNAPSHOT_H
 #define APU_SNAPSHOT_H
 
-#include "blargg_common.h"
+#include "./blargg_common.h"
 
 struct apu_snapshot_t
 {

@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include "gb.h"
+#include "./gb.h"
 
 const GB_cartridge_t GB_cart_defs[256] = {
     // From http://gbdev.gg8.se/wiki/articles/The_Cartridge_Header#0147_-_Cartridge_Type

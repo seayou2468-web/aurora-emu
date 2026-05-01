@@ -1,4 +1,4 @@
-#import "AURDatabaseManager.h"
+#import "./AURDatabaseManager.h"
 
 @interface AURDatabaseManager ()
 @property (nonatomic, strong) NSMutableArray<AURGame *> *allGames;

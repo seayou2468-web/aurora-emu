@@ -13,8 +13,8 @@
 #include <sys/select.h>
 #include <unistd.h>
 #endif
-#include "random.h"
-#include "gb.h"
+#include "./random.h"
+#include "./gb.h"
 
 
 void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes_t attributes, const char *fmt, va_list args)
@@ -129,11 +129,11 @@ static void load_default_border(GB_gameboy_t *gb)
 #endif
     
     if (gb->model > GB_MODEL_CGB_E) {
-        #include "graphics/agb_border.inc"
+        #include "./graphics/agb_border.inc"
         LOAD_BORDER();
     }
     else if (gb->model == GB_MODEL_MGB) {
-        #include "graphics/mgb_border.inc"
+        #include "./graphics/mgb_border.inc"
         LOAD_BORDER();
         if (gb->dmg_palette &&
             gb->dmg_palette->colors[4].b > gb->dmg_palette->colors[4].r) {
@@ -144,11 +144,11 @@ static void load_default_border(GB_gameboy_t *gb)
         }
     }
     else if (GB_is_cgb(gb)) {
-        #include "graphics/cgb_border.inc"
+        #include "./graphics/cgb_border.inc"
         LOAD_BORDER();
     }
     else {
-        #include "graphics/dmg_border.inc"
+        #include "./graphics/dmg_border.inc"
         LOAD_BORDER();
     }
 }

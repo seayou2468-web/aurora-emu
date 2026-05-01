@@ -16,12 +16,12 @@
     with melonDS. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "teakra/include/teakra/teakra.h"
+#include "./teakra/include/teakra/teakra.h"
 
-#include "DSi.h"
-#include "DSi_DSP.h"
-#include "FIFO.h"
-#include "NDS.h"
+#include "./DSi.h"
+#include "./DSi_DSP.h"
+#include "./FIFO.h"
+#include "./NDS.h"
 
 
 namespace DSi_DSP

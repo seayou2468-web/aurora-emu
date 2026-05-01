@@ -4,9 +4,9 @@
 #include <unordered_map>
 #include <variant>
 #include "../include/teakra/disassembler.h"
-#include "common_types.h"
-#include "crash.h"
-#include "parser.h"
+#include "./common_types.h"
+#include "./crash.h"
+#include "./parser.h"
 
 using NodeAsConst = std::string;
 struct NodeAsExpansion {};

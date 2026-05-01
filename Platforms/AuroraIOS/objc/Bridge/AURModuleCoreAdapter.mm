@@ -1,4 +1,4 @@
-#import "AURModuleCoreAdapter.h"
+#import "./AURModuleCoreAdapter.h"
 
 @interface AURModuleCoreAdapter () {
     EmulatorCoreHandle *_coreHandle;

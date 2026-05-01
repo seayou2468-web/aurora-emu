@@ -19,7 +19,7 @@
 #ifndef NDS_HEADER_H
 #define NDS_HEADER_H
 
-#include "types.h"
+#include "./types.h"
 
 // Consult GBATEK for info on what these are
 struct NDSHeader

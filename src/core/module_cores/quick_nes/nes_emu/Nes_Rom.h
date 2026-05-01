@@ -6,8 +6,8 @@
 #ifndef NES_ROM_H
 #define NES_ROM_H
 
-#include "blargg_common.h"
-#include "abstract_file.h"
+#include "./blargg_common.h"
+#include "./abstract_file.h"
 
 class Nes_Rom {
 	typedef BOOST::uint8_t byte;

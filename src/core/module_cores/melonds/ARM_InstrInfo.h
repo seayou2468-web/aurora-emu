@@ -19,7 +19,7 @@
 #ifndef ARMINSTRINFO_H
 #define ARMINSTRINFO_H
 
-#include "types.h"
+#include "./types.h"
 
 namespace ARMInstrInfo
 {

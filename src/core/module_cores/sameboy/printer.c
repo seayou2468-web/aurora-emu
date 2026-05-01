@@ -2,7 +2,7 @@
 #define GB_INTERNAL
 #endif
 
-#include "gb.h"
+#include "./gb.h"
 #include <string.h>
 
 /* TODO: Emulation is VERY basic and assumes the ROM correctly uses the printer's interface.

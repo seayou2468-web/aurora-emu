@@ -1,6 +1,6 @@
 #pragma once
 #ifndef GB_DISABLE_CHEATS
-#include "defs.h"
+#include "./defs.h"
 
 #define GB_CHEAT_ANY_BANK 0xFFFF
 

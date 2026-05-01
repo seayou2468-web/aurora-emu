@@ -18,11 +18,11 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "DSi.h"
-#include "DSi_I2C.h"
-#include "DSi_Camera.h"
-#include "ARM.h"
-#include "SPI.h"
+#include "./DSi.h"
+#include "./DSi_I2C.h"
+#include "./DSi_Camera.h"
+#include "./ARM.h"
+#include "./SPI.h"
 
 
 namespace DSi_BPTWL

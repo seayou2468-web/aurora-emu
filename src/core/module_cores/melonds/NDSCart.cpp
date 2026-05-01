@@ -18,15 +18,15 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "NDS.h"
-#include "DSi.h"
-#include "NDSCart.h"
-#include "ARM.h"
-#include "CRC32.h"
-#include "DSi_AES.h"
-#include "Platform.h"
-#include "ROMList.h"
-#include "melonDLDI.h"
+#include "./NDS.h"
+#include "./DSi.h"
+#include "./NDSCart.h"
+#include "./ARM.h"
+#include "./CRC32.h"
+#include "./DSi_AES.h"
+#include "./Platform.h"
+#include "./ROMList.h"
+#include "./melonDLDI.h"
 
 
 namespace NDSCart

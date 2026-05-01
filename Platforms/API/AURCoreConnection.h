@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "AUREmulatorCoreAPI.h"
+#include "./AUREmulatorCoreAPI.h"
 
 typedef enum AURCoreConnectionKind {
   AUR_CORE_CONNECTION_MODULE_ADAPTER = 0,

@@ -2,7 +2,7 @@
 #define GB_INTERNAL
 #endif
 
-#include "gb.h"
+#include "./gb.h"
 
 static uint32_t noise_seed = 0;
 

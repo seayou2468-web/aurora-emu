@@ -18,11 +18,11 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "NDS.h"
-#include "GPU.h"
+#include "./NDS.h"
+#include "./GPU.h"
 
 
-#include "GPU2D_Soft.h"
+#include "./GPU2D_Soft.h"
 
 namespace GPU
 {

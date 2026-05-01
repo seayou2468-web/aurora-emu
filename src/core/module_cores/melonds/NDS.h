@@ -21,8 +21,8 @@
 
 #include <string>
 
-#include "Savestate.h"
-#include "types.h"
+#include "./Savestate.h"
+#include "./types.h"
 
 // when touching the main loop/timing code, pls test a lot of shit
 // with this enabled, to make sure it doesn't desync

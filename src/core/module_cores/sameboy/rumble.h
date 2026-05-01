@@ -1,6 +1,6 @@
 #pragma once
 
-#include "defs.h"
+#include "./defs.h"
 
 typedef enum {
     GB_RUMBLE_DISABLED,

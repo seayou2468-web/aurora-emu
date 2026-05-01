@@ -10,7 +10,7 @@
 #include "../../../../include/nba/integer.hpp"
 #include "../../../../include/nba/scheduler.hpp"
 
-#include "base_channel.hpp"
+#include "./base_channel.hpp"
 
 namespace nba::core {
 

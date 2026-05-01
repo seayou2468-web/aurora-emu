@@ -18,11 +18,11 @@
 
 #include <stdio.h>
 #include <algorithm>
-#include "NDS.h"
-#include "DSi.h"
-#include "ARM.h"
-#include "ARMInterpreter.h"
-#include "AREngine.h"
+#include "./NDS.h"
+#include "./DSi.h"
+#include "./ARM.h"
+#include "./ARMInterpreter.h"
+#include "./AREngine.h"
 
 #if defined(__APPLE__)
 #include <TargetConditionals.h>

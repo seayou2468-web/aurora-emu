@@ -1,7 +1,7 @@
 
-#include "abstract_file.h"
+#include "./abstract_file.h"
 
-#include "blargg_config.h"
+#include "./blargg_config.h"
 
 #include <assert.h>
 #include <string.h>

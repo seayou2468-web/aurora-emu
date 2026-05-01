@@ -1,5 +1,5 @@
-#import "AURPreferredControllerSkinsViewController.h"
-#import "AURControllerSkinsViewController.h"
+#import "./AURPreferredControllerSkinsViewController.h"
+#import "./AURControllerSkinsViewController.h"
 #import "../Managers/AURSkinManager.h"
 #import "../Views/AURControllerSkinTableViewCell.h"
 

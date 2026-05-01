@@ -2,8 +2,8 @@
 #define GB_INTERNAL
 #endif
 
-#include "gb.h"
-#include "random.h"
+#include "./gb.h"
+#include "./random.h"
 #include <math.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -539,7 +539,7 @@ static uint32_t convert_rgb15_with_fade(GB_gameboy_t *gb, uint16_t color, uint8_
 
 static void render_boot_animation (GB_gameboy_t *gb)
 {
-#include "graphics/sgb_animation_logo.inc"
+#include "./graphics/sgb_animation_logo.inc"
     uint32_t *output = gb->screen;
     if (gb->border_mode != GB_BORDER_NEVER) {
         output += 48 + 40 * 256;
@@ -805,7 +805,7 @@ void GB_sgb_render(GB_gameboy_t *gb, bool incomplete)
 void GB_sgb_load_default_data(GB_gameboy_t *gb)
 {
     
-#include "graphics/sgb_border.inc"
+#include "./graphics/sgb_border.inc"
         
 #ifdef GB_BIG_ENDIAN
     for (unsigned i = 0; i < sizeof(tilemap) / 2; i++) {

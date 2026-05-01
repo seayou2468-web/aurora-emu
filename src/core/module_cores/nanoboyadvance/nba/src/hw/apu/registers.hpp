@@ -9,10 +9,10 @@
 
 #include "../../../include/nba/integer.hpp"
 
-#include "channel/quad_channel.hpp"
-#include "channel/wave_channel.hpp"
-#include "channel/noise_channel.hpp"
-#include "channel/fifo.hpp"
+#include "./channel/quad_channel.hpp"
+#include "./channel/wave_channel.hpp"
+#include "./channel/noise_channel.hpp"
+#include "./channel/fifo.hpp"
 
 namespace nba::core {
 

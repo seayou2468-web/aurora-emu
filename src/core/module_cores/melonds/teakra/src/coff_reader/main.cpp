@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <string>
 #include "../../include/teakra/disassembler.h"
-#include "coff.h"
+#include "./coff.h"
 
 #ifndef NO_MAIN
 int main(int argc, char** argv) {

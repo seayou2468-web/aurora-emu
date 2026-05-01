@@ -49,7 +49,7 @@
 #  undef XXH_INLINE_ALL   /* avoid redefinition */
 #  define XXH_INLINE_ALL
 #endif
-#include "xxhash.h"
+#include "./xxhash.h"
 
 
 /* ===   Compiler specifics   === */

@@ -21,10 +21,10 @@
 
 #include <string>
 
-#include "types.h"
-#include "Savestate.h"
-#include "NDS_Header.h"
-#include "FATStorage.h"
+#include "./types.h"
+#include "./Savestate.h"
+#include "./NDS_Header.h"
+#include "./FATStorage.h"
 
 namespace NDSCart
 {
@@ -155,7 +155,7 @@ private:
     u8 IRCmd;
 };
 
-// CartRetailBT - Pokémon Typing Adventure (SPI BT controller)
+// CartRetailBT - Pokmon Typing Adventure (SPI BT controller)
 class CartRetailBT : public CartRetail
 {
 public:

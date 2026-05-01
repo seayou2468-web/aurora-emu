@@ -19,8 +19,8 @@
 #ifndef FIFO_H
 #define FIFO_H
 
-#include "types.h"
-#include "Savestate.h"
+#include "./types.h"
+#include "./Savestate.h"
 
 template<typename T, u32 NumEntries>
 class FIFO

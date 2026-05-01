@@ -18,9 +18,9 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "DSi.h"
-#include "DSi_Camera.h"
-#include "Platform.h"
+#include "./DSi.h"
+#include "./DSi_Camera.h"
+#include "./Platform.h"
 
 
 namespace DSi_CamModule

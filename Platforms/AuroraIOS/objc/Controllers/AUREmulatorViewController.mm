@@ -1,5 +1,5 @@
-#import "AUREmulatorViewController.h"
-#import "AURInGameMenuViewController.h"
+#import "./AUREmulatorViewController.h"
+#import "./AURInGameMenuViewController.h"
 #import "../Views/AURControllerView.h"
 #import "../Managers/AURSkinManager.h"
 #import "../Managers/AURDatabaseManager.h"

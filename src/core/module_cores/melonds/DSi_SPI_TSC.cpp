@@ -18,9 +18,9 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "DSi.h"
-#include "SPI.h"
-#include "DSi_SPI_TSC.h"
+#include "./DSi.h"
+#include "./SPI.h"
+#include "./DSi_SPI_TSC.h"
 
 
 namespace DSi_SPI_TSC

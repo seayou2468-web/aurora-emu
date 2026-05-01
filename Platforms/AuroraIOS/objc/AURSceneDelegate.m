@@ -1,5 +1,5 @@
-#import "AURSceneDelegate.h"
-#import "Controllers/AURLibraryViewController.h"
+#import "./AURSceneDelegate.h"
+#import "./Controllers/AURLibraryViewController.h"
 
 @implementation AURSceneDelegate
 

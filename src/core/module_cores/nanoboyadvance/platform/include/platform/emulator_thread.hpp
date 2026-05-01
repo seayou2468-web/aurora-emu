@@ -11,7 +11,7 @@
 #include <functional>
 #include "../../../nba/include/nba/core.hpp"
 #include "../../../nba/include/nba/integer.hpp"
-#include "frame_limiter.hpp"
+#include "./frame_limiter.hpp"
 #include <thread>
 #include <queue>
 #include <mutex>

@@ -6,8 +6,8 @@
 #ifndef NES_FME7_APU_H
 #define NES_FME7_APU_H
 
-#include "blargg_common.h"
-#include "Blip_Buffer.h"
+#include "./blargg_common.h"
+#include "./Blip_Buffer.h"
 
 struct fme7_apu_state_t
 {

@@ -1,7 +1,7 @@
 #ifndef OPENGLSUPPORT_H
 #define OPENGLSUPPORT_H
 
-#include "PlatformOGL.h"
+#include "./PlatformOGL.h"
 
 namespace OpenGL {
 

@@ -1,5 +1,5 @@
-#import "AURSettingsViewController.h"
-#import "AURPreferredControllerSkinsViewController.h"
+#import "./AURSettingsViewController.h"
+#import "./AURPreferredControllerSkinsViewController.h"
 #import "../Managers/AURDatabaseManager.h"
 #import "../Managers/AURSkinManager.h"
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>

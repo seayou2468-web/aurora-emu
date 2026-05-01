@@ -6,7 +6,7 @@
 #ifndef NES_NAMCO_APU_H
 #define NES_NAMCO_APU_H
 
-#include "Nes_Apu.h"
+#include "./Nes_Apu.h"
 
 struct namco_state_t;
 

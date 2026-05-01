@@ -2,8 +2,8 @@
 #define GB_INTERNAL
 #endif
 
-#include "rumble.h"
-#include "gb.h"
+#include "./rumble.h"
+#include "./gb.h"
 
 void GB_set_rumble_mode(GB_gameboy_t *gb, GB_rumble_mode_t mode)
 {

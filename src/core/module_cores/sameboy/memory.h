@@ -1,5 +1,5 @@
 #pragma once
-#include "defs.h"
+#include "./defs.h"
 #include <stdint.h>
 
 typedef uint8_t (*GB_read_memory_callback_t)(GB_gameboy_t *gb, uint16_t addr, uint8_t data);

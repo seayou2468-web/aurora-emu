@@ -3,11 +3,11 @@
 
 // Nes_Emu 0.7.0. http://www.slack.net/~ant/
 
-#include "Nes_Mapper.h"
+#include "./Nes_Mapper.h"
 
 #include <string.h>
-#include "Nes_Vrc6_Apu.h"
-#include "blargg_endian.h"
+#include "./Nes_Vrc6_Apu.h"
+#include "./blargg_endian.h"
 
 /* Copyright (C) 2004-2006 Shay Green. This module is free software; you
 can redistribute it and/or modify it under the terms of the GNU Lesser
@@ -20,7 +20,7 @@ more details. You should have received a copy of the GNU Lesser General
 Public License along with this module; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
 
-#include "blargg_source.h"
+#include "./blargg_source.h"
 
 struct vrc6_state_t
 {

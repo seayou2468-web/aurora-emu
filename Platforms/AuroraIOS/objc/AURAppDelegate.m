@@ -1,5 +1,5 @@
-#import "AURAppDelegate.h"
-#import "AURSceneDelegate.h"
+#import "./AURAppDelegate.h"
+#import "./AURSceneDelegate.h"
 
 @implementation AURAppDelegate
 

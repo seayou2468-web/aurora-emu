@@ -6,7 +6,7 @@
 #ifndef EFFECTS_BUFFER_H
 #define EFFECTS_BUFFER_H
 
-#include "Multi_Buffer.h"
+#include "./Multi_Buffer.h"
 
 // Effects_Buffer uses several buffers and outputs stereo sample pairs.
 class Effects_Buffer : public Multi_Buffer {

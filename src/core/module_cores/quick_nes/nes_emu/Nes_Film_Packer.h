@@ -6,7 +6,7 @@
 #ifndef NES_FILM_PACKER_H
 #define NES_FILM_PACKER_H
 
-#include "blargg_common.h"
+#include "./blargg_common.h"
 
 class Nes_Film_Packer {
 public:

@@ -6,8 +6,8 @@
 #ifndef NES_CART_H
 #define NES_CART_H
 
-#include "blargg_common.h"
-#include "abstract_file.h"
+#include "./blargg_common.h"
+#include "./abstract_file.h"
 
 class Nes_Cart {
 	typedef BOOST::uint8_t byte;

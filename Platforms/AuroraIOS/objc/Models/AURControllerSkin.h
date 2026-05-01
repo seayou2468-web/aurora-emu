@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import "AURControllerSkinConfigurations.h"
-#import "AURControllerSkinTraits.h"
+#import "./AURControllerSkinConfigurations.h"
+#import "./AURControllerSkinTraits.h"
 
 @interface AURControllerSkin : NSObject
 @property (nonatomic, copy) NSString *name;

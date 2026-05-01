@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
-#include "defs.h"
+#include "./defs.h"
 
 #define GB_BAND_LIMITED_WIDTH 64
 #define GB_BAND_LIMITED_PHASES 256

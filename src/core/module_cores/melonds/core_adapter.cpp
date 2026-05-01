@@ -1,6 +1,6 @@
 #include "../core_adapter.hpp"
 
-#include "runtime.hpp"
+#include "./runtime.hpp"
 
 namespace {
 

@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "GPU2D.h"
+#include "./GPU2D.h"
 
 namespace GPU2D
 {

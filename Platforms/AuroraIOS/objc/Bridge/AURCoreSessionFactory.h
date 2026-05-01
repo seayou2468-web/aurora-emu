@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import "AURCoreSession.h"
+#import "./AURCoreSession.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

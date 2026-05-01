@@ -7,8 +7,8 @@
 /* storage control modules to the FatFs module with a defined API.       */
 /*-----------------------------------------------------------------------*/
 
-#include "ff.h"			/* Obtains integer types */
-#include "diskio.h"		/* Declarations of disk functions */
+#include "./ff.h"			/* Obtains integer types */
+#include "./diskio.h"		/* Declarations of disk functions */
 
 
 static ff_disk_read_cb ReadCb;

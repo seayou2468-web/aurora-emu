@@ -17,7 +17,7 @@
 */
 
 #include <stdio.h>
-#include "ARM.h"
+#include "./ARM.h"
 
 
 namespace ARMInterpreter

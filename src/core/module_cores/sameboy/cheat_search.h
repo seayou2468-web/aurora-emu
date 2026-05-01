@@ -1,6 +1,6 @@
 #pragma once
 #ifndef GB_DISABLE_CHEAT_SEARCH
-#include "defs.h"
+#include "./defs.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>

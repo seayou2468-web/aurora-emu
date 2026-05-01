@@ -1,10 +1,10 @@
-#include "Nes_Blitter.h"
+#include "./Nes_Blitter.h"
 
 #include <cassert>
 #include <cstdlib>
 
-#include "blargg_endian.h"
-#include "blargg_source.h"
+#include "./blargg_endian.h"
+#include "./blargg_source.h"
 
 #ifndef NES_BLITTER_OUT_DEPTH
 	#define NES_BLITTER_OUT_DEPTH 16

@@ -22,8 +22,8 @@
 #include <array>
 #include <memory>
 
-#include "GPU.h"
-#include "Savestate.h"
+#include "./GPU.h"
+#include "./Savestate.h"
 
 namespace GPU3D
 {
@@ -166,6 +166,6 @@ extern std::unique_ptr<Renderer3D> CurrentRenderer;
 
 }
 
-#include "GPU3D_Soft.h"
+#include "./GPU3D_Soft.h"
 
 #endif

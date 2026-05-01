@@ -1,4 +1,4 @@
-#import "AUREmulatorLauncher.h"
+#import "./AUREmulatorLauncher.h"
 #import "../Controllers/AUREmulatorViewController.h"
 
 @implementation AUREmulatorLauncher

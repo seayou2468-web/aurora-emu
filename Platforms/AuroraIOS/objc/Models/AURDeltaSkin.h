@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import "AURControllerSkin.h"
+#import "./AURControllerSkin.h"
 
 @interface AURDeltaSkin : AURControllerSkin
 @property (nonatomic, copy) NSString *identifier;

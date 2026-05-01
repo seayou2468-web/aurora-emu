@@ -19,25 +19,25 @@
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
-#include "NDS.h"
-#include "DSi.h"
-#include "ARM.h"
-#include "GPU.h"
-#include "NDSCart.h"
-#include "SPI.h"
-#include "DSi_SPI_TSC.h"
-#include "Platform.h"
+#include "./NDS.h"
+#include "./DSi.h"
+#include "./ARM.h"
+#include "./GPU.h"
+#include "./NDSCart.h"
+#include "./SPI.h"
+#include "./DSi_SPI_TSC.h"
+#include "./Platform.h"
 
 
-#include "DSi_NDMA.h"
-#include "DSi_I2C.h"
-#include "DSi_SD.h"
-#include "DSi_AES.h"
-#include "DSi_NAND.h"
-#include "DSi_DSP.h"
-#include "DSi_Camera.h"
+#include "./DSi_NDMA.h"
+#include "./DSi_I2C.h"
+#include "./DSi_SD.h"
+#include "./DSi_AES.h"
+#include "./DSi_NAND.h"
+#include "./DSi_DSP.h"
+#include "./DSi_Camera.h"
 
-#include "tiny-AES-c/aes.hpp"
+#include "./tiny-AES-c/aes.hpp"
 
 
 namespace DSi

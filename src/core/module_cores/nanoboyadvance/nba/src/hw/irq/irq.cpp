@@ -7,7 +7,7 @@
 
 #include "../../arm/arm7tdmi.hpp"
 
-#include "irq.hpp"
+#include "./irq.hpp"
 
 namespace nba::core {
 

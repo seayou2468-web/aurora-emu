@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <assert.h>
-#include "gb.h"
+#include "./gb.h"
 
 
 typedef void opcode_t(GB_gameboy_t *gb, uint8_t opcode);

@@ -1,4 +1,4 @@
-#include "runtime.hpp"
+#include "./runtime.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -8,9 +8,9 @@
 #include <mutex>
 #include <vector>
 
-#include "GPU.h"
-#include "NDS.h"
-#include "Platform.h"
+#include "./GPU.h"
+#include "./NDS.h"
+#include "./Platform.h"
 
 namespace core::melonds {
 namespace {

@@ -18,10 +18,10 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "NDS.h"
-#include "Wifi.h"
-#include "WifiAP.h"
-#include "Platform.h"
+#include "./NDS.h"
+#include "./Wifi.h"
+#include "./WifiAP.h"
+#include "./Platform.h"
 
 #ifndef __WIN32__
 #include <stddef.h>

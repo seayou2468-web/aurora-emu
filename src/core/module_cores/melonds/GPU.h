@@ -21,8 +21,8 @@
 
 #include <memory>
 
-#include "GPU2D.h"
-#include "NonStupidBitfield.h"
+#include "./GPU2D.h"
+#include "./NonStupidBitfield.h"
 
 namespace GPU
 {
@@ -609,6 +609,6 @@ void SetDispStat(u32 cpu, u16 val);
 void SetVCount(u16 val);
 }
 
-#include "GPU3D.h"
+#include "./GPU3D.h"
 
 #endif

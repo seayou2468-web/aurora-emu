@@ -19,7 +19,7 @@
 #ifndef WIFIAP_H
 #define WIFIAP_H
 
-#include "types.h"
+#include "./types.h"
 
 namespace WifiAP
 {

@@ -11,9 +11,9 @@
 #include <stdexcept>
 
 #include "../arm/arm7tdmi.hpp"
-#include "bus.hpp"
+#include "./bus.hpp"
 
-#include "io.hpp"
+#include "./io.hpp"
 
 namespace nba::core {
 

@@ -8,8 +8,8 @@
 
 #include <cstddef>
 
-#include "Nes_State.h"
-#include "Nes_Film_Packer.h"
+#include "./Nes_State.h"
+#include "./Nes_Film_Packer.h"
 
 class Nes_Film_Data {
 public:

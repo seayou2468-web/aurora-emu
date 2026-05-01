@@ -19,9 +19,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <algorithm>
-#include "NDS.h"
-#include "GPU.h"
-#include "FIFO.h"
+#include "./NDS.h"
+#include "./GPU.h"
+#include "./FIFO.h"
 
 
 // 3D engine notes

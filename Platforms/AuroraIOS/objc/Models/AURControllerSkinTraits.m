@@ -1,4 +1,4 @@
-#import "AURControllerSkinTraits.h"
+#import "./AURControllerSkinTraits.h"
 
 @implementation AURControllerSkinTraits
 

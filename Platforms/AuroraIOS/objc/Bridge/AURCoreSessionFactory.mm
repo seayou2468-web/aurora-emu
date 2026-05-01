@@ -1,6 +1,6 @@
-#import "AURCoreSessionFactory.h"
-#import "AURBridgeCoreAdapter.h"
-#import "AURModuleCoreAdapter.h"
+#import "./AURCoreSessionFactory.h"
+#import "./AURBridgeCoreAdapter.h"
+#import "./AURModuleCoreAdapter.h"
 
 @implementation AURCoreSessionFactory
 

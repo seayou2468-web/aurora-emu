@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GPU3D.h"
+#include "./GPU3D.h"
 
 namespace GPU3D {
 

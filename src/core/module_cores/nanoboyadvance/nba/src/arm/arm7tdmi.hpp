@@ -15,7 +15,7 @@
 #include "../../include/nba/scheduler.hpp"
 
 #include "../bus/bus.hpp"
-#include "state.hpp"
+#include "./state.hpp"
 
 /**
  * Some TODOs:
@@ -274,10 +274,10 @@ private:
     ldm_usermode_conflict = false;
   }
 
-  #include "handlers/arithmetic.inl"
-  #include "handlers/handler16.inl"
-  #include "handlers/handler32.inl"
-  #include "handlers/memory.inl"
+  #include "./handlers/arithmetic.inl"
+  #include "./handlers/handler16.inl"
+  #include "./handlers/handler32.inl"
+  #include "./handlers/memory.inl"
 
   Scheduler& scheduler;
   Bus& bus;

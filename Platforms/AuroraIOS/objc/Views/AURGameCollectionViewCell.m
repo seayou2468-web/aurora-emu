@@ -1,4 +1,4 @@
-#import "AURGameCollectionViewCell.h"
+#import "./AURGameCollectionViewCell.h"
 
 @implementation AURGameCollectionViewCell
 

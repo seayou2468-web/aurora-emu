@@ -8,13 +8,13 @@
 #pragma once
 
 #include <memory>
-#include "rom/gpio/rtc.hpp"
-#include "rom/gpio/solar_sensor.hpp"
-#include "rom/rom.hpp"
-#include "config.hpp"
-#include "integer.hpp"
-#include "save_state.hpp"
-#include "scheduler.hpp"
+#include "./rom/gpio/rtc.hpp"
+#include "./rom/gpio/solar_sensor.hpp"
+#include "./rom/rom.hpp"
+#include "./config.hpp"
+#include "./integer.hpp"
+#include "./save_state.hpp"
+#include "./scheduler.hpp"
 #include <vector>
 
 namespace nba {

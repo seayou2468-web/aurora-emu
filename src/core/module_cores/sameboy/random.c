@@ -2,7 +2,7 @@
 #define GB_INTERNAL
 #endif
 
-#include "random.h"
+#include "./random.h"
 #include <time.h>
 
 static uint64_t seed;

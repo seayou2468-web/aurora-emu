@@ -2,7 +2,7 @@
 #define GB_INTERNAL
 #endif
 
-#include "gb.h"
+#include "./gb.h"
 #include <stdlib.h>
 
 #ifndef GB_DISABLE_CHEAT_SEARCH

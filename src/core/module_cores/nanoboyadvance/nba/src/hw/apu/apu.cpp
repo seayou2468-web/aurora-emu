@@ -12,7 +12,7 @@
 #include "../../../include/nba/common/dsp/resampler/nearest.hpp"
 #include "../../../include/nba/common/dsp/resampler/sinc.hpp"
 
-#include "apu.hpp"
+#include "./apu.hpp"
 
 namespace nba::core {
 

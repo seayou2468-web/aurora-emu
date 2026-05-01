@@ -6,10 +6,10 @@
 #ifndef NES_MAPPER
 #define NES_MAPPER
 
-#include "Nes_Cart.h"
-#include "Nes_Cpu.h"
-#include "nes_data.h"
-#include "Nes_Core.h"
+#include "./Nes_Cart.h"
+#include "./Nes_Cpu.h"
+#include "./nes_data.h"
+#include "./Nes_Core.h"
 class Blip_Buffer;
 class blip_eq_t;
 class Nes_Core;

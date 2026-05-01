@@ -1,4 +1,4 @@
-#import "AURExternalControllerManager.h"
+#import "./AURExternalControllerManager.h"
 
 @implementation AURExternalControllerManager
 

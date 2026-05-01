@@ -8,8 +8,8 @@
 #include <cstdio>
 
 #include "../arm/arm7tdmi.hpp"
-#include "bus.hpp"
-#include "io.hpp"
+#include "./bus.hpp"
+#include "./io.hpp"
 
 namespace nba::core {
 

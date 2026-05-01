@@ -1,4 +1,4 @@
-#import "AURControllerSkinTableViewCell.h"
+#import "./AURControllerSkinTableViewCell.h"
 
 @implementation AURControllerSkinTableViewCell
 

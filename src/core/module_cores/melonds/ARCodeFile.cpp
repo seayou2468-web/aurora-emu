@@ -18,8 +18,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "ARCodeFile.h"
-#include "Platform.h"
+#include "./ARCodeFile.h"
+#include "./Platform.h"
 
 
 // TODO: import codes from other sources (usrcheat.dat, ...)

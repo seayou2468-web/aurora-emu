@@ -19,7 +19,7 @@
 #ifndef SPI_H
 #define SPI_H
 
-#include "Savestate.h"
+#include "./Savestate.h"
 
 namespace SPI_Firmware
 {

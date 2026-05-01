@@ -18,9 +18,9 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "NDS.h"
-#include "DSi.h"
-#include "ARM.h"
+#include "./NDS.h"
+#include "./DSi.h"
+#include "./ARM.h"
 
 
 // access timing for cached regions

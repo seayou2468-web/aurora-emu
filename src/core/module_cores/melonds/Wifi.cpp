@@ -18,13 +18,13 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "NDS.h"
-#include "SPI.h"
-#include "Wifi.h"
-#include "WifiAP.h"
-#include "Platform.h"
-#include "ARM.h"
-#include "GPU.h"
+#include "./NDS.h"
+#include "./SPI.h"
+#include "./Wifi.h"
+#include "./WifiAP.h"
+#include "./Platform.h"
+#include "./ARM.h"
+#include "./GPU.h"
 
 
 namespace Wifi

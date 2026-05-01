@@ -1,4 +1,4 @@
-#import "AURDeltaSkin.h"
+#import "./AURDeltaSkin.h"
 
 @interface AURDeltaSkin ()
 @property (nonatomic, copy) NSString *basePath;

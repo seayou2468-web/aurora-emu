@@ -19,8 +19,8 @@
 #ifndef DSI_NAND_H
 #define DSI_NAND_H
 
-#include "types.h"
-#include "NDS_Header.h"
+#include "./types.h"
+#include "./NDS_Header.h"
 #include <vector>
 #include <string>
 

@@ -2,8 +2,8 @@
 #ifndef GB_DISABLE_DEBUGGER
 #include <stdbool.h>
 #include <stdint.h>
-#include "defs.h"
-#include "symbol_hash.h"
+#include "./defs.h"
+#include "./symbol_hash.h"
 
 typedef void (*GB_debugger_reload_callback_t)(GB_gameboy_t *gb);
 

@@ -19,8 +19,8 @@
 #ifndef DMA_H
 #define DMA_H
 
-#include "types.h"
-#include "Savestate.h"
+#include "./types.h"
+#include "./Savestate.h"
 
 class DMA
 {

@@ -1,4 +1,4 @@
-#include "OpenGLSupport.h"
+#include "./OpenGLSupport.h"
 
 namespace OpenGL {
 

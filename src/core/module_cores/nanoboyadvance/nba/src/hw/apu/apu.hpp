@@ -14,12 +14,12 @@
 #include "../../../include/nba/scheduler.hpp"
 #include <mutex>
 
-#include "channel/quad_channel.hpp"
-#include "channel/wave_channel.hpp"
-#include "channel/noise_channel.hpp"
-#include "channel/fifo.hpp"
-#include "hle/mp2k.hpp"
-#include "registers.hpp"
+#include "./channel/quad_channel.hpp"
+#include "./channel/wave_channel.hpp"
+#include "./channel/noise_channel.hpp"
+#include "./channel/fifo.hpp"
+#include "./hle/mp2k.hpp"
+#include "./registers.hpp"
 #include "../dma/dma.hpp"
 
 namespace nba::core {

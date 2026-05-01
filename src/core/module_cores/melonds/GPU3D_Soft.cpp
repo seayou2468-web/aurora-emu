@@ -19,13 +19,13 @@
     with melonDS. If not, see http://www.gnu.org/licenses/.
 */
 
-#include "GPU3D_Soft.h"
+#include "./GPU3D_Soft.h"
 
 #include <algorithm>
 #include <stdio.h>
 #include <string.h>
-#include "NDS.h"
-#include "GPU.h"
+#include "./NDS.h"
+#include "./GPU.h"
 
 
 namespace GPU3D

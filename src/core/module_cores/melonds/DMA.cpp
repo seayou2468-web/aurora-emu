@@ -17,11 +17,11 @@
 */
 
 #include <stdio.h>
-#include "NDS.h"
-#include "DSi.h"
-#include "DMA.h"
-#include "GPU.h"
-#include "DMA_Timings.h"
+#include "./NDS.h"
+#include "./DSi.h"
+#include "./DMA.h"
+#include "./GPU.h"
+#include "./DMA_Timings.h"
 
 
 

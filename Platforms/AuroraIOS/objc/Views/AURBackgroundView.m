@@ -1,4 +1,4 @@
-#import "AURBackgroundView.h"
+#import "./AURBackgroundView.h"
 
 @interface AURBackgroundView () <MTKViewDelegate>
 @property (nonatomic, strong) id<MTLCommandQueue> commandQueue;

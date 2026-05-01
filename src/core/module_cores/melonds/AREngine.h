@@ -19,7 +19,7 @@
 #ifndef ARENGINE_H
 #define ARENGINE_H
 
-#include "ARCodeFile.h"
+#include "./ARCodeFile.h"
 
 namespace AREngine
 {
