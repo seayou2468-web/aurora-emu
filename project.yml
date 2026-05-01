@@ -32,6 +32,7 @@ targets:
       - path: Platforms/AuroraIOS/swift
       - path: Platforms/API
       - path: src/core/api/emulator_core_c_api.cpp
+      - path: src/core/module_cores/core_adapter_registry.cpp
       - path: src
         recursive: true
         excludes:
