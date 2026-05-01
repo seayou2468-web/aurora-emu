@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(aurora_linux LANGUAGES C CXX)
+project(aurora LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 20)
@@ -16,24 +16,36 @@ list(FILTER CORE_CPP EXCLUDE REGEX ".*/teakra/tests/.*")
 list(FILTER CORE_C EXCLUDE REGEX ".*/bridge_cores/.*")
 list(FILTER CORE_C EXCLUDE REGEX ".*/teakra/tests/.*")
 
-add_executable(aurora_linux
-  Platforms/linux/main.c
+add_library(aurora_core STATIC
   ${CORE_CPP}
   ${CORE_C}
 )
 
-target_include_directories(aurora_linux PRIVATE
+target_include_directories(aurora_core PUBLIC
   .
   Platforms/API
   src
   src/core/api
   src/core/module_cores
+)
+
+target_compile_options(aurora_core PRIVATE
+  $<$<COMPILE_LANGUAGE:C>:-Wno-error>
+  $<$<COMPILE_LANGUAGE:CXX>:-Wno-error>
+)
+
+add_executable(aurora_linux
+  Platforms/linux/main.c
+)
+
+target_include_directories(aurora_linux PRIVATE
+  .
+  Platforms/API
   ${SDL2_INCLUDE_DIRS}
 )
 
 target_compile_options(aurora_linux PRIVATE
   $<$<COMPILE_LANGUAGE:C>:-Wno-error>
-  $<$<COMPILE_LANGUAGE:CXX>:-Wno-error>
 )
 
-target_link_libraries(aurora_linux PRIVATE ${SDL2_LIBRARIES} z)
+target_link_libraries(aurora_linux PRIVATE aurora_core ${SDL2_LIBRARIES} z)
